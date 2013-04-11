@@ -1,0 +1,207 @@
+//Copyright (C) 2013 Cem Bassoy.
+//
+//This file is part of the OpenCL Utility Toolkit.
+//
+//OpenCL Utility Toolkit is free software: you can redistribute it and/or modify
+//it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or
+//(at your option) any later version.
+//
+//OpenCL Utility Toolkit is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with OpenCL Utility Toolkit.  If not, see <http://www.gnu.org/licenses/>.
+
+
+#ifndef OCL_KERNEL_H
+#define OCL_KERNEL_H
+
+
+#include <string>
+#include <typeinfo>
+#include <set>
+#include <vector>
+
+#include <ocl_event.h>
+#include <utl_assert.h>
+
+#include <CL/opencl.h>
+
+namespace utl
+{
+class Type;
+}
+
+namespace ocl
+{
+
+class Program;
+class Context;
+class Queue;
+class EventList;
+
+/*! \class Kernel ocl_kernel.h "inc/ocl_kernel.h"
+  *
+  * \brief Wrapper for cl_kernel.
+  *
+  * A Kernel is a wrapper for an OpenCL cl_kernel. It contains
+  * the complete kernel function string and the function name. Additionally
+  * It stores its calling parameters such as the global, local size
+  * and working dimension.
+  * Usually the user does not have to create Kernel objects. Instead
+  * the Program is responsible for creating such from an input stream
+  * or string and storing them with the possibility to acces Kernel functions
+  * via their name. The Kernel can be executed if the corresponding
+  * Program is built.
+  * In order to execute a Kernel, arguments such as global and local
+  * work size must be first set. The Kernel can then be called
+  * by providing its arguments. Memory locations are extracted
+  * autmatically by analyzing the kernel string.
+  * A Kernel is destroyed by its Program.
+  */
+class Kernel
+{
+public:
+    /*! \brief Enumeration for the memory locations of the arguments of this Kernel.*/
+    enum mem_loc {global,local,host,constant};
+    Kernel(const std::string &kernel);
+    Kernel(const Program&, const std::string &kernel);
+    Kernel(const std::string &kernel, const utl::Type &);
+    Kernel(const Program&, const std::string &kernel, const utl::Type &);
+    Kernel(const Kernel&) = delete;
+	~Kernel();
+    void create();
+    bool created() const;
+    void release();
+    cl_kernel id() const;
+    const Program& program() const;
+    void setProgram(const Program&);
+    Context& context() const;
+
+    template<class T, class ... Types>
+    void setArg(int& pos, const T& data, Types& ... args)
+    {
+        setArg(pos, data);
+        pos++;
+        setArg(pos, args ... );
+    }
+
+    template<class ... Types>
+    void setArg(int& pos, cl_mem mem, const Types& ... args)
+    {
+        setArg(pos, mem);
+        pos++;
+        setArg(pos, args ... );
+    }
+
+    template<class T>
+    void setArg(int pos, const T& data);
+    void setArg(int pos, cl_mem data);
+
+    template<class ... Types>
+    void setArg(const Types& ... args)
+    {
+        int pos = 0;
+        setArg(pos, args ...);
+    }
+
+    /*! \brief Executes this Kernel with arguments and returns an Event by which the execution can be tracked.
+      *
+      * The number of arguments must be equal to the number of arguments
+      * defined in the kernel function of this Kernel. Also the types
+      * must match.
+    */
+	template<typename ... Types>
+    ocl::Event operator()(const Queue &queue, const EventList& list, const Types& ... args)
+	{
+        int pos = 0;
+        setArg(pos, args ... );
+        return callKernel(queue, list);
+	}
+
+    /*! \brief Executes this Kernel with arguments and returns an Event by which the execution can be tracked.
+      *
+      * The number of arguments must be equal to the number of arguments
+      * defined in the kernel function of this Kernel. Also the types
+      * must match.
+    */
+    template<typename ... Types>
+    ocl::Event operator()(const Queue &queue, const Types& ... args)
+    {
+        int pos = 0;
+        setArg(pos, args ... );
+        return callKernel(queue);
+    }
+
+    /*! \brief Executes this Kernel with arguments and returns an Event by which the execution can be tracked.
+      *
+      * The number of arguments must be equal to the number of arguments
+      * defined in the kernel function of this Kernel. Also the types
+      * must match.
+    */
+    template<typename ... Types>
+    ocl::Event operator()(const Types& ... args)
+    {
+        int pos = 0;
+        setArg(pos, args ... );
+        return callKernel();
+    }
+
+
+    ocl::Event operator()();
+
+
+	void setWorkSize(size_t lSizeX, size_t gSizeX);
+	void setWorkSize(size_t lSizeX, size_t lSizeY, size_t gSizeX, size_t gSizeY);
+	void setWorkSize(size_t lSizeX, size_t lSizeY, size_t lSizeZ, size_t gSizeX, size_t gSizeY, size_t gSizeZ);
+
+	void setWorkDim(size_t dim);
+	size_t workDim() const;
+
+	const size_t* localSize() const;
+	const size_t* globalSize() const;
+	size_t localSize(size_t pos) const;
+	size_t globalSize(size_t pos) const;
+
+	void setLocalSize(size_t *localSize);
+	void setGlobalSize(size_t *globalSize);
+	void setLocalSize(size_t localSize, size_t pos);
+    void setGlobalSize(size_t globalSize, size_t pos);
+
+    const std::string& name() const;
+    const std::string& toString() const;
+    size_t numberOfArgs() const;
+    mem_loc memoryLocation(size_t pos) const;
+
+
+    static std::string specialize(const std::string &kernel, const std::string &type); //const utl::Type &);
+    static std::vector<mem_loc> extractMemlocs(const std::string &kernel);
+    static std::string extractName(const std::string &kernel);
+    static std::string extractParameter(const std::string& kernel);
+    static bool templated(const std::string& kernel);
+
+
+private:
+    Kernel();
+    const Program * _program;
+    cl_kernel _id;
+    size_t _workDim;
+    size_t _globalSize[3];
+    size_t _localSize[3];
+    ocl::Event callKernel();
+    ocl::Event callKernel(const Queue&, const EventList&);
+    ocl::Event callKernel(const Queue&);
+
+    std::string _kernelfunc;
+    std::string _name;
+    std::vector<mem_loc> _memlocs;
+
+};
+
+}
+
+#endif
+
