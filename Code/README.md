@@ -6,7 +6,7 @@ The OpenCL Utility Toolkit contains C++ Wrapper classes for a more convient util
 
 Folders
 --------------
-In order to be able to 'make' the 'libOclWrapper.a', a certain folder layout exist. After cloning the project, 'build' and 'lib' folders need to be added.
+In order to be able to 'make' the 'libOclWrapper.a', a certain folder layout must exist.
 
 * inc
 	* Contains all C++ headers '*.h'
@@ -34,11 +34,10 @@ Make
 You need to make sure that GCC version >= 4.6.x are used and that OpenCL runtime libraries of the corresponding vendors support the OpenCL standard >= 1.1. If you don't use the GCC, make sure that your compiler supports the C++11 standard. Follow the steps in order to create the library.
 
 1. 'clone' the project.
-2. Create empty folders 'build' and 'lib' on the same level as 'src' and 'inc'.
-3. Edit the 'Makefile' and verify that the paths set in OPENCL_INC and OPENCL_LIB are correct.
-4. In the command line type 'make' to create the static library.
-5. In the command line type 'doxygen' to create the documentation (docu/index.html). 
-6. Link the static library 'libOclWrapper.a' in a new project and use the OpenCL C++wrapper classes by providing
+2. Edit the 'Makefile' and verify that the paths set in OPENCL_INC and OPENCL_LIB are correct.
+3. In the command line type 'make' to create the static library.
+4. In the command line type 'doxygen' to create the documentation (docu/index.html). 
+5. Link the static library 'libOclWrapper.a' in a new project and use the OpenCL C++wrapper classes by providing
 	* the include path of this project and
 	* the library path of this project.
 
