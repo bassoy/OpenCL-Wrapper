@@ -30,6 +30,14 @@
 
 #include <utl_assert.h>
 
+/*
+ * Since CL_KHR_ICD is an extension, some platforms (e. g. OS X) may not
+ * include it.
+ */
+#ifdef CL_PLATFORM_NOT_FOUND_KHR
+#define HAS_CL_KHR_ICD
+#endif
+
 using namespace std;
 
 
@@ -334,9 +342,12 @@ void ocl::safe_call(cl_int status, const std::string file, const std::string fun
     case CL_MAP_FAILURE                                :  {cerr << "CL_MAP_FAILURE."; break;}
     case CL_MISALIGNED_SUB_BUFFER_OFFSET               :  {cerr << "CL_MISALIGNED_SUB_BUFFER_OFFSET."; break;}
     case CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST  :  {cerr << "CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST."; break;}
+#ifdef HAS_CL_KHR_ICD
     case CL_PLATFORM_NOT_FOUND_KHR                     :  {cerr << "CL_PLATFORM_NOT_FOUND_KHR."; break;}
     case CL_DEVICE_PARTITION_FAILED_EXT                :  {cerr << "CL_DEVICE_PARTITION_FAILED_EXT."; break;}
     case CL_INVALID_PARTITION_COUNT_EXT                :  {cerr << "CL_INVALID_PARTITION_COUNT_EXT."; break;}
+    case CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR        :  {cerr << "CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR."; break;}
+#endif
     case CL_INVALID_EVENT_WAIT_LIST                    :  {cerr << "CL_INVALID_EVENT_WAIT_LIST."; break;}
     case CL_INVALID_PLATFORM                           :  {cerr << "CL_INVALID_PLATFORM."; break;}
     case CL_INVALID_DEVICE_TYPE                        :  {cerr << "CL_INVALID_DEVICE_TYPE."; break;}
@@ -369,7 +380,6 @@ void ocl::safe_call(cl_int status, const std::string file, const std::string fun
     case CL_INVALID_OPERATION                          :  {cerr << "CL_INVALID_OPERATION."; break;}
     case CL_INVALID_GL_OBJECT                          :  {cerr << "CL_INVALID_GL_OBJECT."; break;}
     case CL_INVALID_MIP_LEVEL                          :  {cerr << "CL_INVALID_MIP_LEVEL."; break;}
-    case CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR        :  {cerr << "CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR."; break;}
     default                                            :  {cerr << "Unknown error."; break;}
     }
     cerr << "Error in file=" << file << ", in function=" << function << ", in line="<< line << endl;
