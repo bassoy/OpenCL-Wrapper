@@ -2,7 +2,11 @@
 
 #include <ocl_wrapper.h>
 #include <utl_utils.h>
+#ifdef __APPLE__
+#include <OpenCL/opencl.h>
+#else
 #include <CL/opencl.h>
+#endif
 
 namespace kernel_strings {
 
