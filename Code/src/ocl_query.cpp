@@ -112,7 +112,7 @@ void ocl::printPlatform(cl_platform_id id,
     if(print_extensions) out << "Platform Extensions : " << ocl::extensions(id) << endl;
     if(print_devices){
         out << "Devices : " << endl;
-        ocl::printDevices(id, print_profile, print_vendor, print_version, print_extensions, out);
+        ocl::printDevices(id, print_profile, print_version, print_name, print_vendor, print_extensions, out);
     }
 }
 
