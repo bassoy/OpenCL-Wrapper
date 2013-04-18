@@ -23,8 +23,11 @@
 #include <set>
 #include <string>
 
+#ifdef __APPLE__
+#include <OpenCL/opencl.h>
+#else
 #include <CL/opencl.h>
-
+#endif
 
 #include <ocl_device.h>
 
