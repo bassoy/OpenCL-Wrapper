@@ -24,8 +24,9 @@
 #include <vector>
 #include <algorithm>
 #include <typeinfo>
+#include <cmath>
 
-#include <math.h>
+
 #include <ocl_program.h>
 #include <ocl_query.h>
 #include <ocl_context.h>
