@@ -1,4 +1,4 @@
-CC := g++
+CC := clang++
 
 OPENCL_LIB := -L/usr/lib64 -lOpenCL
 OPENCL_INC := -I/usr/include
@@ -13,7 +13,7 @@ OBJS   = $(addprefix build/,$(OBJS2))
 	
 TARGET := lib/libOclWrapper.a
 
-GCC_FLAGS=-std=c++0x -Wall $(GCC_FLAGS1)
+GCC_FLAGS=-std=c++0x -stdlib=libc++ -Wall $(GCC_FLAGS1)
 
 archive: $(OBJS)
 	ar cr $(TARGET) build/*.o
