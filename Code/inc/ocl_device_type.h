@@ -22,7 +22,11 @@
 #include <string>
 #include <vector>
 
+#ifdef __APPLE__
+#include <OpenCL/opencl.h>
+#else
 #include <CL/opencl.h>
+#endif
 
 namespace ocl
 {

@@ -23,7 +23,11 @@
 #include <string>
 #include <sstream>
 
+#ifdef __APPLE__
+#include <OpenCL/opencl.h>
+#else
 #include <CL/opencl.h>
+#endif
 
 #include <ocl_event.h>
 #include <ocl_event_list.h>

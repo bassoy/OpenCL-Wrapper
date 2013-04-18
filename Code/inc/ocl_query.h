@@ -21,9 +21,11 @@
 #include <string>
 #include <iostream>
 
-
+#ifdef __APPLE__
+#include <OpenCL/opencl.h>
+#else
 #include <CL/opencl.h>
-
+#endif
 
 #define OPENCL_SAFE_CALL(status) ocl::safe_call(status,__FILE__,__FUNCTION__,__LINE__);
 

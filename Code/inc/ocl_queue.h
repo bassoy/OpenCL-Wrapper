@@ -18,7 +18,11 @@
 #ifndef OCL_QUEUE_H
 #define OCL_QUEUE_H
 
+#ifdef __APPLE__
+#include <OpenCL/opencl.h>
+#else
 #include <CL/opencl.h>
+#endif
 
 /*! \file ocl_queue.h "inc/ocl_queue.h"
   * \brief Wrapper file for cl_command_queue  */

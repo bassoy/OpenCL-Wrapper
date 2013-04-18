@@ -24,7 +24,11 @@
 #include <string>
 #include <memory>
 
+#ifdef __APPLE__
+#include <OpenCL/opencl.h>
+#else
 #include <CL/opencl.h>
+#endif
 
 
 namespace ocl{

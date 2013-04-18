@@ -28,8 +28,11 @@
 #include <ocl_event.h>
 #include <utl_assert.h>
 
+#ifdef __APPLE__
+#include <OpenCL/opencl.h>
+#else
 #include <CL/opencl.h>
-
+#endif
 namespace utl
 {
 class Type;
