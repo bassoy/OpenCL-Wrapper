@@ -85,6 +85,10 @@ const std::string& ocl::CompileOption::operator ()() const
     return this->_options;
 }
 
+ocl::CompileOption& ocl::CompileOption::operator=(const CompileOption &other) {
+    _options = other._options;
+    return *this;
+}
 
 namespace compile_option{
     ocl::CompileOption SINGLE_CONSTANT("-cl-single-precision-constant");

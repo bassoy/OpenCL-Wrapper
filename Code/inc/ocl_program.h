@@ -47,6 +47,7 @@ public:
     CompileOption operator | (const CompileOption&);
     CompileOption operator | (const std::string&);
     const std::string& operator()() const;
+    CompileOption& operator=(const CompileOption &);
 
 private:
     std::string _options;
