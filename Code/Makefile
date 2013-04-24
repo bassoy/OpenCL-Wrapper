@@ -1,10 +1,9 @@
+include ../libraries.mk 
+
 CC := g++
 
-OPENCL_LIB := -L/usr/lib64 -lOpenCL
-OPENCL_INC := -I/usr/include
-
-INCS := $(OPENCL_INC) -Iinc
-LIBS := $(OPENCL_LIB)
+INCS := $(OCL_INC) -Iinc
+LIBS := $(OCL_LIB)
 
 CFILES = $(wildcard src/*.cpp)
 OBJS1  = $(notdir $(CFILES))
@@ -23,7 +22,6 @@ build/%.o : src/%.cpp
 
 purge :
 		rm -f build/* $(TARGET)
-		$(MAKE) clean -C $(UTIL_DIR)
 
 .PHONY : clean
 
