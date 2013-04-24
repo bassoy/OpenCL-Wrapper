@@ -165,7 +165,10 @@ ocl::Program::~Program()
 */
 void ocl::Program::release()
 {
-    if(this->isBuilt()){
+    if(_context)
+        _context->release(this);
+
+   if(this->isBuilt()){
         removeKernels();
         OPENCL_SAFE_CALL( clReleaseProgram (_id));
 
