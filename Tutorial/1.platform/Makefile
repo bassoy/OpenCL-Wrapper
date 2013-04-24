@@ -8,10 +8,10 @@ OBJS    = $(addprefix build/,$(OBJS2))
 TARGET := ../platform
 
 $(TARGET): $(OBJS)
-	g++ $(GCC_FLAGS) $(OBJS) $(LIBS) -o $(TARGET)
+		g++ $(GCC_FLAGS) $(OBJS) $(LIBS) -o $(TARGET)
 
 build/%.o : %.cpp
-	g++ -c $(INCS) $(GCC_FLAGS) $< -o $@
+	$(CC) -c $(INCS) $(GCC_FLAGS) $< -o $@
 
 .PHONY : clean
 
