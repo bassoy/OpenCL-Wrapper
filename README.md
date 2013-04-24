@@ -11,3 +11,10 @@ Folders
 	* Contains the OpenCL Utiltiy Toolkit.
 * Tutorial
 	* Contains examples.
+
+Files
+--------------
+* librar.mk
+	* Is used to change the OpenCL include and library path directory
+* README.md
+	* This file.
