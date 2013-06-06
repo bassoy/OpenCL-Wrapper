@@ -57,4 +57,5 @@ HEADERS += \
 	inc/utl_profile_pass_manager.h \
 	inc/utl_profile_pass.h \
 	inc/utl_flags.h \
+	inc/utl_matrix.h \
 	inc/utl_timer.h

@@ -33,5 +33,6 @@
 #include <utl_stream.h>
 #include <utl_timer.h>
 #include <utl_type.h>
+#include <utl_matrix.h>
 
 #endif
