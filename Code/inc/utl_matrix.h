@@ -215,7 +215,7 @@ public :
     Matrix operator-(const Matrix& rhs) const     { return __MatrixBase<T>::operator-(rhs);   }
     Matrix operator/(const_reference value) const { return __MatrixBase<T>::operator/(value); }
 
-    Matrix operator*(const Matrix& rhs)
+    Matrix operator*(const Matrix& rhs) const
     {
         const Matrix& lhs = *this;
         TRUE_ASSERT(lhs.cols() == rhs.rows(), "LhsMatrix.cols() != RhsMatrix.rows()");
@@ -315,7 +315,7 @@ public :
     Matrix operator-(const Matrix& rhs) const     { return __MatrixBase<T>::operator-(rhs); }
     Matrix operator/(const_reference value) const { return __MatrixBase<T>::operator/(value); }
 
-    Matrix operator*(const Matrix& rhs)
+    Matrix operator*(const Matrix& rhs) const
     {
         const Matrix& lhs = *this;
         TRUE_ASSERT(lhs.cols() == rhs.rows(), "LhsMatrix.cols() != RhsMatrix.rows()");

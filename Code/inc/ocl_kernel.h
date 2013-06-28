@@ -121,7 +121,7 @@ public:
     ocl::Event operator()(const Queue &queue, const EventList& list, const Types& ... args)
 	{
         int pos = 0;
-        setArg(pos, args ... );
+        if(sizeof...(args) > 0) setArg(pos, args ... );
         return callKernel(queue, list);
 	}
 
@@ -135,7 +135,7 @@ public:
     ocl::Event operator()(const Queue &queue, const Types& ... args)
     {
         int pos = 0;
-        setArg(pos, args ... );
+        if(sizeof...(args) > 0) setArg(pos, args ... );
         return callKernel(queue);
     }
 

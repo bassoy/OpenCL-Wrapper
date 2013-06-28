@@ -29,6 +29,14 @@
 
 
 namespace ocl{
+
+
+struct QueueProp
+{
+
+};
+
+
 class Context;
 class Device;
 class EventList;
@@ -45,7 +53,7 @@ class EventList;
 class Queue
 {
 public:
-	typedef cl_command_queue_properties props; /*!< Choose In-order/Out-of-order and/or Profiling for this Queue. */
+    typedef cl_command_queue_properties props; /*!< Choose In-order/Out-of-order and/or Profiling for this Queue. */
     Queue();
     Queue(const Device&, props = 0);
     Queue(Context&, const Device&, props = 0);
@@ -71,16 +79,16 @@ public:
 	void finish() const;
 	const Context& context() const;
 	const Device& device() const;
-	props properties() const;
+    props properties() const;
     void barrier(const EventList&) const;
 
 
 private:
-
 	const Device *_device;
     Context *_context;
-	props _props;
+    props _props;
 	cl_command_queue _id;
+
 };
 
 }
