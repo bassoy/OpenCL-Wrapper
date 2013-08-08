@@ -55,6 +55,24 @@ ocl::Buffer::Buffer (size_t size_bytes) :
 	create(size_bytes);
 }
 
+/*! \brief Instantiates this Buffer within a context with size_bytes from an OpenGL Buffer.
+  *
+  * No Memory is allocated but only an object created which can be used within
+  * the specified Context. Allocation takes place when data is transfered.
+  * This Buffer ist created from an OpenGL Buffer, so the data can be shared between OpenGL and OpenGL.
+  * A shared context between OpenGL and OpenCL is assumed.
+  * The existence of an active Queue within the Context is assumed.
+  *
+  * \param ctxt is a shared context between OpenGL and OpenCL
+  * \param size_bytes is the size in bytes which are needed for the Memory.
+  * \param vbo_desc is the VBO description of the OpenGL Buffer from which this Buffer is created.
+  */
+ocl::Buffer::Buffer(Context &ctxt, unsigned int vbo_desc) :
+    Memory(ctxt)
+{
+    this->create(vbo_desc);
+}
+
 /*! \brief Instantiates this Buffer without a Context
   *
   * No Buffer is created. Use Buffer::create for the creation of such an object.
@@ -120,6 +138,33 @@ void ocl::Buffer::create(size_t size_bytes)
 	OPENCL_SAFE_CALL( status );
     TRUE_ASSERT(_id != 0, "could not create buffer");
 }
+
+/*! \brief Creates cl_mem for this Buffer.
+  *
+  * Note that no Memory is allocated. Allocation takes place when data is transfered.
+  * It is assumed that an active Queue exists.
+  * This Buffer is now shared between OpenGL and OpenCL.
+  *
+  * \param size_bytes Number of bytes to be reserved.
+  */
+void ocl::Buffer::create(GLuint vbo_desc)
+{
+    cl_mem_flags flags = ocl::Buffer::ReadWrite;
+
+    if (this->_context->devices().size() == 1 &&
+            this->_context->devices().at(0).type() == ocl::device_type::CPU){
+        flags |= ocl::Buffer::AllocHost;
+    }
+
+    cl_int status;
+
+    //Create Buffer from GL Buffer
+    this->_id = clCreateFromGLBuffer(this->_context->id(),
+                                     flags, vbo_desc, &status);
+    OPENCL_SAFE_CALL(status);
+    TRUE_ASSERT(this->_id != 0, "Could not create shared buffer.");
+}
+
 
 /*! \brief Creates a new cl_mem for this Buffer.
   *
@@ -503,4 +548,27 @@ ocl::Buffer & ocl::Buffer::operator= ( Buffer && other )
     if(this == &other) return *this;
     ocl::Memory::operator =(std::move(other));
     return *this;
+}
+
+/*! \brief Acquires access to this Buffer.
+  *
+  * Access is aquired to this Buffer. Only OpenCL can access this Buffer now.
+  * \param q is the active OpenCL queue.
+  * \returns whether acquiring was successful or not.
+  */
+cl_int ocl::Buffer::acquireAccess(Queue &q) {
+    glFinish();
+    return clEnqueueAcquireGLObjects(q.id(), 1, &this->_id, NULL, NULL, NULL);
+}
+
+
+/*! \brief Releases access to this Buffer.
+  *
+  * Access is released to this Buffer.
+  * \param q is the active OpenCL queue.
+  * \returns whether releasing was successful or not.
+  */
+cl_int ocl::Buffer::releaseAccess(Queue &q, const EventList& list) {
+    cl_event event_id;
+    return clEnqueueReleaseGLObjects(q.id(), 1, &this->_id, list.size(), list.events().data(), &event_id);
 }

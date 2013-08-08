@@ -25,8 +25,13 @@
 
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
+#include <OpenGL/OpenGL.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
 #else
 #include <CL/opencl.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #endif
 
 #include <ocl_event.h>
@@ -69,12 +74,14 @@ public:
                    };
     explicit Buffer();
     Buffer (Context&, size_t size_bytes);
+    Buffer (Context &, unsigned int vbo_desc);
     explicit Buffer (size_t size_bytes);
 	~Buffer();
 	Buffer ( const Buffer & other );
     Buffer ( Buffer && other);
 
 	void create(size_t size_bytes);
+    void create(unsigned int vbo_desc);
 	void recreate(size_t size_bytes);
 
     void 	copyTo ( size_t thisOffset, size_t size_bytes, const Buffer & dest, size_t destOffset, const EventList & list = EventList()  ) const;
@@ -107,6 +114,9 @@ public:
 
 	Buffer & 	operator= ( const Buffer & other );
     Buffer & 	operator= ( Buffer && other );
+
+    cl_int acquireAccess(Queue&);
+    cl_int releaseAccess(Queue&, const EventList& = EventList());
 };
 
 }

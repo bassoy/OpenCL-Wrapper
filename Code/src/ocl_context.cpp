@@ -134,6 +134,68 @@ ocl::Context::Context(const ocl::Platform &p) :
 	this->create();
 }
 
+/*! \brief Instantiates this Context.
+  *
+  * Instantiates this Context as a shared Context between OpenCL and OpenGL
+  * with the given Device. This Context is created.
+  *
+  * \param OS is the selected operating system.
+  * \param d is the Device for the Context.
+  */
+ocl::Context::Context(ocl::Context::OS os, const ocl::Device &d) :
+    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
+{
+    _devices.push_back(d);
+    this->create(os);
+}
+
+/*! \brief Instantiates this Context.
+  *
+  * Instantiates this Context as a shared Context between OpenCL and OpenGL
+  * with the given Device. This Context is created.
+  *
+  * \param OS is the selected operating system.
+  * \param d is a list of Device objects for this Context.
+  */
+ocl::Context::Context(ocl::Context::OS os, const std::vector<Device> &d) :
+    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(d), _activeQueue(NULL), _activeProgram(NULL)
+{
+    TRUE_ASSERT(!d.empty(), "No Devices specified. Cannot create context without devices.");
+    this->create(os);
+}
+
+/*! \brief Instantiates this Context.
+  *
+  * Instantiates this Context as a shared Context between OpenCL and OpenGL
+  * with the given Device. This Context is created.
+  *
+  * \param OS is the selected operating system.
+  * \param d1 is the Device for this Context.
+  * \param d2 is the Device for this Context.
+  */
+ocl::Context::Context(ocl::Context::OS os, const ocl::Device &d1, const ocl::Device &d2) :
+    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
+{
+    this->_devices.push_back(d1);
+    this->_devices.push_back(d2);
+    this->create(os);
+}
+
+/*! \brief Instantiates this Context.
+  *
+  * Instantiates this Context as a shared Context between OpenCL and OpenGL
+  * with the given Device. This Context is created.
+  *
+  * \param OS is the selected operating system.
+  * \param p is a Platform from which all Device objects are taken.
+  */
+ocl::Context::Context(ocl::Context::OS os, const ocl::Platform &p) :
+    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
+{
+    this->_devices = p.devices();
+    this->create(os);
+}
+
 /*! \brief Sets all Device objects of the specified Platform for this Context.
   *
   * Do not forget to create this Context.
@@ -169,6 +231,7 @@ void ocl::Context::setDevices(const ocl::Device &d)
 {
     _devices.clear();
     _devices.push_back(d);
+
 }
 
 /*! \brief Creates this Context.
@@ -190,6 +253,36 @@ void ocl::Context::create()
 	OPENCL_SAFE_CALL(status);
 }
 
+void ocl::Context::create(ocl::Context::OS os)
+{
+    TRUE_ASSERT(_id == 0, "Cannot create a context twice");
+    TRUE_ASSERT(!this->_devices.empty(), "No devices specified");
+    std::vector<cl_context_properties> properties;
+    #ifdef __APPLE__
+        CGLContextObj glContext = CGLGetCurrentContext();
+        CGLShareGroupObj shareGroup = CGLGetShareGroup(glContext);
+        properties.push_back(CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE);
+        properties.push_back((cl_context_properties)shareGroup);
+        properties.push_back(0);
+    #else
+        properties.push_back(CL_GL_CONTEXT_KHR);
+        properties.push_back((cl_context_properties) glXGetCurrentContext());
+        properties.push_back(CL_GLX_DISPLAY_KHR);
+        properties.push_back((cl_context_properties) glXGetCurrentDisplay());
+        properties.push_back(CL_CONTEXT_PLATFORM);
+        properties.push_back((cl_context_properties) this->_devices[0].platform());
+        properties.push_back(0);
+    #endif
+
+
+    // create a shared context from a GL context
+    cl_int status;
+    std::vector<cl_device_id> dev = this->cl_devices();
+
+    _id = clCreateContext(properties.data(), dev.size(), dev.data(), NULL, NULL, &status);
+    OPENCL_SAFE_CALL(status);
+
+}
 
 /*! \brief Destructs this Context.
   *
