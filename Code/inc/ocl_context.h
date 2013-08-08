@@ -25,8 +25,14 @@
 
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
+#include <OpenGL/OpenGL.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
 #else
 #include <CL/opencl.h>
+#include <GL/glx.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #endif
 
 #include <ocl_device.h>
@@ -63,7 +69,11 @@ class Context
 {
 
 public:
-
+    enum OS{
+        SHARED_CONTEXT_WINDOWS = 0,
+        SHARED_CONTEXT_LINUX = 1,
+        SHARED_CONTEXT_MAC = 2
+    };
 
 
     Context(cl_context);
@@ -72,6 +82,11 @@ public:
     Context(const Device&);
     Context(const Device&, const Device&);
 	Context();
+
+    Context(OS, const ocl::Platform &);
+    Context(OS, const std::vector<Device> &);
+    Context(OS, const ocl::Device &);
+    Context(OS, const ocl::Device &, const ocl::Device &);
     ~Context();
 
     void setDevices(const Platform&);
@@ -83,7 +98,8 @@ public:
 	bool operator==(const Context &) const;
 	bool operator!=(const Context &) const;
 
-	void create();
+    virtual void create();
+    void create(OS);
 	bool created() const;
     void release();
 
@@ -126,7 +142,7 @@ public:
 	std::vector<cl_device_id> cl_devices() const;
 
 
-private:
+protected:
 
 
 	cl_context _id;                  /**< OpenCL context. */
