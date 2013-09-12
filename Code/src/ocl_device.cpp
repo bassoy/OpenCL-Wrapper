@@ -249,14 +249,14 @@ size_t ocl::Device::localMemSize() const
 cl_platform_id ocl::Device::platform() const
 {
 	cl_platform_id _pl;
-	OPENCL_SAFE_CALL( clGetDeviceInfo (this->id(), CL_DEVICE_MAX_WORK_ITEM_SIZES , sizeof(_pl), &_pl, NULL) );
+	OPENCL_SAFE_CALL( clGetDeviceInfo (this->id(), CL_DEVICE_PLATFORM  , sizeof(_pl), &_pl, NULL) );
 	return _pl;
 }
 
 /*! \brief Returns the version of this Device .*/
 std::string ocl::Device::version() const
 {
-    std::string buffer(100,0);
+	std::string buffer(100,0);
 	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VERSION,  buffer.size(), &buffer[0], NULL));
 	return buffer;
 }
