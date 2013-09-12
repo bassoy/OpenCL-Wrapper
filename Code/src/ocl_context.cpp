@@ -193,12 +193,15 @@ void ocl::Context::create(bool shared)
 	TRUE_ASSERT(!this->_devices.empty(), "No devices specified");
 	cl_int status;
 	std::vector<cl_device_id> dev = this->cl_devices();
-	if(!shared)
+	if(shared == false)
 	{
 		_id = clCreateContext(NULL, dev.size(), dev.data(), NULL, NULL, &status);
 		OPENCL_SAFE_CALL(status);
+		TRUE_ASSERT(_id != 0, "Could not create Context");
 		return;
 	}
+
+	TRUE_COMMENT("Creating a shared context");
 
 	std::vector<cl_context_properties> properties;
 	#ifdef __APPLE__
@@ -218,7 +221,7 @@ void ocl::Context::create(bool shared)
 	#endif
 	_id = clCreateContext(properties.data(), dev.size(), dev.data(), NULL, NULL, &status);
 	OPENCL_SAFE_CALL(status);
-
+	TRUE_ASSERT(_id != 0, "Could not create Context");
 }
 
 /*! \brief Destructs this Context.

@@ -13,6 +13,7 @@ SOURCES += \
 	src/ocl_program.cpp \
 	src/ocl_context.cpp \
 	src/ocl_kernel.cpp \
+	src/ocl_image.cpp \
 	src/ocl_platform.cpp \
 	src/ocl_device.cpp \
 	src/ocl_device_type.cpp \        
@@ -28,6 +29,7 @@ HEADERS += \
 	inc/ocl_program.h \
 	inc/ocl_context.h \
 	inc/ocl_kernel.h \
+	inc/ocl_image.h \
 	inc/ocl_platform.h \
 	inc/ocl_device.h \
 	inc/ocl_device_type.h \        

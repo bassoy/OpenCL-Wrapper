@@ -40,5 +40,6 @@
 #include <ocl_platform.h>
 #include <ocl_program.h>
 #include <ocl_queue.h>
+#include <ocl_image.h>
 
 #endif

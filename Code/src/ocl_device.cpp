@@ -249,7 +249,8 @@ size_t ocl::Device::localMemSize() const
 cl_platform_id ocl::Device::platform() const
 {
 	cl_platform_id _pl;
-	OPENCL_SAFE_CALL( clGetDeviceInfo (this->id(), CL_DEVICE_PLATFORM		 , sizeof(_pl), &_pl, NULL) );
+	OPENCL_SAFE_CALL( clGetDeviceInfo (this->id(), CL_DEVICE_PLATFORM , sizeof(_pl), &_pl, NULL) );
+	TRUE_ASSERT(_pl != 0, "Platform not found");
 	return _pl;
 }
 

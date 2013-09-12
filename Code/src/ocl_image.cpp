@@ -130,7 +130,7 @@ void ocl::Image::create(size_t width, size_t height, DataType data_type, Access 
     cl_int status;
     this->_id = clCreateImage2D(this->_context->id(), flags, &format, width, height, 0, NULL, &status);
     OPENCL_SAFE_CALL(status);
-    TRUE_ASSERT(this->_id != 0, "Could not create shared texture.");
+		TRUE_ASSERT(this->_id != 0, "Could not create shared image.");
 }
 
 
@@ -169,7 +169,7 @@ void ocl::Image::create(size_t width, size_t height, size_t depth, DataType data
     cl_int status;
     this->_id = clCreateImage3D(this->_context->id(), flags, &format, width, height, depth, 0, 0, NULL, &status);
     OPENCL_SAFE_CALL(status);
-    TRUE_ASSERT(this->_id != 0, "Could not create shared texture.");
+		TRUE_ASSERT(this->_id != 0, "Could not create shared image.");
 }
 
 
@@ -183,15 +183,14 @@ void ocl::Image::create(unsigned int texture, unsigned long texture_target, long
 {
     cl_mem_flags flags = ocl::Image::ReadWrite;
     if (this->_context->devices().size() == 1 &&
-            this->_context->devices().at(0).type() == ocl::device_type::CPU){
+						this->_context->devices().front().type() == ocl::device_type::CPU){
         flags |= ocl::Image::AllocHost;
     }
 
     cl_int status;
-
     this->_id = clCreateFromGLTexture2D(this->_context->id(), flags, texture_target, miplevel, texture, &status);
     OPENCL_SAFE_CALL(status);
-    TRUE_ASSERT(this->_id != 0, "Could not create shared texture.");
+		TRUE_ASSERT(this->_id != 0, "Could not create shared image.");
 }
 
 /**
