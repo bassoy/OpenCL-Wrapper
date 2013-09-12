@@ -2,7 +2,7 @@ OCL_WRAPPER_DIR := ../../Code
 
 include ../libraries.mk 
 INCS:="$(OCL_WRAPPER_INC) $(OCL_INC)"
-LIBS:="$(OCL_WRAPPER_LIB) $(OCL_LIB)"
+LIBS:="$(OCL_WRAPPER_LIB) $(OCL_LIB) $(OGL_LIB)"
 
 GCC_FLAGS:="-std=c++0x -Wall -g -DDEBUG"
 

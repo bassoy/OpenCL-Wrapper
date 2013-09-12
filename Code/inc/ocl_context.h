@@ -69,92 +69,79 @@ class Context
 {
 
 public:
-    enum OS{
-        SHARED_CONTEXT_WINDOWS = 0,
-        SHARED_CONTEXT_LINUX = 1,
-        SHARED_CONTEXT_MAC = 2
-    };
 
-
-    Context(cl_context);
-	Context(const Platform &);
-    Context(const std::vector<Device>&);
-    Context(const Device&);
-    Context(const Device&, const Device&);
+	Context(cl_context, bool shared = false);
+	Context(const Platform &, bool shared = false);
+	Context(const std::vector<Device>&, bool shared = false);
+	Context(const Device&, bool shared = false);
+	Context(const Device&, const Device&, bool shared = false);
 	Context();
 
-    Context(OS, const ocl::Platform &);
-    Context(OS, const std::vector<Device> &);
-    Context(OS, const ocl::Device &);
-    Context(OS, const ocl::Device &, const ocl::Device &);
-    ~Context();
+	~Context();
 
-    void setDevices(const Platform&);
-    void setDevices(const std::vector<Device>&);
-    void setDevices(const Device&);
+	void setDevices(const Platform&);
+	void setDevices(const std::vector<Device>&);
+	void setDevices(const Device&);
 
 	cl_context id() const;
 
 	bool operator==(const Context &) const;
 	bool operator!=(const Context &) const;
 
-    virtual void create();
-    void create(OS);
+	void create(bool shared = false);
 	bool created() const;
-    void release();
+	void release();
+
+	void insert(Program*);
+	void insert(Queue*);
+	void insert(Memory*);
+	void insert(Event*);
+
+	void release(Event*);
+	void release(Program*);
+	void release(Queue*);
+	void release(Memory*);
+
+	void remove(Event*);
+	void remove(Program*);
+	void remove(Queue*);
+	void remove(Memory*);
+
+	bool has(const Device&)  const;
+
+	bool has(const Program&) const;
+	bool has(const Queue&)   const;
+	bool has(const Memory&)  const;
+	bool has(const Event&)   const;
 
 
-    void insert(Program*);
-    void insert(Queue*);
-    void insert(Memory*);
-    void insert(Event*);
+	Program& activeProgram() const;
+	void setActiveProgram(Program&);
 
-    void release(Event*);
-    void release(Program*);
-    void release(Queue*);
-    void release(Memory*);
-
-    void remove(Event*);
-    void remove(Program*);
-    void remove(Queue*);
-    void remove(Memory*);
-
-    bool has(const Device&)  const;
-
-    bool has(const Program&) const;
-    bool has(const Queue&)   const;
-    bool has(const Memory&)  const;
-    bool has(const Event&)   const;
+	Queue& activeQueue() const;
+	void setActiveQueue(Queue&);
 
 
-    Program& activeProgram() const;
-    void setActiveProgram(Program&);
-
-    Queue& activeQueue() const;
-    void setActiveQueue(Queue&);
-
-
-    const std::set<Event*>    & events() const;
-    const std::set<Memory*>   & memories() const;
-    const std::set<Queue*>    & queues() const;
-    const std::vector<Device> & devices() const;
+	const std::set<Event*>    & events() const;
+	const std::set<Memory*>   & memories() const;
+	const std::set<Queue*>    & queues() const;
+	const std::vector<Device> & devices() const;
 
 	std::vector<cl_device_id> cl_devices() const;
 
 
 protected:
 
-
 	cl_context _id;                  /**< OpenCL context. */
 
-    std::set<Program*>  _programs;    /**< OpenCL programs which shall run on the context. */
-    std::set<Queue*>    _queues;
-    std::set<Event*>    _events;
-    std::set<Memory*>   _memories;
-    std::vector<Device> _devices;
+	std::set<Program*>  _programs;    /**< OpenCL programs which shall run on the context. */
+	std::set<Queue*>    _queues;
+	std::set<Event*>    _events;
+	std::set<Memory*>   _memories;
+	std::vector<Device> _devices;
 
 	Queue* _activeQueue;
-    Program* _activeProgram;
+	Program* _activeProgram;
 
 };
 

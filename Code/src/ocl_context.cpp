@@ -45,8 +45,9 @@
   * Do not forget to determine an active Queue.
   *
   * \param id is the cl_context with which this Context is created.
+	* \param shared if true, creates a shared Context for OpenGL interoperability.
   */
-ocl::Context::Context(cl_context id) :
+ocl::Context::Context(cl_context id, bool shared) :
     _id(id), _programs(), _queues(), _events(), _memories(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
 {
     TRUE_ASSERT(_id != 0, "Context not valid");
@@ -59,7 +60,7 @@ ocl::Context::Context(cl_context id) :
         OPENCL_SAFE_CALL( clGetContextInfo (_id, CL_CONTEXT_DEVICES, num_devices, devices, NULL) );
         for(size_t i = 0; i < num_devices; ++i) this->_devices.push_back(ocl::Device(devices[i]));
         delete[] devices;
-        this->create();
+				this->create(shared);
     }
 
 }
@@ -69,13 +70,14 @@ ocl::Context::Context(cl_context id) :
   * Instantiates this Context with the given Device. Do not forget
   * to determine an active Queue. This Context is created.
   *
-  * \param d is the Device for this Context.
+	* \param device is the Device for this Context.
+	* \param shared if true, creates a shared Context for OpenGL interoperability.
   */
-ocl::Context::Context(const ocl::Device&  d) :
+ocl::Context::Context(const ocl::Device&  device, bool shared) :
     _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
 {
-    _devices.push_back(d);
-	this->create();
+		_devices.push_back(device);
+	this->create(shared);
 }
 
 
@@ -84,15 +86,16 @@ ocl::Context::Context(const ocl::Device&  d) :
   * Instantiates this Context with the given Device objects. Do not forget
   * to determine an active Queue. This Context is created.
   *
-  * \param d1 is the Device for this Context.
-  * \param d2 is the Device for this Context.
+	* \param device1 is the Device for this Context.
+	* \param device2 is the Device for this Context.
+	* \param shared if true, creates a shared Context for OpenGL interoperability.
   */
-ocl::Context::Context(const ocl::Device&  d1, const ocl::Device& d2) :
+ocl::Context::Context(const ocl::Device&  device1, const ocl::Device& device2, bool shared) :
     _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
 {
-    _devices.push_back(d1);
-    _devices.push_back(d2);
-	this->create();
+		_devices.push_back(device1);
+		_devices.push_back(device2);
+	this->create(shared);
 }
 
 /*! \brief Instantiates this Context.
@@ -110,13 +113,14 @@ ocl::Context::Context() :
   * Instantiates this Context with the given Device objects. Do not forget
   * to determine an active Queue. This Context is created.
   *
-  * \param d is a list of Device objects for this Context.
+	* \param devices is a list of Device objects for this Context.
+	* \param shared if true, creates a shared Context for OpenGL interoperability.
   */
-ocl::Context::Context(const std::vector<Device> & d) :
-    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(d), _activeQueue(NULL), _activeProgram(NULL)
+ocl::Context::Context(const std::vector<Device> & devices, bool shared) :
+		_id(NULL), _programs(), _queues(), _events(), _memories(), _devices(devices), _activeQueue(NULL), _activeProgram(NULL)
 {
-	TRUE_ASSERT(!d.empty(), "No Devices specified. Cannot create context without devices.");
-	this->create();
+	TRUE_ASSERT(!devices.empty(), "No Devices specified. Cannot create context without devices.");
+	this->create(shared);
 }
 
 /*! \brief Instantiates this Context.
@@ -126,74 +130,13 @@ ocl::Context::Context(const std::vector<Device> & d) :
   * This Context is created.
   *
   * \param p is a Platform from which all Device objects are taken.
+	* \param shared if true, creates a shared Context for OpenGL interoperability.
   */
-ocl::Context::Context(const ocl::Platform &p) :
+ocl::Context::Context(const ocl::Platform &p, bool shared) :
     _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
 {
     this->_devices = p.devices();
-	this->create();
-}
-
-/*! \brief Instantiates this Context.
-  *
-  * Instantiates this Context as a shared Context between OpenCL and OpenGL
-  * with the given Device. This Context is created.
-  *
-  * \param OS is the selected operating system.
-  * \param d is the Device for the Context.
-  */
-ocl::Context::Context(ocl::Context::OS os, const ocl::Device &d) :
-    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
-{
-    _devices.push_back(d);
-    this->create(os);
-}
-
-/*! \brief Instantiates this Context.
-  *
-  * Instantiates this Context as a shared Context between OpenCL and OpenGL
-  * with the given Device. This Context is created.
-  *
-  * \param OS is the selected operating system.
-  * \param d is a list of Device objects for this Context.
-  */
-ocl::Context::Context(ocl::Context::OS os, const std::vector<Device> &d) :
-    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(d), _activeQueue(NULL), _activeProgram(NULL)
-{
-    TRUE_ASSERT(!d.empty(), "No Devices specified. Cannot create context without devices.");
-    this->create(os);
-}
-
-/*! \brief Instantiates this Context.
-  *
-  * Instantiates this Context as a shared Context between OpenCL and OpenGL
-  * with the given Device. This Context is created.
-  *
-  * \param OS is the selected operating system.
-  * \param d1 is the Device for this Context.
-  * \param d2 is the Device for this Context.
-  */
-ocl::Context::Context(ocl::Context::OS os, const ocl::Device &d1, const ocl::Device &d2) :
-    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
-{
-    this->_devices.push_back(d1);
-    this->_devices.push_back(d2);
-    this->create(os);
-}
-
-/*! \brief Instantiates this Context.
-  *
-  * Instantiates this Context as a shared Context between OpenCL and OpenGL
-  * with the given Device. This Context is created.
-  *
-  * \param OS is the selected operating system.
-  * \param p is a Platform from which all Device objects are taken.
-  */
-ocl::Context::Context(ocl::Context::OS os, const ocl::Platform &p) :
-    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
-{
-    this->_devices = p.devices();
-    this->create(os);
+	this->create(shared);
 }
 
 /*! \brief Sets all Device objects of the specified Platform for this Context.
@@ -242,45 +185,39 @@ void ocl::Context::setDevices(const ocl::Device &d)
   *
   * Do not forget to determine an active Queue.
   *
+	* \param shared if true, creates a shared Context for OpenGL interoperability.
   */
-void ocl::Context::create()
+void ocl::Context::create(bool shared)
 {
-    TRUE_ASSERT(_id == 0, "Cannot create a context twice");
+	TRUE_ASSERT(_id == 0, "Cannot create a context twice");
 	TRUE_ASSERT(!this->_devices.empty(), "No devices specified");
 	cl_int status;
 	std::vector<cl_device_id> dev = this->cl_devices();
-	_id = clCreateContext(NULL, dev.size(), dev.data(), NULL, NULL, &status);
+	if(!shared)
+	{
+		_id = clCreateContext(NULL, dev.size(), dev.data(), NULL, NULL, &status);
+		OPENCL_SAFE_CALL(status);
+		return;
+	}
+
+	std::vector<cl_context_properties> properties;
+	#ifdef __APPLE__
+			CGLContextObj glContext = CGLGetCurrentContext();
+			CGLShareGroupObj shareGroup = CGLGetShareGroup(glContext);
+			properties.push_back(CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE);
+			properties.push_back((cl_context_properties)shareGroup);
+			properties.push_back(0);
+	#else
+			properties.push_back(CL_GL_CONTEXT_KHR);
+			properties.push_back((cl_context_properties) glXGetCurrentContext());
+			properties.push_back(CL_GLX_DISPLAY_KHR);
+			properties.push_back((cl_context_properties) glXGetCurrentDisplay());
+			properties.push_back(CL_CONTEXT_PLATFORM);
+			properties.push_back((cl_context_properties) this->devices().front().platform());
+			properties.push_back(0);
+	#endif
+	_id = clCreateContext(properties.data(), dev.size(), dev.data(), NULL, NULL, &status);
 	OPENCL_SAFE_CALL(status);
-}
-
-void ocl::Context::create(ocl::Context::OS os)
-{
-    TRUE_ASSERT(_id == 0, "Cannot create a context twice");
-    TRUE_ASSERT(!this->_devices.empty(), "No devices specified");
-    std::vector<cl_context_properties> properties;
-    #ifdef __APPLE__
-        CGLContextObj glContext = CGLGetCurrentContext();
-        CGLShareGroupObj shareGroup = CGLGetShareGroup(glContext);
-        properties.push_back(CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE);
-        properties.push_back((cl_context_properties)shareGroup);
-        properties.push_back(0);
-    #else
-        properties.push_back(CL_GL_CONTEXT_KHR);
-        properties.push_back((cl_context_properties) glXGetCurrentContext());
-        properties.push_back(CL_GLX_DISPLAY_KHR);
-        properties.push_back((cl_context_properties) glXGetCurrentDisplay());
-        properties.push_back(CL_CONTEXT_PLATFORM);
-        properties.push_back((cl_context_properties) this->_devices[0].platform());
-        properties.push_back(0);
-    #endif
-
-
-    // create a shared context from a GL context
-    cl_int status;
-    std::vector<cl_device_id> dev = this->cl_devices();
-
-    _id = clCreateContext(properties.data(), dev.size(), dev.data(), NULL, NULL, &status);
-    OPENCL_SAFE_CALL(status);
 
 }
 

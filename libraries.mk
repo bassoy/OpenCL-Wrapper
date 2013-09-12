@@ -19,4 +19,6 @@ ifdef AMD
 endif
 
 OCL_WRAPPER_LIB:=-L$(OCL_WRAPPER_DIR)/lib -lOclWrapper
-OCL_WRAPPER_INC:=-I$(OCL_WRAPPER_DIR)/inc
+OCL_WRAPPER_INC:=-I$(OCL_WRAPPER_DIR)/inc#
+
+OGL_LIB := -lGL -lGLU -lpthread
