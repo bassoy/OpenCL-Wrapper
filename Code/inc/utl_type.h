@@ -126,7 +126,7 @@ namespace type{
 	extern Type UInt;
 	extern Type Char;
 	extern Type UChar;
-	extern Type Bool;
+	//extern Type Bool;
 }
 }
 
