@@ -110,27 +110,31 @@ void ocl::Image::create(size_t width, size_t height, DataType data_type, Access 
 {
     TRUE_ASSERT(this->_context != 0, "Context not valid - cannot create Image");
     cl_mem_flags flags = access;
-
-
-//    _cl_image_desc desc;
-//    desc.image_type = CL_MEM_OBJECT_IMAGE2D;
-//    desc.image_height = height;
-//    desc.image_width = width;
-//    desc.image_depth = 0;
-//    desc.image_array_size = 1;
-//    desc.image_row_pitch = 0;
-//    desc.image_slice_pitch = 0;
-//    desc.num_mip_levels = 0;
-//    desc.num_samples = 0;
-//    desc.buffer = NULL;
     cl_image_format format;
     format.image_channel_order = CL_RGBA;
     format.image_channel_data_type = data_type;
-
     cl_int status;
+
+#if defined(OPENCL_V1_0) || defined(OPENCL_V1_1)
     this->_id = clCreateImage2D(this->_context->id(), flags, &format, width, height, 0, NULL, &status);
+#else
+
+    _cl_image_desc desc;
+    desc.image_type = CL_MEM_OBJECT_IMAGE2D;
+    desc.image_height = height;
+    desc.image_width = width;
+    desc.image_depth = 0;
+    desc.image_array_size = 1;
+    desc.image_row_pitch = 0;
+    desc.image_slice_pitch = 0;
+    desc.num_mip_levels = 0;
+    desc.num_samples = 0;
+    desc.buffer = NULL;
+
+    this->_id = clCreateImage(this->_context->id(), flags, &format, &desc, NULL, &status);
+#endif
     OPENCL_SAFE_CALL(status);
-		TRUE_ASSERT(this->_id != 0, "Could not create shared image.");
+    TRUE_ASSERT(this->_id != 0, "Could not create 2D image.");
 }
 
 
@@ -150,26 +154,30 @@ void ocl::Image::create(size_t width, size_t height, size_t depth, DataType data
     TRUE_ASSERT(this->_context != 0, "Context not valid - cannot create Image");
     cl_mem_flags flags = access;
 
-
-//    _cl_image_desc desc;
-//    desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-//    desc.image_height = height;
-//    desc.image_width = width;
-//    desc.image_depth = depth;
-//    desc.image_array_size = 1;
-//    desc.image_row_pitch = 0;
-//    desc.image_slice_pitch = 0;
-//    desc.num_mip_levels = 0;
-//    desc.num_samples = 0;
-//    desc.buffer = NULL;
     cl_image_format format;
     format.image_channel_order = CL_RGBA;
     format.image_channel_data_type = data_type;
 
     cl_int status;
+
+#if defined(OPENCL_V1_0) || defined(OPENCL_V1_1)
     this->_id = clCreateImage3D(this->_context->id(), flags, &format, width, height, depth, 0, 0, NULL, &status);
+#else
+    _cl_image_desc desc;
+    desc.image_type = CL_MEM_OBJECT_IMAGE3D;
+    desc.image_height = height;
+    desc.image_width = width;
+    desc.image_depth = depth;
+    desc.image_array_size = 1;
+    desc.image_row_pitch = 0;
+    desc.image_slice_pitch = 0;
+    desc.num_mip_levels = 0;
+    desc.num_samples = 0;
+    desc.buffer = NULL;
+    this->_id = clCreateImage(this->_context->id(), flags, &format, &desc, NULL, &status);
+#endif
     OPENCL_SAFE_CALL(status);
-		TRUE_ASSERT(this->_id != 0, "Could not create shared image.");
+    TRUE_ASSERT(this->_id != 0, "Could not create 3D image.");
 }
 
 
@@ -188,9 +196,13 @@ void ocl::Image::create(unsigned int texture, unsigned long texture_target, long
     }
 
     cl_int status;
+#if defined(OPENCL_V1_0) || defined(OPENCL_V1_1)
     this->_id = clCreateFromGLTexture2D(this->_context->id(), flags, texture_target, miplevel, texture, &status);
+#else
+    this->_id = clCreateFromGLTexture(this->_context->id(), flags, texture_target, miplevel, texture, &status);
+#endif
     OPENCL_SAFE_CALL(status);
-		TRUE_ASSERT(this->_id != 0, "Could not create shared image.");
+    TRUE_ASSERT(this->_id != 0, "Could not create shared image.");
 }
 
 /**
