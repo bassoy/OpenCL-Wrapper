@@ -219,6 +219,12 @@ void ocl::Context::create(bool shared)
 			properties.push_back((cl_context_properties) this->devices().front().platform());
 			properties.push_back(0);
 	#endif
+
+	size_t ext_size = 1024;
+	char *ext_string = (char*) malloc(ext_size);
+	int err = clGetDeviceInfo(this->_devices.front().id(), CL_DEVICE_EXTENSIONS, ext_size, ext_string, &ext_size);
+	std::cout << ext_string << std::endl;
+	std::cout << ext_size << std::endl;
 	_id = clCreateContext(properties.data(), dev.size(), dev.data(), NULL, NULL, &status);
 	OPENCL_SAFE_CALL(status);
 	TRUE_ASSERT(_id != 0, "Could not create Context");
