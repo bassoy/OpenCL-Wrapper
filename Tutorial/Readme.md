@@ -1,4 +1,4 @@
-OpenCL C++-Wrapper Tutorial
+OpenCL Tutorial
 ==================
 
 The tutorials shall provide examples and illustrate how convenient heterogeneous programming can be. In order to be able to use the tutorials, 'make' the 'libOclWrapper.a'. If you want to create projects, you need to 
