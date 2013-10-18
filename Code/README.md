@@ -1,4 +1,4 @@
-OpenCL Utility Toolkit
+OpenCL C++ Wrapper
 ==================
 
 The OpenCL Utility Toolkit contains C++ Wrapper classes for a more convient utilization of the OpenCL API. Using the 'Makefile', a static library 'libOclWrapper.a' is created which can be then used for further linking. In order to be able to compile, a GCC Version => 4.6.x and an OpenCL library featuring the OpenCL standard >= 1.1 is needed. The OpenCL wrapper classes are in the namespace 'ocl'. Next to these classes you find helper functions and classes which are encapsulated by the 'utl' namespace. A more detailed description of the framework is given by the doxygen documentation which can be created using the 'Doxyfile'. 
