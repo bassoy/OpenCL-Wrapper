@@ -67,7 +67,6 @@ ocl::CompileOption::CompileOption(ocl::CompileOption&& c) :
 */
 ocl::CompileOption ocl::CompileOption::operator | (const CompileOption &other)
 {
-    //return ocl::CompileOption(this->_options + ", " + other._options);
   return *this | other._options;
 }
 

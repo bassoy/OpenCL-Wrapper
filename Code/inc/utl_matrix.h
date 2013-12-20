@@ -152,7 +152,6 @@ public:
     bool is_vector() const { return !is_scalar() && (_rows == 1 || _cols == 1); }
     bool is_matrix() const { return _rows > 1 && _cols > 1; }
 
-    //virtual ~__MatrixBase() noexcept = default;
     virtual ~__MatrixBase() = default;
 
 protected:
@@ -206,7 +205,7 @@ public :
     Matrix(const Matrix& m) : __MatrixBase<T>(m) {}
     Matrix(Matrix&& m) : __MatrixBase<T>(std::move(m)) {}
     Matrix() = default;
-    //virtual ~Matrix() noexcept = default;
+
 
 
     Matrix operator*(const_reference value) const { return __MatrixBase<T>::operator*(value);  }
@@ -218,7 +217,6 @@ public :
 
     Matrix operator*(const Matrix& rhs) const
     {
-#if 1
         const Matrix& lhs = *this;
         TRUE_ASSERT(lhs.cols() == rhs.rows(), "LhsMatrix.cols() != RhsMatrix.rows()");
         Matrix res(lhs.rows(), rhs.cols());
@@ -243,16 +241,6 @@ public :
             }
         }
         return res;
-#else
-        Matrix res( this->rows(), rhs.cols() );
-        
-        for ( size_t i = 0u; i < res.rows(); ++i )
-          for ( size_t k = 0u; k < res.cols(); ++k )
-            for ( size_t j = 0u; j < rhs.rows(); ++j )
-              res[i * res.rows() + k] += (*this)[i * this->rows() + j] * rhs[j * rhs.cols() + k];
-            
-        return res;
-#endif
     }
 
 
@@ -317,7 +305,7 @@ public :
     Matrix(const Matrix& m) : __MatrixBase<T>(m) {}    
     Matrix(Matrix&& m) : __MatrixBase<T>(std::move(m)) {}
     Matrix() = default;
-    //~Matrix() = default;
+
 
 
     Matrix operator*(const_reference value) const { return __MatrixBase<T>::operator*(value); }
