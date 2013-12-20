@@ -58,6 +58,9 @@ public:
     Queue(const Device&, props = 0);
     Queue(Context&, const Device&, props = 0);
 	~Queue();
+	
+  Queue( Queue const& ) = delete;
+  Queue& operator =( Queue const& ) = delete;
 
     void setDevice(const Device&);
     void setContext(Context&);

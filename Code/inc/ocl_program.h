@@ -118,6 +118,9 @@ public:
 
     Program& operator << (const std::string &kernels);
     Program& operator << (std::istream& stream);
+    
+    Program( Program const& ) = delete;
+    Program& operator =( Program const& ) = delete;
 
     void setTypes(const utl::Types &);
     void setTypes(utl::Types &&);

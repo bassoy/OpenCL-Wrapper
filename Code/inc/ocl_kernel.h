@@ -83,6 +83,9 @@ public:
     const Program& program() const;
     void setProgram(const Program&);
     Context& context() const;
+    
+    
+    Kernel& operator =( Kernel const& ) = delete;
 
     template<class T, class ... Types>
     void setArg(int& pos, const T& data, Types& ... args)

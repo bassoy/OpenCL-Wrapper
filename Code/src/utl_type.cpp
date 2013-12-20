@@ -98,34 +98,38 @@ namespace type{
 ////////////////////////////////////
 
 utl::Types::Types() :
-    set<const Type*>()
+    //set<const Type*>()
+    impl_()
 {
 }
 
 utl::Types::Types(const Type& _Type) :
-    set<const Type*>()
+    //set<const Type*>()
+    impl_()
 {
-    this->insert(&_Type);
+    impl_.insert(&_Type);
 }
 
 utl::Types::Types(const Types& _Types) :
-    set<const Type*>(_Types)
+    //set<const Type*>(_Types)
+    impl_(_Types.impl_)
 {
 }
 
 utl::Types::Types(Types&& _Types) :
-    set<const Type*>(std::move(_Types))
+    //set<const Type*>(std::move(_Types))
+    impl_(std::move(_Types.impl_))
 {
 }
 
 bool utl::Types::contains(const Type &_Type)   const
 {
-    return this->find(&_Type) != this->end();
+    return impl_.find(&_Type) != impl_.end();
 }
 
 bool utl::Types::contains(const Types &_Types) const
 {
-    return std::includes(this->begin(), this->end(), _Types.begin(), _Types.end());
+    return std::includes(impl_.begin(), impl_.end(), _Types.begin(), _Types.end());
 }
 
 std::set<std::string> utl::Types::names() const
@@ -151,13 +155,15 @@ std::string utl::Types::toString() const
 
 utl::Types& utl::Types::operator=(const Types &t)
 {
-    std::set<const Type*>::operator =(t);
+    //std::set<const Type*>::operator =(t);
+    impl_ = t.impl_;
     return *this;
 }
 
 utl::Types& utl::Types::operator=(Types &&t)
 {
-    std::set<const Type*>::operator =(std::move(t));
+    //std::set<const Type*>::operator =(std::move(t));
+    impl_ = std::move(t.impl_);
     return *this;
 }
 

@@ -67,7 +67,8 @@ ocl::CompileOption::CompileOption(ocl::CompileOption&& c) :
 */
 ocl::CompileOption ocl::CompileOption::operator | (const CompileOption &other)
 {
-    return ocl::CompileOption(this->_options + ", " + other._options);
+    //return ocl::CompileOption(this->_options + ", " + other._options);
+  return *this | other._options;
 }
 
 /*! \brief Instantiating a new CompileOption from this CompileOption and another string.
@@ -76,7 +77,7 @@ ocl::CompileOption ocl::CompileOption::operator | (const CompileOption &other)
 */
 ocl::CompileOption ocl::CompileOption::operator | (const std::string& other)
 {
-    return ocl::CompileOption(this->_options + ", " + other);
+    return ocl::CompileOption(this->_options + " " + other);
 }
 
 /*! \brief Returns the string of the CompileOption. */
@@ -90,16 +91,18 @@ ocl::CompileOption& ocl::CompileOption::operator=(const CompileOption &other) {
     return *this;
 }
 
+namespace ocl {
 namespace compile_option{
-    ocl::CompileOption SINGLE_CONSTANT("-cl-single-precision-constant");
-    ocl::CompileOption NO_DENORMALS("-cl-denorms-are-zero");
-    ocl::CompileOption RND_CORRECTLY_DIVIDE_SQRT("-cl-fp32-correctly-rounded-divide-sqrt");
-    ocl::CompileOption DISABLE_OPT("-cl-opt-disable");
-    ocl::CompileOption ENABLE_MAD("-cl-mad-enable");
-    ocl::CompileOption NO_SIGNED_ZERO("-cl-no-signed-zeros");
-    ocl::CompileOption UNSAFE_MATH_OPT("-cl-unsafe-math-optimizations");
-    ocl::CompileOption FINITE_MATH("-cl-finite-math-only");
-    ocl::CompileOption FAST_MATH("-cl-fast-relaxed-math");
+    CompileOption SINGLE_CONSTANT("-cl-single-precision-constant");
+    CompileOption NO_DENORMALS("-cl-denorms-are-zero");
+    CompileOption RND_CORRECTLY_DIVIDE_SQRT("-cl-fp32-correctly-rounded-divide-sqrt");
+    CompileOption DISABLE_OPT("-cl-opt-disable");
+    CompileOption ENABLE_MAD("-cl-mad-enable");
+    CompileOption NO_SIGNED_ZERO("-cl-no-signed-zeros");
+    CompileOption UNSAFE_MATH_OPT("-cl-unsafe-math-optimizations");
+    CompileOption FINITE_MATH("-cl-finite-math-only");
+    CompileOption FAST_MATH("-cl-fast-relaxed-math");
+}
 }
 
 
@@ -120,7 +123,7 @@ namespace compile_option{
     * \param options defines a valid CompileOption for build process.
 */
 ocl::Program::Program(ocl::Context& ctxt, const utl::Types &types, const ocl::CompileOption &options) :
-    _id(NULL), _context(&ctxt), _types(types), _options(options)
+    _id(NULL), _context(&ctxt), _kernels(), _types(types), _options(options)
 {
     TRUE_ASSERT(!_types.empty(), "no types selected.");
     _context->insert(this);
@@ -136,7 +139,7 @@ ocl::Program::Program(ocl::Context& ctxt, const utl::Types &types, const ocl::Co
     * \param options defines a valid CompileOption for build process.
 */
 ocl::Program::Program(ocl::Context& ctxt, const ocl::CompileOption &options) :
-    _id(NULL), _context(&ctxt), _types(), _options(options)
+    _id(NULL), _context(&ctxt), _kernels(), _types(), _options(options)
 {
     _context->insert(this);
 }
@@ -148,7 +151,7 @@ ocl::Program::Program(ocl::Context& ctxt, const ocl::CompileOption &options) :
     * functions and to build it.
 */
 ocl::Program::Program() :
-    _id(NULL), _context(), _types(), _options()
+    _id(NULL), _context(), _kernels(), _types(), _options()
 {
 }
 

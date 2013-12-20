@@ -78,6 +78,9 @@ public:
 	explicit Platform(cl_platform_id);
     explicit Platform(const DeviceType&);
     explicit Platform(const DeviceTypes&);
+    
+    Platform( Platform const& ) = delete;
+    Platform& operator =( Platform const& ) = delete;
 
 	~Platform();
 

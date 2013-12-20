@@ -40,7 +40,7 @@ class Type;
   * Define your type in order to query types at runtime.
   */
 
-class Types : public std::set<const Type*>
+class Types //: public std::set<const Type*>
 {
 public:
 	typedef typename std::set<const Type*>::iterator iterator;
@@ -54,13 +54,21 @@ public:
     Types(Types&&);
 
     template<typename ... Ts>
-    Types(Ts ... args) : std::set<const Type*>()
+    Types(Ts ... args) : impl_()
     {
         std::vector<const Type*> __v = {args...};
         for(auto e : __v)
-            this->insert(e);
+            impl_.insert(e);
     }
-
+    
+    bool empty() const { return impl_.empty(); }
+    iterator begin() { return impl_.begin(); }
+    const_iterator begin() const { return impl_.begin(); }
+    iterator end() { return impl_.end(); }
+    const_iterator end() const { return impl_.end(); }
+    void insert( const_iterator beg, const_iterator end ) { impl_.insert( beg, end ); }
+    std::pair< iterator, bool > insert( Type const* const t ) { return impl_.insert( t ); }
+    
 
     bool contains(const Type &) const;
     bool contains(const Types &) const;
@@ -80,6 +88,9 @@ public:
 
 	Types& operator<<(const Type &);
     Types& operator<<(const Types &);
+    
+private :
+  std::set<const Type*> impl_;
 };
 
 
@@ -93,6 +104,9 @@ class Type
 {
 public:
 	Type(const std::string &name, const std::type_info &info);
+	
+	Type( Type const& ) = delete;
+	Type& operator =( Type const& ) = delete;
 
 	bool operator==(const Type &) const;
 	bool operator!=(const Type &) const;
