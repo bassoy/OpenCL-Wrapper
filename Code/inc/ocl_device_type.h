@@ -83,7 +83,7 @@ public:
 	static const DeviceType& type(cl_device_type);
     ~DeviceType(){}
 private:
-    DeviceType(){}
+    DeviceType(): _type(){}
 	static std::vector<DeviceType> _allTypes;
 	cl_device_type _type;
 };

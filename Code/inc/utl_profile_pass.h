@@ -49,7 +49,8 @@ class ProfilePass
 
 public:
 	ProfilePass(const std::string& str, const Dim& start, const Dim& step, const Dim& end, size_t __iter = 10) :
-        _name(str), _start(start), _step(step), _end(end), _iter(__iter), _print_n(true), _print_t(true), _print_o(true), _print_p(true) , _countUp(true)
+        _name(str), _start(start), _step(step), _end(end), _iter(__iter), _print_n(true), _print_t(true),
+        _print_o(true), _print_p(true) , _elems(), _ops(), _times(), _perf(), _countUp(true)
 	{}
 
     virtual ~ProfilePass(){}

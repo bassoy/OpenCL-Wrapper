@@ -94,7 +94,7 @@ public:
     {
         const __MatrixBase& lhs = *this;
         TRUE_ASSERT(lhs.dim() == rhs.dim(), "Dimensions must be equal");
-        __MatrixBase res(lhs.rows(), lhs.rows());
+        __MatrixBase res(lhs.rows(), lhs.cols());
         std::transform(lhs.begin(), lhs.end(), rhs.begin(), res.begin(), std::plus<T>());
         return res;
     }
@@ -110,7 +110,7 @@ public:
     {
         const __MatrixBase& lhs = *this;
         TRUE_ASSERT(lhs.dim() == rhs.dim(), "Dimensions must be equal");
-        __MatrixBase res(lhs.rows(), lhs.rows());
+        __MatrixBase res(lhs.rows(), lhs.cols());
         std::transform(lhs.begin(), lhs.end(), rhs.begin(), res.begin(), std::minus<T>());
         return res;
     }
@@ -152,7 +152,7 @@ public:
     bool is_vector() const { return !is_scalar() && (_rows == 1 || _cols == 1); }
     bool is_matrix() const { return _rows > 1 && _cols > 1; }
 
-    ~__MatrixBase() = default;
+    virtual ~__MatrixBase() = default;
 
 protected:
 
@@ -205,7 +205,7 @@ public :
     Matrix(const Matrix& m) : __MatrixBase<T>(m) {}
     Matrix(Matrix&& m) : __MatrixBase<T>(std::move(m)) {}
     Matrix() = default;
-    ~Matrix() = default;
+
 
 
     Matrix operator*(const_reference value) const { return __MatrixBase<T>::operator*(value);  }
@@ -305,7 +305,7 @@ public :
     Matrix(const Matrix& m) : __MatrixBase<T>(m) {}    
     Matrix(Matrix&& m) : __MatrixBase<T>(std::move(m)) {}
     Matrix() = default;
-    ~Matrix() = default;
+
 
 
     Matrix operator*(const_reference value) const { return __MatrixBase<T>::operator*(value); }

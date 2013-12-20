@@ -76,6 +76,9 @@ public:
 	Context(const Device&, bool shared = false);
 	Context(const Device&, const Device&, bool shared = false);
 	Context();
+	
+	Context( Context const& ) = delete;
+	Context& operator =( Context const& ) = delete;
 
 	~Context();
 

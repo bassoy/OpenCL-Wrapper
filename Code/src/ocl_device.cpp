@@ -257,44 +257,56 @@ cl_platform_id ocl::Device::platform() const
 /*! \brief Returns the version of this Device .*/
 std::string ocl::Device::version() const
 {
-	std::string buffer(100,0);
-	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VERSION,  buffer.size(), &buffer[0], NULL));
-	return buffer;
+	char   buf[128] = { '\0' };
+  size_t size     = 0u;
+
+	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VERSION,  sizeof buf, buf, &size));
+	return std::string( buf, size);
 }
 
 /*! \brief Returns the name of this Device .*/
 std::string ocl::Device::name() const
 {
-    std::string buffer(100,0);
-	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_NAME,  buffer.size(), &buffer[0], NULL));
-	return buffer;
+  char   buf[128] = { '\0' };
+  size_t size     = 0u;
+
+	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_NAME,  sizeof buf, buf, &size));
+	return std::string( buf, size);
 }
 
 /*! \brief Returns the name of the vendor of this Device .*/
 std::string ocl::Device::vendor() const
 {
-    std::string buffer(100,0);
-	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VENDOR,  buffer.size(), &buffer[0], NULL));
-	return buffer;
+  char   buf[128] = { '\0' };
+  size_t size     = 0u;
+
+	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VENDOR,  sizeof buf, buf, &size));
+	return std::string( buf, size);
 }
 
 /*! \brief Returns all extensions of this Device (support of double precision?) .*/
 std::string ocl::Device::extensions() const
 {
-    std::string buffer(1000,0);
-	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_EXTENSIONS,  buffer.size(), &buffer[0], NULL));
-	return buffer;
+  char   buf[1024] = { '\0' };
+  size_t size     = 0u;
+
+	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_EXTENSIONS,  sizeof buf, buf, &size));
+	return std::string( buf, size);
 }
 
 /*! \brief Prints this Device.*/
 void ocl::Device::print() const
 {
-    std::string buffer(100,0);
+    char   buf[128] = { '\0' };
+    size_t size     = 0u;
+
     std::cout << "\tDevice " << std::endl;
-    OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VENDOR, buffer.size(), &buffer[0], NULL) );
-    std::cout << "\t\tDevice: " << buffer << std::endl;
-    buffer.assign(100,0);
-    OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_NAME, buffer.size(), &buffer[0], NULL) );
-    std::cout << "\t\tName: " <<  buffer << std::endl;
+    OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VENDOR, sizeof buf, buf, &size) );
+    buf[size] = '\0';
+    std::cout << "\t\tDevice: " << buf << std::endl;
+
+    OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_NAME, sizeof buf, buf, &size) );
+    buf[size] = '\0';
+    std::cout << "\t\tName: " <<  buf << std::endl;
 
 }

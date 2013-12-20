@@ -84,7 +84,7 @@ protected:
     Memory (Context &context);
     Memory (const Memory & other);
     Memory (Memory && other);
-    ~Memory ();
+    virtual ~Memory ();
 
 protected:
     Context *_context;

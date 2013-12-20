@@ -574,7 +574,7 @@ ocl::Event ocl::Image::writeAsync(const Queue &queue, size_t *origin, const void
   */
 void ocl::Image::acquireAccess(Queue &q) {
     glFinish();
-    OPENCL_SAFE_CALL( clEnqueueAcquireGLObjects(q.id(), 1, &this->_id, NULL, NULL, NULL) );
+    OPENCL_SAFE_CALL( clEnqueueAcquireGLObjects(q.id(), 1, &this->_id, 0u, NULL, NULL) );
 }
 
 

@@ -46,7 +46,7 @@ class ProfilePassManager
     typedef typename std::vector<ProfilePass<T>*>::pointer        pointer;
     typedef typename std::vector<ProfilePass<T>*>::reference      reference;
 public:
-    ProfilePassManager() {};
+    ProfilePassManager(): _passes() {};
 	
 	~ProfilePassManager()
 	{

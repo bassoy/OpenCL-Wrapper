@@ -73,14 +73,14 @@ public:
                      CopyHost  = CL_MEM_COPY_HOST_PTR   /*!< memory object will be created on the device and copied from the host memory.*/
                    };
     explicit Buffer();
-    Buffer (Context&, size_t size_bytes);
+    Buffer (Context&, size_t size_bytes, Access const access);
     Buffer (Context &, unsigned int vbo_desc);
-    explicit Buffer (size_t size_bytes);
+    explicit Buffer (size_t size_bytes, Access const access );
 	~Buffer();
 	Buffer ( const Buffer & other );
     Buffer ( Buffer && other);
 
-	void create(size_t size_bytes);
+	void create(size_t size_bytes, Access const access );
     void create(unsigned int vbo_desc);
 	void recreate(size_t size_bytes);
 

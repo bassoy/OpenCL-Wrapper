@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 #include <ocl_query.h>
 
@@ -133,10 +134,9 @@ string ocl::profile(cl_platform_id id)
     OPENCL_SAFE_CALL( clGetPlatformInfo(id, CL_PLATFORM_PROFILE,  0, 0, &buffer_size));
     TRUE_ASSERT(buffer_size > 0, "Cannot retrieve platform profile");
 
-
-    string buffer(buffer_size,' ');
-    OPENCL_SAFE_CALL( clGetPlatformInfo(id, CL_PLATFORM_PROFILE,  buffer.size(), &buffer[0], NULL));
-    return buffer;
+    std::unique_ptr< char[] > buf( new char[buffer_size] );
+    OPENCL_SAFE_CALL( clGetPlatformInfo(id, CL_PLATFORM_PROFILE,  buffer_size, buf.get(), &buffer_size));
+    return std::string( buf.get(), buffer_size - 1 );
 }
 
 /*! \brief Returns the version of the specified OpenCL platform. */
@@ -312,7 +312,7 @@ cl_device_type ocl::deviceType(cl_device_id id)
 
 
 /*! brief Auxiliary function for measuring OpenCL kernels. */
-double ocl::execTime(cl_event &event)
+double ocl::execTime(cl_event const&event)
 {
     cl_ulong start, end;
     
