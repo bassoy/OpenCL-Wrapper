@@ -205,6 +205,8 @@ void ocl::Context::create(bool shared)
 
 	// TODO: check if shared context possible.
 
+	#ifdef __OPENGL__
+
 	std::vector<cl_context_properties> properties;
 	#ifdef __APPLE__
 			CGLContextObj glContext = CGLGetCurrentContext();
@@ -231,6 +233,7 @@ void ocl::Context::create(bool shared)
 	_id = clCreateContext(properties.data(), dev.size(), dev.data(), NULL, NULL, &status);
 	OPENCL_SAFE_CALL(status);
 	TRUE_ASSERT(_id != 0, "Could not create Context");
+	#endif
 }
 
 /*! \brief Destructs this Context.

@@ -25,13 +25,17 @@
 
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
+#ifdef __OPENGL__
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
+#endif
 #else
 #include <CL/opencl.h>
+#ifdef __OPENGL__
 #include <GL/gl.h>
 #include <GL/glu.h>
+#endif
 #endif
 
 #include <ocl_event.h>
@@ -72,51 +76,57 @@ public:
                      AllocHost = CL_MEM_ALLOC_HOST_PTR, /*!< memory object in the host memory will be created by instantiating a buffer object.*/
                      CopyHost  = CL_MEM_COPY_HOST_PTR   /*!< memory object will be created on the device and copied from the host memory.*/
                    };
-    explicit Buffer();
-    Buffer (Context&, size_t size_bytes);
-    Buffer (Context &, unsigned int vbo_desc);
-    explicit Buffer (size_t size_bytes);
+	explicit Buffer();
+	Buffer (Context&, size_t size_bytes);
+	#ifdef __OPENGL__
+	Buffer (Context &, GLuint vbo_desc);
+	#endif
+	explicit Buffer (size_t size_bytes);
 	~Buffer();
 	Buffer ( const Buffer & other );
-    Buffer ( Buffer && other);
+	Buffer ( Buffer && other);
 
 	void create(size_t size_bytes);
-    void create(unsigned int vbo_desc);
+	#ifdef __OPENGL__
+	void create(GLuint vbo_desc);
+	#endif
 	void recreate(size_t size_bytes);
 
-    void 	copyTo ( size_t thisOffset, size_t size_bytes, const Buffer & dest, size_t destOffset, const EventList & list = EventList()  ) const;
-    Event copyToAsync( size_t thisOffset, size_t size_bytes, const Buffer & dest, size_t destOffset, const EventList & list = EventList() );
+	void 	copyTo ( size_t thisOffset, size_t size_bytes, const Buffer & dest, size_t destOffset, const EventList & list = EventList()  ) const;
+	Event copyToAsync( size_t thisOffset, size_t size_bytes, const Buffer & dest, size_t destOffset, const EventList & list = EventList() );
 
-    void 	copyTo (const Queue&, size_t thisOffset, size_t size_bytes, const Buffer & dest, size_t destOffset, const EventList & list = EventList() ) const;
-    Event copyToAsync(const Queue&, size_t thisOffset, size_t size_bytes, const Buffer & dest, size_t destOffset, const EventList & list = EventList() );
+	void 	copyTo (const Queue&, size_t thisOffset, size_t size_bytes, const Buffer & dest, size_t destOffset, const EventList & list = EventList() ) const;
+	Event copyToAsync(const Queue&, size_t thisOffset, size_t size_bytes, const Buffer & dest, size_t destOffset, const EventList & list = EventList() );
 
 
 
 	void * map ( size_t thisOffset, size_t size_bytes, Memory::Access access ) const;
 	void * map ( Memory::Access access ) const;
-    Event mapAsync ( void ** ptr, size_t offset, size_t size_bytes, Memory::Access access, const EventList & list = EventList() ) const;
+	Event mapAsync ( void ** ptr, size_t offset, size_t size_bytes, Memory::Access access, const EventList & list = EventList() ) const;
 
-    void 	read ( size_t offset, void *ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
-    void 	read ( void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
-    Event 	readAsync ( size_t offset, void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
+	void 	read ( size_t offset, void *ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
+	void 	read ( void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
+	Event 	readAsync ( size_t offset, void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
 
-    void 	read (const Queue&, size_t offset, void *ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
-    void 	read (const Queue&, void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
-    Event 	readAsync (const Queue&, size_t offset, void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
+	void 	read (const Queue&, size_t offset, void *ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
+	void 	read (const Queue&, void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
+	Event 	readAsync (const Queue&, size_t offset, void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
 
-    void 	write ( const void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
-    void 	write ( size_t offset, const void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
-    Event 	writeAsync ( size_t offset, const void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
+	void 	write ( const void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
+	void 	write ( size_t offset, const void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
+	Event 	writeAsync ( size_t offset, const void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
 
-    void 	write (const Queue&, const void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
-    void 	write (const Queue&, size_t offset, const void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
-    Event 	writeAsync (const Queue&, size_t offset, const void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
+	void 	write (const Queue&, const void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
+	void 	write (const Queue&, size_t offset, const void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
+	Event 	writeAsync (const Queue&, size_t offset, const void * ptr_to_host_data, size_t size_bytes, const EventList & list = EventList() ) const;
 
 	Buffer & 	operator= ( const Buffer & other );
-    Buffer & 	operator= ( Buffer && other );
+	Buffer & 	operator= ( Buffer && other );
 
-    cl_int acquireAccess(Queue&);
-    cl_int releaseAccess(Queue&, const EventList& = EventList());
+	#ifdef __OPENGL__
+	cl_int acquireAccess(Queue&);
+	cl_int releaseAccess(Queue&, const EventList& = EventList());
+	#endif
 };
 
 }

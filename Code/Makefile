@@ -1,6 +1,7 @@
 include ../libraries.mk 
 
 CC := g++
+#CC := icpc
 
 INCS := $(OCL_INC) -Iinc
 LIBS := $(OCL_LIB)
@@ -12,7 +13,7 @@ OBJS   = $(addprefix build/,$(OBJS2))
 	
 TARGET := lib/libOclWrapper.a
 
-GCC_FLAGS=-std=c++0x -Wall $(GCC_FLAGS1) #-DOPENCL_V1_0
+GCC_FLAGS=-std=c++11 -Wall $(GCC_FLAGS1) #-D__OPENGL__ #-DOPENCL_V1_0 
 
 archive: $(OBJS)
 	ar cr $(TARGET) build/*.o
@@ -21,7 +22,7 @@ build/%.o : src/%.cpp
 	$(CC) -c $(INCS) $(GCC_FLAGS) $< -o $@
 
 purge :
-		rm -f build/* $(TARGET)
+	rm -f build/* $(TARGET)
 
 .PHONY : clean
 

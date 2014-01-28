@@ -67,11 +67,13 @@ ocl::Buffer::Buffer (size_t size_bytes) :
   * \param size_bytes is the size in bytes which are needed for the Memory.
   * \param vbo_desc is the VBO description of the OpenGL Buffer from which this Buffer is created.
   */
-ocl::Buffer::Buffer(Context &ctxt, unsigned int vbo_desc) :
+#ifdef __OPENGL__
+ocl::Buffer::Buffer(Context &ctxt, GLuint vbo_desc) :
     Memory(ctxt)
 {
     this->create(vbo_desc);
 }
+#endif
 
 /*! \brief Instantiates this Buffer without a Context
   *
@@ -147,6 +149,8 @@ void ocl::Buffer::create(size_t size_bytes)
   *
   * \param size_bytes Number of bytes to be reserved.
   */
+
+#ifdef __OPENGL__
 void ocl::Buffer::create(GLuint vbo_desc)
 {
     cl_mem_flags flags = ocl::Buffer::ReadWrite;
@@ -164,6 +168,7 @@ void ocl::Buffer::create(GLuint vbo_desc)
     OPENCL_SAFE_CALL(status);
     TRUE_ASSERT(this->_id != 0, "Could not create shared buffer.");
 }
+#endif
 
 
 /*! \brief Creates a new cl_mem for this Buffer.
@@ -556,11 +561,14 @@ ocl::Buffer & ocl::Buffer::operator= ( Buffer && other )
   * \param q is the active OpenCL queue.
   * \returns whether acquiring was successful or not.
   */
-cl_int ocl::Buffer::acquireAccess(Queue &q) {
+
+#ifdef __OPENGL__
+cl_int ocl::Buffer::acquireAccess(Queue &q) 
+{
     glFinish();
     return clEnqueueAcquireGLObjects(q.id(), 1, &this->_id, NULL, NULL, NULL);
 }
-
+#endif
 
 /*! \brief Releases access to this Buffer.
   *
@@ -568,7 +576,9 @@ cl_int ocl::Buffer::acquireAccess(Queue &q) {
   * \param q is the active OpenCL queue.
   * \returns whether releasing was successful or not.
   */
+#ifdef __OPENGL__
 cl_int ocl::Buffer::releaseAccess(Queue &q, const EventList& list) {
     cl_event event_id;
     return clEnqueueReleaseGLObjects(q.id(), 1, &this->_id, list.size(), list.events().data(), &event_id);
 }
+#endif

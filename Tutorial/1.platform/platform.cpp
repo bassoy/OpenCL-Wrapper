@@ -12,8 +12,14 @@
 int main()
 {
 
-    ocl::Platform platform(ocl::device_type::CPU);
-    ocl::Device device = platform.device(ocl::device_type::CPU);
+    ocl::printPlatforms();
+
+    //ocl::Platform platform(ocl::device_type::GPU);
+    //ocl::Device device = platform.device(ocl::device_type::GPU);
+
+/*
+    ocl::Platform platform(ocl::device_type::ACC);
+    ocl::Device device = platform.device(ocl::device_type::ACC);
 
     //std::cout << "Printing platform" << std::endl;
     platform.print(false, true, true, true, true, false);
@@ -29,6 +35,6 @@ int main()
     std::string s;
     device.isCpu() ? s = "CPU!" : s = "GPU!";
     std::cout << "Device is a " << s << std::endl;
-
+*/
 	return 0;
 }

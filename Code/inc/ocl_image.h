@@ -9,13 +9,17 @@
 
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
+#ifdef __OPENGL__
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
+#endif
 #else
 #include <CL/opencl.h>
+#ifdef __OPENGL__
 #include <GL/gl.h>
 #include <GL/glu.h>
+#endif
 #endif
 
 #include <ocl_event.h>

@@ -572,10 +572,12 @@ ocl::Event ocl::Image::writeAsync(const Queue &queue, size_t *origin, const void
   * \param q is the active OpenCL queue.
   * \returns whether acquiring was successful or not.
   */
+#ifdef __OPENGL__
 void ocl::Image::acquireAccess(Queue &q) {
     glFinish();
     OPENCL_SAFE_CALL( clEnqueueAcquireGLObjects(q.id(), 1, &this->_id, NULL, NULL, NULL) );
 }
+#endif
 
 
 /*! \brief Releases access to this Image.
