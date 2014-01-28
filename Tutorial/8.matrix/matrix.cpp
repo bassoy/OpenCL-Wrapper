@@ -49,8 +49,8 @@ int main()
 
 
 
-    ocl::Platform platform(ocl::device_type::CPU);
-    ocl::Device device = platform.device(ocl::device_type::CPU);
+    ocl::Platform platform(ocl::device_type::GPU);
+    ocl::Device device = platform.device(ocl::device_type::GPU);
 
     // creates a context for a decice or platform
     ocl::Context context(device);

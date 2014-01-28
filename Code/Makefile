@@ -13,7 +13,7 @@ OBJS   = $(addprefix build/,$(OBJS2))
 	
 TARGET := lib/libOclWrapper.a
 
-GCC_FLAGS=-std=c++11 -Wall $(GCC_FLAGS1) #-D__OPENGL__ #-DOPENCL_V1_0 
+GCC_FLAGS=-std=c++11 -Wall $(GCC_FLAGS1) -DOPENCL_V1_1  #-D__OPENGL__ #
 
 archive: $(OBJS)
 	ar cr $(TARGET) build/*.o

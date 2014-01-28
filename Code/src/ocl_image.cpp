@@ -118,7 +118,6 @@ void ocl::Image::create(size_t width, size_t height, DataType data_type, Access 
 #if defined(OPENCL_V1_0) || defined(OPENCL_V1_1)
     this->_id = clCreateImage2D(this->_context->id(), flags, &format, width, height, 0, NULL, &status);
 #else
-
     _cl_image_desc desc;
     desc.image_type = CL_MEM_OBJECT_IMAGE2D;
     desc.image_height = height;
