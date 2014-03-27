@@ -4,7 +4,7 @@ include ../libraries.mk
 INCS:="$(OCL_WRAPPER_INC) $(OCL_INC)"
 LIBS:="$(OCL_WRAPPER_LIB) $(OCL_LIB) $(OGL_LIB)"
 
-GCC_FLAGS:="-std=c++0x -Wall -g -DDEBUG"
+GCC_FLAGS:="-std=c++11 -Wall -g -DDEBUG"
 
 TARGET:
 		$(MAKE) -C 1.platform LIBS=$(LIBS) INCS=$(INCS) GCC_FLAGS=$(GCC_FLAGS)
