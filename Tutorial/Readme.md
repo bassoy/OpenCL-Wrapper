@@ -32,3 +32,4 @@ Projects
 7. Events:   creates several queues and performs read/write operations asynchronously. Synchronizes with queues.
 8. Matrix:   shows how to work with host matrices and how to perform comparison.
 9. Minimum:  performs a minimum operations on vectors and shows how to work with local memory.
+10.Image:    shows how to with images. Very simple examples.
