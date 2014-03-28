@@ -126,8 +126,8 @@ std::vector<ocl::DeviceType> ocl::DeviceType::_allTypes;
 /*! \brief Instantiates this DeviceType from an OpenCL device type
   *
   */
-ocl::DeviceType::DeviceType(cl_device_type type) :
-    _type(type)
+ocl::DeviceType::DeviceType(cl_device_type type, std::string name) :
+    _type(type), _name(name)
 {
 	_allTypes.push_back(*this);
 }
@@ -136,7 +136,7 @@ ocl::DeviceType::DeviceType(cl_device_type type) :
   *
   */
 ocl::DeviceType::DeviceType(const ocl::DeviceType &type) :
-    _type(type._type)
+    _type(type._type), _name(type._name)
 {
 }
 
@@ -157,6 +157,15 @@ cl_device_type ocl::DeviceType::operator()() const
 {
 	return _type;
 }
+
+/*! \brief Returns the OpenCL device type
+  *
+  */
+std::string ocl::DeviceType::name() const
+{
+	return _name;
+}
+
 
 /*! \brief Returns true if this and the specified DeviceType have the same OpenCL device type. */
 bool ocl::DeviceType::operator == (const ocl::DeviceType& t) const
@@ -193,11 +202,13 @@ const ocl::DeviceType& ocl::DeviceType::type(cl_device_type t)
 
 
 
+
+
 namespace ocl{
 namespace device_type{
-	DeviceType GPU(CL_DEVICE_TYPE_GPU);
-	DeviceType CPU(CL_DEVICE_TYPE_CPU);
-	DeviceType ACC(CL_DEVICE_TYPE_ACCELERATOR);
-	DeviceType ALL(CL_DEVICE_TYPE_ALL);
+	DeviceType GPU(CL_DEVICE_TYPE_GPU, "GPU");
+	DeviceType CPU(CL_DEVICE_TYPE_CPU, "CPU");
+	DeviceType ACC(CL_DEVICE_TYPE_ACCELERATOR, "ACC");
+	DeviceType ALL(CL_DEVICE_TYPE_ALL, "ALL");
 }
 }

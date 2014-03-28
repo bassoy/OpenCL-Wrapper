@@ -16,6 +16,7 @@ TARGET:
 		$(MAKE) -C 7.events   LIBS=$(LIBS) INCS=$(INCS) GCC_FLAGS=$(GCC_FLAGS)
 		$(MAKE) -C 8.matrix   LIBS=$(LIBS) INCS=$(INCS) GCC_FLAGS=$(GCC_FLAGS)
 		$(MAKE) -C 9.minimum  LIBS=$(LIBS) INCS=$(INCS) GCC_FLAGS=$(GCC_FLAGS)
+		$(MAKE) -C 10.image   LIBS=$(LIBS) INCS=$(INCS) GCC_FLAGS=$(GCC_FLAGS)
 
 
 .PHONY : clean
@@ -30,4 +31,5 @@ clean :
 		$(MAKE) clean -C 7.events
 		$(MAKE) clean -C 8.matrix
 		$(MAKE) clean -C 9.minimum
+		$(MAKE) clean -C 10.image
 

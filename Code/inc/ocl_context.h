@@ -50,6 +50,7 @@ class Queue;
 class Platform;
 class Event;
 class Memory;
+class Sampler;
 
 
 /*! \class Context ocl_context.h "inc/ocl_context.h"
@@ -100,16 +101,19 @@ public:
 	void insert(Queue*);
 	void insert(Memory*);
 	void insert(Event*);
+	void insert(Sampler*);
 
 	void release(Event*);
 	void release(Program*);
 	void release(Queue*);
 	void release(Memory*);
+	void release(Sampler*);
 
 	void remove(Event*);
 	void remove(Program*);
 	void remove(Queue*);
 	void remove(Memory*);
+	void remove(Sampler*);
 
 	bool has(const Device&)  const;
 
@@ -117,6 +121,7 @@ public:
 	bool has(const Queue&)   const;
 	bool has(const Memory&)  const;
 	bool has(const Event&)   const;
+	bool has(const Sampler&) const;
 
 
 	Program& activeProgram() const;
@@ -129,6 +134,7 @@ public:
 	const std::set<Event*>    & events() const;
 	const std::set<Memory*>   & memories() const;
 	const std::set<Queue*>    & queues() const;
+	const std::set<Sampler*>  & samplers() const;
 	const std::vector<Device> & devices() const;
 
 	std::vector<cl_device_id> cl_devices() const;
@@ -142,6 +148,7 @@ protected:
 	std::set<Queue*>    _queues;
 	std::set<Event*>    _events;
 	std::set<Memory*>   _memories;
+	std::set<Sampler*>  _samplers;
 	std::vector<Device> _devices;
 
 	Queue* _activeQueue;

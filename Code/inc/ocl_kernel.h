@@ -100,9 +100,18 @@ public:
         setArg(pos, args ... );
     }
 
+    template<class ... Types>
+    void setArg(int& pos, cl_sampler sampler, const Types& ... args)
+    {
+        setArg(pos, sampler);
+        pos++;
+        setArg(pos, args ... );
+    }    
+
     template<class T>
     void setArg(int pos, const T& data);
-    void setArg(int pos, cl_mem data);
+    void setArg(int pos, cl_mem);    
+    void setArg(int pos, cl_sampler);
 
     template<class ... Types>
     void setArg(const Types& ... args)
@@ -172,19 +181,19 @@ public:
 	void setLocalSize(size_t *localSize);
 	void setGlobalSize(size_t *globalSize);
 	void setLocalSize(size_t localSize, size_t pos);
-    void setGlobalSize(size_t globalSize, size_t pos);
+	void setGlobalSize(size_t globalSize, size_t pos);
 
-    const std::string& name() const;
-    const std::string& toString() const;
-    size_t numberOfArgs() const;
-    mem_loc memoryLocation(size_t pos) const;
+	const std::string& name() const;
+	const std::string& toString() const;
+	size_t numberOfArgs() const;
+	mem_loc memoryLocation(size_t pos) const;
 
 
-    static std::string specialize(const std::string &kernel, const std::string &type); //const utl::Type &);
-    static std::vector<mem_loc> extractMemlocs(const std::string &kernel);
-    static std::string extractName(const std::string &kernel);
-    static std::string extractParameter(const std::string& kernel);
-    static bool templated(const std::string& kernel);
+	static std::string specialize(const std::string &kernel, const std::string &type); //const utl::Type &);
+	static std::vector<mem_loc> extractMemlocs(const std::string &kernel);
+	static std::string extractName(const std::string &kernel);
+	static std::string extractParameter(const std::string& kernel);
+	static bool templated(const std::string& kernel);
 
 
 private:

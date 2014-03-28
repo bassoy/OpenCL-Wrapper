@@ -1,3 +1,20 @@
+//Copyright (C) 2013 Cem Bassoy.
+//
+//This file is part of the OpenCL Utility Toolkit.
+//
+//OpenCL Utility Toolkit is free software: you can redistribute it and/or modify
+//it under the terms of the GNU General Public License as published by
+//the Free Software Foundation, either version 3 of the License, or
+//(at your option) any later version.
+//
+//OpenCL Utility Toolkit is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with OpenCL Utility Toolkit.  If not, see <http://www.gnu.org/licenses/>.
+
 #include <ocl_memory.h>
 #include <ocl_context.h>
 #include <ocl_query.h>
@@ -21,23 +38,6 @@ ocl::Image::Image()
 }
 
 /**
- * \brief ocl::Image::Image Instantiates an 1D-Image within a context.
- *
- * No Memory is allocated but only an object created which can be used within
- * the active Context. Allocation takes place when data is transfered.
- * The existence of an active Context and an active Queue is assumed.
- *
- * \param ctxt Active Context.
- * \param width Width of the 1D-Image.
- * \param data_type Data type of the image.
- */
-ocl::Image::Image(Context& ctxt, size_t width, DataType data_type, Access access)
-    :Memory(ctxt)
-{
-    this->create(width, 1, data_type, access);
-}
-
-/**
  * \brief ocl::Image::Image Instantiates an 2D-Image within a context.
  *
  * No Memory is allocated but only an object created which can be used within
@@ -47,12 +47,13 @@ ocl::Image::Image(Context& ctxt, size_t width, DataType data_type, Access access
  * \param ctxt Active Context.
  * \param width Width of the 2D-Image.
  * \param height Height of the 2D-Image.
- * \param data_type Data type of the image.
+ * \param type Channeltype of the image.
+ * \param order Channelorder of the image.
  */
-ocl::Image::Image(Context& ctxt, size_t width, size_t height, DataType data_type, Access access)
+ocl::Image::Image(Context& ctxt, size_t width, size_t height, ChannelType type, ChannelOrder order, Access access)
     :Memory(ctxt)
 {
-    this->create(width, height, data_type, access);
+    this->create(width, height, type, order, access);
 }
 
 /**
@@ -66,12 +67,13 @@ ocl::Image::Image(Context& ctxt, size_t width, size_t height, DataType data_type
  * \param width Width of the 3D-Image.
  * \param height Height of the 3D-Image.
  * \param depth Depth of the 3D-Image.
- * \param data_type Data type of the image.
+ * \param type Channeltype of the image.
+ * \param order Channelorder of the image.
  */
-ocl::Image::Image(Context& ctxt, size_t width, size_t height, size_t depth, DataType data_type, Access access)
+ocl::Image::Image(Context& ctxt, size_t width, size_t height, size_t depth, ChannelType type, ChannelOrder order, Access access)
     :Memory(ctxt)
 {
-    this->create(width, height, depth, data_type, access);
+    this->create(width, height, depth, type, order, access);
 }
 
 /**
@@ -104,15 +106,16 @@ ocl::Image::~Image()
  *
  * \param width Width of the image.
  * \param height Height of the image.
- * \param data_type Data type of the image.
+ * \param type Channeltype of the image.
+ * \param order Channelorder of the image.
  */
-void ocl::Image::create(size_t width, size_t height, DataType data_type, Access access)
+void ocl::Image::create(size_t width, size_t height, ChannelType type, ChannelOrder order, Access access)
 {
     TRUE_ASSERT(this->_context != 0, "Context not valid - cannot create Image");
     cl_mem_flags flags = access;
     cl_image_format format;
-    format.image_channel_order = CL_RGBA;
-    format.image_channel_data_type = data_type;
+    format.image_channel_order = order;
+    format.image_channel_data_type = type;
     cl_int status;
 
 #if defined(OPENCL_V1_0) || defined(OPENCL_V1_1)
@@ -146,16 +149,17 @@ void ocl::Image::create(size_t width, size_t height, DataType data_type, Access 
  * \param width Width of the image.
  * \param height Height of the image.
  * \param depth Depth of the image.
- * \param data_type Data type of the image.
+ * \param type Channeltype of the image.
+ * \param order Channelorder of the image.
  */
-void ocl::Image::create(size_t width, size_t height, size_t depth, DataType data_type, Access access)
+void ocl::Image::create(size_t width, size_t height, size_t depth, ChannelType type, ChannelOrder order, Access access)
 {
     TRUE_ASSERT(this->_context != 0, "Context not valid - cannot create Image");
     cl_mem_flags flags = access;
 
     cl_image_format format;
-    format.image_channel_order = CL_RGBA;
-    format.image_channel_data_type = data_type;
+    format.image_channel_order = order;
+    format.image_channel_data_type = type;
 
     cl_int status;
 
@@ -211,12 +215,13 @@ void ocl::Image::create(unsigned int texture, unsigned long texture_target, long
  *
  * \param width Width of the image.
  * \param height Height of the image.
- * \param data_type Data type of the image.
+ * \param type Channeltype of the image.
+ * \param order Channelorder of the image.
  */
-void ocl::Image::recreate(size_t width, size_t height, DataType data_type)
+void ocl::Image::recreate(size_t width, size_t height, ChannelType type, ChannelOrder order)
 {
     this->release();
-    this->create(width, height, data_type);
+    this->create(width, height, type, order);
 }
 
 
@@ -231,7 +236,7 @@ void ocl::Image::recreate(size_t width, size_t height, DataType data_type)
  * \param dest is the Image into which the data is going to be copied.
  * \param dest_origin is the 3D offset in bytes from which the destionation Image is read.
  */
-void ocl::Image::copyTo(size_t *src_origin, size_t *region, const Image & dest, size_t *dest_origin, const EventList & list ) const
+void ocl::Image::copyTo(size_t *src_origin, const size_t *region, const Image & dest, size_t *dest_origin, const EventList & list ) const
 {
     TRUE_ASSERT(this->context() == dest.context(), "Context of this and dest must be equal");
     TRUE_ASSERT(this->id() != dest.id(), "Images must not be equal this->id() " << this->id() << "; other.id " << dest.id());
@@ -249,7 +254,7 @@ void ocl::Image::copyTo(size_t *src_origin, size_t *region, const Image & dest, 
  * \param list contains all events for which this command has to wait.
  * \return event which can be integrated into other EventList.
  */
-ocl::Event ocl::Image::copyToAsync(size_t *src_origin, size_t *region, const Image &dest, size_t *dest_origin, const EventList &list)
+ocl::Event ocl::Image::copyToAsync(size_t *src_origin, const size_t *region, const Image &dest, size_t *dest_origin, const EventList &list)
 {
     TRUE_ASSERT(this->context() == dest.context(), "Context of this and dest must be equal");
     TRUE_ASSERT(this->id() != dest.id(), "Images must not be equal this->id() " << this->id() << "; other.id " << dest.id());
@@ -273,7 +278,7 @@ ocl::Event ocl::Image::copyToAsync(size_t *src_origin, size_t *region, const Ima
  * \param dest is the Image into which the data is going to be copied.
  * \param dest_origin is the 3D offset in bytes from which the destionation Image is read.
  */
-void ocl::Image::copyTo(const Queue &queue, size_t *src_origin, size_t *region, const Image &dest, size_t *dest_origin, const EventList &list) const
+void ocl::Image::copyTo(const Queue &queue, size_t *src_origin, const size_t *region, const Image &dest, size_t *dest_origin, const EventList &list) const
 {
     TRUE_ASSERT(this->context() == dest.context(), "Context of this and dest must be equal");
     TRUE_ASSERT(this->id() != dest.id(), "Image must not be equal this->id() " << this->id() << "; other.id " << dest.id());
@@ -293,7 +298,7 @@ void ocl::Image::copyTo(const Queue &queue, size_t *src_origin, size_t *region, 
  * \param list contains all events for which this command has to wait.
  * \return event which can be integrated into other EventList.
  */
-ocl::Event ocl::Image::copyToAsync(const Queue &queue, size_t *src_origin, size_t *region, const Image &dest, size_t *dest_origin, const EventList &list)
+ocl::Event ocl::Image::copyToAsync(const Queue &queue, size_t *src_origin, const size_t *region, const Image &dest, size_t *dest_origin, const EventList &list)
 {
     TRUE_ASSERT(this->context() == dest.context(), "Context of this and dest must be equal");
     TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
@@ -314,7 +319,7 @@ ocl::Event ocl::Image::copyToAsync(const Queue &queue, size_t *src_origin, size_
  * \param access specifies in what way the host_mem is used.
  * \return a void pointer to the mapped host memory location.
  */
-void * ocl::Image::map(size_t *origin, size_t *region, Memory::Access access) const
+void * ocl::Image::map(size_t *origin, const size_t *region, Memory::Access access) const
 {
     TRUE_ASSERT(this->activeQueue().device().isCpu(), "Device " << this->activeQueue().device().name() << " is not a cpu!");
     cl_int status;
@@ -339,7 +344,7 @@ void * ocl::Image::map(size_t *origin, size_t *region, Memory::Access access) co
  * \param list contains all events for which this command has to wait.
  * \return event which can be integrated into other EventList
  */
-ocl::Event ocl::Image::mapAsync(void **ptr, size_t *origin, size_t *region, Memory::Access access, const EventList &list) const
+ocl::Event ocl::Image::mapAsync(void **ptr, size_t *origin, const size_t *region, Memory::Access access, const EventList &list) const
 {
     TRUE_ASSERT(this->activeQueue().device().isCpu(), "Device " << this->activeQueue().device().name() << " is not a cpu!");
     cl_int status;
@@ -361,7 +366,7 @@ ocl::Event ocl::Image::mapAsync(void **ptr, size_t *origin, size_t *region, Memo
  * \param ptr_to_host_data must point to a memory location whith region bytes available.
  * \param region is the 3D region of the data. It is given with {image_width, image_height, image_depth}.
  */
-void ocl::Image::read(size_t *origin,  void *ptr_to_host_data, size_t *region, const EventList &list) const
+void ocl::Image::read(size_t *origin,  void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
     TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
     OPENCL_SAFE_CALL( clEnqueueReadImage(this->activeQueue().id(), this->id(), CL_TRUE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
@@ -375,7 +380,7 @@ void ocl::Image::read(size_t *origin,  void *ptr_to_host_data, size_t *region, c
  * \param ptr_to_host_data must point to a memory location whith region bytes available.
  * \param region is the 3D region of the data. It is given with {image_width, image_height, image_depth}.
  */
-void ocl::Image::read(void *ptr_to_host_data, size_t *region, const EventList &list) const
+void ocl::Image::read(void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
     TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
     std::vector<size_t> origin = {0, 0, 0};
@@ -393,7 +398,7 @@ void ocl::Image::read(void *ptr_to_host_data, size_t *region, const EventList &l
  * \param list contains all events for which this command has to wait.
  * \return an event which can be further put into an event list for synchronization.
  */
-ocl::Event ocl::Image::readAsync(size_t *origin, void *ptr_to_host_data, size_t *region, const EventList &list) const
+ocl::Event ocl::Image::readAsync(size_t *origin, void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
     TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
     cl_event event_id;
@@ -412,7 +417,7 @@ ocl::Event ocl::Image::readAsync(size_t *origin, void *ptr_to_host_data, size_t 
  * \param ptr_to_host_data must point to a memory location whith region bytes available.
  * \param region is the 3D region of the data. It is given with {image_width, image_height, image_depth}.
  */
-void ocl::Image::read(const Queue& queue, size_t *origin, void *ptr_to_host_data, size_t *region, const EventList &list) const
+void ocl::Image::read(const Queue& queue, const size_t *origin, void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
     TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
     TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
@@ -429,12 +434,12 @@ void ocl::Image::read(const Queue& queue, size_t *origin, void *ptr_to_host_data
  * \param ptr_to_host_data must point to a memory location whith region bytes available.
  * \param region is the 3D region of the data. It is given with {image_width, image_height, image_depth}.
  */
-void ocl::Image::read(const Queue& queue, void *ptr_to_host_data, size_t *region, const EventList &list) const
+void ocl::Image::read(const Queue& queue, void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
     TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
     TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    std::vector<size_t> origin = {0, 0, 0};
-    OPENCL_SAFE_CALL( clEnqueueReadImage(queue.id(), this->id(), CL_TRUE, origin.data(), region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
+    const size_t origin[3] = {0, 0, 0};
+    OPENCL_SAFE_CALL( clEnqueueReadImage(queue.id(), this->id(), CL_TRUE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
     OPENCL_SAFE_CALL( clFinish(queue.id()) );
 }
 
@@ -450,7 +455,7 @@ void ocl::Image::read(const Queue& queue, void *ptr_to_host_data, size_t *region
  * \param list contains all events for which this command has to wait.
  * \return an event which can be further put into an event list for synchronization.
  */
-ocl::Event ocl::Image::readAsync(const Queue &queue, size_t *origin, void *ptr_to_host_data, size_t *region, const EventList &list) const
+ocl::Event ocl::Image::readAsync(const Queue &queue, size_t *origin, void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
     TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
     TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
@@ -467,7 +472,7 @@ ocl::Event ocl::Image::readAsync(const Queue &queue, size_t *origin, void *ptr_t
  * \param ptr_to_host_data must point to a memory location whith region bytes available.
  * \param region is the 3D region of the data. It is given with {image_width, image_height, image_depth}.
  */
-void ocl::Image::write(size_t *origin, const void *ptr_to_host_data, size_t *region, const EventList &list) const
+void ocl::Image::write(size_t *origin, const void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
     TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
     OPENCL_SAFE_CALL( clEnqueueWriteImage(this->activeQueue().id(), this->id(), CL_TRUE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
@@ -481,7 +486,7 @@ void ocl::Image::write(size_t *origin, const void *ptr_to_host_data, size_t *reg
  * \param ptr_to_host_data must point to a memory location whith region bytes available.
  * \param region is the 3D region of the data. It is given with {image_width, image_height, image_depth}.
  */
-void ocl::Image::write(const void *ptr_to_host_data, size_t *region, const EventList &list) const
+void ocl::Image::write(const void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
     TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
     std::vector<size_t> origin = {0, 0, 0};
@@ -499,7 +504,7 @@ void ocl::Image::write(const void *ptr_to_host_data, size_t *region, const Event
  * \param list contains all events for which this command has to wait.
  * \return an event which can be further put into an event list for synchronization.
  */
-ocl::Event ocl::Image::writeAsync(size_t *origin, const void *ptr_to_host_data, size_t *region, const EventList &list) const
+ocl::Event ocl::Image::writeAsync(size_t *origin, const void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
     TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
     cl_event event_id;
@@ -518,7 +523,7 @@ ocl::Event ocl::Image::writeAsync(size_t *origin, const void *ptr_to_host_data, 
  * \param ptr_to_host_data must point to a memory location whith region bytes available.
  * \param region is the 3D region of the data. It is given with {image_width, image_height, image_depth}.
  */
-void ocl::Image::write(const Queue& queue, size_t *origin, const void *ptr_to_host_data, size_t *region, const EventList &list) const
+void ocl::Image::write(const Queue& queue, size_t *origin, const void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
     TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
     TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
@@ -535,7 +540,7 @@ void ocl::Image::write(const Queue& queue, size_t *origin, const void *ptr_to_ho
  * \param ptr_to_host_data must point to a memory location whith region bytes available.
  * \param region is the 3D region of the data. It is given with {image_width, image_height, image_depth}.
  */
-void ocl::Image::write(const Queue& queue, const void *ptr_to_host_data, size_t *region, const EventList &list) const
+void ocl::Image::write(const Queue& queue, const void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
     TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
     TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
@@ -556,7 +561,7 @@ void ocl::Image::write(const Queue& queue, const void *ptr_to_host_data, size_t 
  * \param list contains all events for which this command has to wait.
  * \return an event which can be further put into an event list for synchronization.
  */
-ocl::Event ocl::Image::writeAsync(const Queue &queue, size_t *origin, const void *ptr_to_host_data, size_t *region, const EventList &list) const
+ocl::Event ocl::Image::writeAsync(const Queue &queue, size_t *origin, const void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
     TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
     TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");

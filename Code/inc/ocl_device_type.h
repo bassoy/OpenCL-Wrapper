@@ -47,16 +47,16 @@ public:
 	DeviceTypes();
 	DeviceTypes(const DeviceType &, const DeviceType&);
 	DeviceTypes operator |(const DeviceType&) const;
-    void operator |=(const DeviceType&);
+	void operator |=(const DeviceType&);
 	bool operator == (const DeviceTypes&) const;
 	bool operator != (const DeviceTypes&) const;
-    bool contains (const DeviceTypes&) const;
+	bool contains (const DeviceTypes&) const;
 	bool contains (const DeviceType&) const;
 	bool contains (cl_device_type) const;
-    const std::vector<DeviceType>& operator()() const;
-    size_t size() const;
+	const std::vector<DeviceType>& operator()() const;
+	size_t size() const;
 protected:
-    void push_back(const DeviceType&);
+	void push_back(const DeviceType&);
 	explicit DeviceTypes(const DeviceType&);
 private:
     std::vector<DeviceType> _deviceTypes;
@@ -72,20 +72,22 @@ private:
 class DeviceType
 {
 public:
-    explicit DeviceType(cl_device_type);
-    DeviceType(const DeviceType&);
+	explicit DeviceType(cl_device_type, std::string name);
+	DeviceType(const DeviceType&);
 	DeviceTypes operator | (const DeviceType&) const;
 	bool operator == (const DeviceType&) const;
 	bool operator != (const DeviceType&) const;
 	bool operator == (cl_device_type) const;
 	bool operator != (cl_device_type) const;
-    cl_device_type operator()() const;
+	cl_device_type operator()() const;
 	static const DeviceType& type(cl_device_type);
-    ~DeviceType(){}
+	~DeviceType(){}
+	std::string name() const;
 private:
-    DeviceType(){}
+	DeviceType(){}
 	static std::vector<DeviceType> _allTypes;
 	cl_device_type _type;
+	std::string _name;
 };
 
 

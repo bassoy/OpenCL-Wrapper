@@ -72,7 +72,7 @@ ocl::Platform::Platform(const ocl::DeviceType &type) :
     _devices(), _id(0)
 {
     cl_platform_id id = ocl::Platform::id(type);
-    TRUE_ASSERT(id != 0, "Could not find any platform for type");
+    TRUE_ASSERT(id != 0, "Could not find any platform for type " << type.name());
     this->create(id);
 
 //	this->create(type);
@@ -85,6 +85,7 @@ ocl::Platform::Platform(const ocl::DeviceType &type) :
   *
   * \param types DeviceTypes which are searched for within all Platform objects.
   */
+
 ocl::Platform::Platform(const ocl::DeviceTypes &types) :
     _devices(), _id(0)
 {
@@ -187,14 +188,13 @@ bool ocl::Platform::has(const ocl::Device &dev) const
 }
 
 
-
-/*! \brief Returns an OpenCL platform for a specified DeviceTypes.
+/*! \brief Returns an OpenCL platform for a specified DeviceType.
   *
-  * Searches the system for a Platform which supports all the
-  * specified DeviceType objects within the DeviceTypes.
+  * Searches the system for a Platform which supports the
+  * specified DeviceType.
   *
-  * \returns a valid OpenCL platform if the Platform supports
-  * the specified DeviceTypes. Otherwise a NULL is returned.
+  * \returns a valid OpenCL platform if the Platform supports the
+  * specified DeviceType. Otherwise a NULL is returned.
 */
 cl_platform_id ocl::Platform::id(const ocl::DeviceTypes& types)
 {
@@ -202,11 +202,11 @@ cl_platform_id ocl::Platform::id(const ocl::DeviceTypes& types)
     for(auto p_id : platforms)
     {
         const auto &devs = ocl::devices(p_id);
-        ocl::DeviceTypes ts;
-        for(auto d_id : devs){
-            ts |= ocl::DeviceType(ocl::deviceType(d_id));
-        }
-        if(ts.contains(types)) return p_id;
+        ocl::DeviceTypes others;
+      	for(auto d_id : devs){
+      		others |= DeviceType::type(ocl::deviceType(d_id));
+      	}
+        if(others.contains(types)) return p_id;
     }
     return 0;
 }

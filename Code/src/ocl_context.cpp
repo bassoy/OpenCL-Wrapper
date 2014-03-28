@@ -33,6 +33,7 @@
 #include <ocl_device.h>
 #include <ocl_device_type.h>
 #include <ocl_buffer.h>
+#include <ocl_sampler.h>
 
 #include <utl_assert.h>
 
@@ -48,7 +49,7 @@
 	* \param shared if true, creates a shared Context for OpenGL interoperability.
   */
 ocl::Context::Context(cl_context id, bool shared) :
-    _id(id), _programs(), _queues(), _events(), _memories(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
+    _id(id), _programs(), _queues(), _events(), _memories(), _devices(), _samplers(), _activeQueue(NULL), _activeProgram(NULL)
 {
     TRUE_ASSERT(_id != 0, "Context not valid");
 
@@ -74,7 +75,7 @@ ocl::Context::Context(cl_context id, bool shared) :
 	* \param shared if true, creates a shared Context for OpenGL interoperability.
   */
 ocl::Context::Context(const ocl::Device&  device, bool shared) :
-    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
+    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _samplers(), _activeQueue(NULL), _activeProgram(NULL)
 {
 		_devices.push_back(device);
 	this->create(shared);
@@ -91,7 +92,7 @@ ocl::Context::Context(const ocl::Device&  device, bool shared) :
 	* \param shared if true, creates a shared Context for OpenGL interoperability.
   */
 ocl::Context::Context(const ocl::Device&  device1, const ocl::Device& device2, bool shared) :
-    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
+    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _samplers(), _activeQueue(NULL), _activeProgram(NULL)
 {
 		_devices.push_back(device1);
 		_devices.push_back(device2);
@@ -104,7 +105,7 @@ ocl::Context::Context(const ocl::Device&  device1, const ocl::Device& device2, b
   * Also provide an active Queue.
   */
 ocl::Context::Context() :
-    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
+    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _samplers(), _activeQueue(NULL), _activeProgram(NULL)
 {}
 
 
@@ -133,7 +134,7 @@ ocl::Context::Context(const std::vector<Device> & devices, bool shared) :
 	* \param shared if true, creates a shared Context for OpenGL interoperability.
   */
 ocl::Context::Context(const ocl::Platform &p, bool shared) :
-    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
+    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _samplers(), _activeQueue(NULL), _activeProgram(NULL)
 {
     this->_devices = p.devices();
 	this->create(shared);
@@ -273,6 +274,10 @@ void ocl::Context::release()
         ocl::Memory *m = *it; ++it;
         this->release(m);
     }
+    for(auto it = _samplers.begin(); it != _samplers.end();){
+        ocl::Sampler *m = *it; ++it;
+        this->release(m);
+    }
 
     this->_activeProgram = 0;
     this->_activeQueue = 0;
@@ -329,6 +334,7 @@ void ocl::Context::release(ocl::Memory *mem)
     mem->release();
 }
 
+
 /*! \brief Removes a Memory if it belongs to this Context.
   *
   * Remove is called from a Memory when its scope ends
@@ -343,6 +349,51 @@ void ocl::Context::remove(ocl::Memory *mem)
     _memories.erase(mem);
 }
 
+/*! \brief Inserts a Sampler.
+  *
+  * Insertion is performed when the Sampler
+  * is created. This is done by the Sampler
+  * itself and must not be done by the user.
+  *
+  * \param sampler Sampler to be inserted into the set of Sampler objects.
+  */
+void ocl::Context::insert(ocl::Sampler *sampler)
+{
+    TRUE_ASSERT(sampler != 0, "Sampler not valid.");
+    if(this->has(*sampler)) return;
+    TRUE_ASSERT(sampler->context() == *this, "Cannot insert Sampler with a different Context and this Context");
+    this->_samplers.insert(sampler);
+}
+
+/*! \brief Releases a Sampler if it belongs to this Context.
+  *
+  * Release is called if this Context is destructed. You do not
+  * have to call this function. The release of a Sampler
+  * is controlled by the location of its declaration and thus its
+  * scope.
+  * \param sampler Sampler to be released and removed from the set of Sampler objects.
+  */
+void ocl::Context::release(ocl::Sampler *sampler)
+{
+    TRUE_ASSERT(sampler != 0, "Sampler not valid");
+    if(_samplers.find(sampler) == _samplers.end()) return;
+    _samplers.erase(sampler);
+    sampler->release();
+}
+
+/*! \brief Removes a Sampler if it belongs to this Context.
+  *
+  * Remove is called from a Sampler when its scope ends
+  * and thus must be destructed. You do not have to call this function.
+  *
+  * \param sampler Sampler to be removed from the set of Sampler objects.
+  */
+void ocl::Context::remove(ocl::Sampler *sampler)
+{
+    TRUE_ASSERT(sampler != 0, "Sampler not valid");
+    if(_samplers.find(sampler) == _samplers.end()) return;
+    _samplers.erase(sampler);
+}
 
 /*! \brief Inserts a Queue.
   *
@@ -547,6 +598,13 @@ bool ocl::Context::has(const ocl::Device& d) const
     return std::find(this->devices().begin(),this->devices().end(), d) != this->devices().end();
 }
 
+/*! \brief Returns true if this Context has the specified Sampler. */
+bool ocl::Context::has(const ocl::Sampler& s) const
+{
+    return this->_samplers.find(const_cast<ocl::Sampler*>(&s)) != this->_samplers.end();
+}
+
+
 /*! \brief Returns true if this Context has the specified Queue. */
 bool ocl::Context::has(const ocl::Queue& q) const
 {
@@ -572,6 +630,13 @@ const std::set<ocl::Memory*>& ocl::Context::memories() const
 {
     return this->_memories;
 }
+
+/*! \brief Returns all Memory s for this Context. */
+const std::set<ocl::Sampler*>& ocl::Context::samplers() const
+{
+    return this->_samplers;
+}
+
 
 
 /*! \brief Returns all Queue s for this Context. */

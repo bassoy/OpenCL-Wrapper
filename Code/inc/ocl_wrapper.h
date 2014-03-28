@@ -41,5 +41,6 @@
 #include <ocl_program.h>
 #include <ocl_queue.h>
 #include <ocl_image.h>
+#include <ocl_sampler.h>
 
 #endif

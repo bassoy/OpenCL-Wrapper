@@ -45,13 +45,13 @@ namespace ocl{
 class  Device
 {
 public:
-    Device(const Device&);
+	Device(const Device&);
 	explicit Device(cl_device_id);
-    Device();
-    ~Device();
+	Device();
+	~Device();
 
 
-    Device& operator =(const Device&);
+	Device& operator =(const Device&);
 
 	bool operator == (const Device &) const;
 	bool operator != (const Device &) const;
@@ -63,20 +63,20 @@ public:
 	bool isGpu() const;
 	bool isCpu() const;
 	bool isAccelerator() const;
-    void print() const;
+	void print() const;
 
-    void setId(cl_device_id);
+	void setId(cl_device_id);
 	cl_device_id id() const;
 	const DeviceType& type() const;
 
 	std::vector<size_t> maxWorkItemSizes() const;
 	size_t maxWorkItemDim() const;
 	size_t maxComputeUnits() const;
-    size_t maxMemAllocSize() const;
-    size_t maxConstantBufferSize() const;
-    size_t globalMemSize() const;
-    size_t localMemSize() const;
-    size_t maxWorkGroupSize() const;
+	size_t maxMemAllocSize() const;
+	size_t maxConstantBufferSize() const;
+	size_t globalMemSize() const;
+	size_t localMemSize() const;
+	size_t maxWorkGroupSize() const;
 
 	cl_platform_id platform() const;
 	std::string version()    const;

@@ -418,8 +418,19 @@ void ocl::Kernel::setWorkSize(size_t lSizeX, size_t lSizeY, size_t lSizeZ, size_
 void ocl::Kernel::setArg(int pos, cl_mem data)
 {
     TRUE_ASSERT(this->numberOfArgs() > size_t(pos), "Position " << pos << " >= " << this->_memlocs.size());
-    TRUE_ASSERT(this->memoryLocation(pos) == global, "Argument must be of type GLOBAL at pos " << pos);
+    //TRUE_ASSERT(this->memoryLocation(pos) == global, "Argument must be of type GLOBAL at pos " << pos);
 	cl_int stat = clSetKernelArg(_id, pos, sizeof(cl_mem), &data);
+	if(stat != CL_SUCCESS) cerr << "Error setting kernel "<< this->name() << " argument " << pos << endl;
+	OPENCL_SAFE_CALL( stat );
+}
+
+/*! \brief Sets the OpenCL sampler object into the argument list of this Kernel at the specified position.
+  *
+*/
+void ocl::Kernel::setArg(int pos, cl_sampler data)
+{
+	TRUE_ASSERT(this->numberOfArgs() > size_t(pos), "Position " << pos << " >= " << this->_memlocs.size());
+	cl_int stat = clSetKernelArg(_id, pos, sizeof(cl_sampler), &data);
 	if(stat != CL_SUCCESS) cerr << "Error setting kernel "<< this->name() << " argument " << pos << endl;
 	OPENCL_SAFE_CALL( stat );
 }
@@ -505,8 +516,10 @@ std::vector<ocl::Kernel::mem_loc> ocl::Kernel::extractMemlocs(const std::string 
 
         const string& argument = kernel.substr(pos_before, pos_after - pos_before + 1);
 
+        if( argument.find("global") != argument.npos )     locs.push_back(global);
         if( argument.find("__global") != argument.npos )     locs.push_back(global);
-        else if( argument.find("__local") != argument.npos ) locs.push_back(local);
+        else if( argument.find("local") != argument.npos ) locs.push_back(local);
+        else if( argument.find("__local") != argument.npos ) locs.push_back(local);       
         else                                                 locs.push_back(host);
         pos_before = pos_after+2;
     }
