@@ -18,39 +18,56 @@
 #include <utl_timer.h>
 
 
+utl::Seconds::Seconds (long double m) : _m(m){}
+utl::Seconds::Seconds (const Seconds &s) : _m(s._m){}
+utl::Seconds::Seconds (const MilliSeconds &s) : _m(s._m*1e-3){}
+utl::Seconds::Seconds (const MicroSeconds &s) : _m(s._m*1e-6){}
+
+
+
+
+utl::MilliSeconds::MilliSeconds (long double m) : _m(m){}
+utl::MilliSeconds::MilliSeconds (const Seconds &s) : _m(s._m*1e3){}
+utl::MilliSeconds::MilliSeconds (const MilliSeconds &s) : _m(s._m){}
+utl::MilliSeconds::MilliSeconds (const MicroSeconds &s) : _m(s._m*1e-3){}	
+
+
+
+utl::MicroSeconds::MicroSeconds (long double m) : _m(m){}
+utl::MicroSeconds::MicroSeconds (const Seconds &s) : _m(s._m*1e6){}
+utl::MicroSeconds::MicroSeconds (const MilliSeconds &s) : _m(s._m*1e3){}
+utl::MicroSeconds::MicroSeconds (const MicroSeconds &s) : _m(s._m){}		
+
+
 
 utl::Timer::point utl::Timer::_start;
 utl::Timer::point utl::Timer::_stop;
 
-// need tic for toc in seconds
-double utl::Timer::tic()
+void utl::Timer::tic()
 {
     _start = clock::now();
-    // duration in resolution
-    const duration &dur = std::chrono::duration_cast<resolution>(_start.time_since_epoch());
-     // duration in seconds
-    double sec = double(dur.count()) / double(resolution::period::den);
-    return sec;
 }
 
-// elapsed time since tic in seconds
-double utl::Timer::toc()
+void utl::Timer::toc()
 {
     _stop = clock::now();
-    // duration in resolution
-    const duration &dur = std::chrono::duration_cast<resolution>(_stop - _start);
-    // duration in seconds
-    double sec = double(dur.count()) / double(resolution::period::den);
-    return sec;
 }
 
-double utl::Timer::elapsed()
+utl::MicroSeconds utl::Timer::elapsed()
+{
+    const duration &dur = std::chrono::duration_cast<resolution>(_stop - _start);
+    MicroSeconds s = double(dur.count());
+    return s;
+}
+
+utl::MicroSeconds utl::Timer::elapsed(size_t run)
 {
     const duration &dur = std::chrono::duration_cast<resolution>(_stop - _start);
     // duration in seconds
-    double sec = double(dur.count()) / double(resolution::period::den);
-    return sec;
+    MicroSeconds s = (double(dur.count()) / double(run));
+    return s;
 }
+
 
 utl::Timer::point utl::Timer::start()
 {

@@ -63,7 +63,7 @@ public:
             //std::cout << "Iter=" << _iter << ", cIter = " << j << std::endl;
 		}
         utl::Timer::toc();
-        return utl::Timer::elapsed() / double(_iter);
+        return utl::Timer::elapsed(_iter);
 	}
 
 

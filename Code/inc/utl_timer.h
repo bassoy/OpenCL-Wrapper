@@ -19,6 +19,7 @@
 #define UTL_TIME_H
 
 #include <chrono>
+#include <ostream>
 
 namespace utl
 {
@@ -32,23 +33,86 @@ namespace utl
   * query the runtime in seconds of a function.
   */
 
+class MilliSeconds;
+class MicroSeconds;
+
+class Seconds 
+{
+public:
+	Seconds (long double m);
+	Seconds (const Seconds &s);
+	Seconds (const MilliSeconds &s);
+	Seconds (const MicroSeconds &s);
+	friend std::ostream& operator<< (std::ostream & out, const Seconds & s) { out << s._m << "[s]"; return out;}
+	friend MilliSeconds;
+	friend MicroSeconds;
+private:
+	long double _m;
+};
+
+class MilliSeconds 
+{
+public:
+	MilliSeconds (long double m);
+	MilliSeconds (const Seconds &s);
+	MilliSeconds (const MilliSeconds &s);
+	MilliSeconds (const MicroSeconds &s);
+	friend std::ostream& operator<< (std::ostream & out, const MilliSeconds & s) { out << s._m << "[ms]"; return out;}
+	friend Seconds;
+	friend MicroSeconds;	
+private:
+	long double _m;
+};
+
+class MicroSeconds 
+{
+public:
+	MicroSeconds (long double m);
+	MicroSeconds (const Seconds &s);
+	MicroSeconds (const MilliSeconds &s);
+	MicroSeconds (const MicroSeconds &s);
+	friend std::ostream& operator<< (std::ostream & out, const MicroSeconds & s) { out << s._m << "[us]"; return out;}
+	friend Seconds;
+	friend MilliSeconds;	
+private:
+	long double _m;
+};
+
+/*
+Seconds operator "" _s(long double d)
+{
+	return Seconds(d);
+}
+
+MilliSeconds operator "" _ms(long double d)
+{
+	return MilliSeconds(d);
+}
+
+MicroSeconds operator "" _us(long double d)
+{
+	return MicroSeconds(d);
+}
+*/
 
 class Timer
 {
 public :
+		
     typedef std::chrono::high_resolution_clock clock;
     typedef typename clock::duration duration;
     typedef typename clock::time_point point;
     typedef typename clock::period period;
     typedef std::chrono::microseconds resolution;
 
-    static double tic();
-    static double toc();
+    static void tic();
+    static void toc();
 
     static point start();
     static point stop();
 
-    static double elapsed();
+    static MicroSeconds elapsed();
+    static MicroSeconds elapsed(size_t run);
 
 
 private:
