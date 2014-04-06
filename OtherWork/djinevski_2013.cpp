@@ -1,8 +1,8 @@
 /**
- * GEMM reconstructed from "Benchmarking GPUs to Tune Dense Linear Algebra"
- * by Volkov and Demmel, 2008
+ * GEMM reconstructed from "Superlinear Speedup for Matrix Multiplication in GPU Devices"
+ * by Djineski, Ristov and Gusev, 2013
  * 
- * @see http://mc.stanford.edu/cgi-bin/images/6/65/SC08_Volkov_GPU.pdf
+ * @see http://link.springer.com/chapter/10.1007%2F978-3-642-37169-1_28
  * 
  * @author Felix Patschkowski
  * @date April 2014
@@ -28,10 +28,10 @@ typedef float Type;
 
 
 
-class Volkov2008Pass : public utl::ProfilePass< Type >
+class Djinevski2013Pass : public utl::ProfilePass< Type >
 {
 public :
-  Volkov2008Pass( std::istream& source, utl::Dim const& start, utl::Dim const& step, utl::Dim const& end, std::size_t iter = 10 );
+  Djinevski2013Pass( std::istream& source, utl::Dim const& start, utl::Dim const& step, utl::Dim const& end, std::size_t iter = 10 );
     
   double prof( utl::Dim const& ) override;
   
@@ -51,9 +51,9 @@ private :
 
 
 
-Volkov2008Pass::Volkov2008Pass( std::istream& source, utl::Dim const& start, utl::Dim const& step, utl::Dim const& end, std::size_t iter ):
-  ProfilePass< Type >( "Volkov2008", start, step, end, iter ),
-  testing_( false ),
+Djinevski2013Pass::Djinevski2013Pass( std::istream& source, utl::Dim const& start, utl::Dim const& step, utl::Dim const& end, std::size_t iter ):
+  ProfilePass< Type >( "Djinevski2013", start, step, end, iter ),
+  testing_( true ),
   platform_( ocl::device_type::CPU ),
   device_( platform_.device( ocl::device_type::CPU ) ),
   context_( device_ ),
@@ -89,26 +89,30 @@ Volkov2008Pass::Volkov2008Pass( std::istream& source, utl::Dim const& start, utl
 
 
 
-double Volkov2008Pass::prof( utl::Dim const& dim )
+double Djinevski2013Pass::prof( utl::Dim const& dim )
 {
   std::size_t const N = dim[0];
-  std::size_t const M = dim[1];
-  std::size_t const L = dim[2];
   
-  Zeros result( N, M );
+  Zeros result( N, N );
   
-  Matrix lhs( N, L );
-  Matrix rhs( L, M );
+  Matrix lhs( N, N );
+  Matrix rhs( N, N );
   
   // for ( size_t i = 0; i < N * L; ++i ) lhs[i] = i + 1; for ( size_t i = 0; i < L * M; ++i ) rhs[i] = i + 1;
-  for ( size_t i = 0; i < N * L; ++i ) lhs[i] = i % L;
-  for ( size_t i = 0; i < L * M; ++i ) rhs[i] = i / L;
+  for ( size_t i = 0; i < N * N; ++i ) lhs[i] = i % N;
+  for ( size_t i = 0; i < N * N; ++i ) rhs[i] = i / N;
   
   std::chrono::nanoseconds totalRuntime{ 0 };
   
   ocl::Kernel& kernel( program_.kernel( "gemm" ) );
+  
+  size_t const numProcessingElements = device_.maxComputeUnits();
       
-  kernel.setWorkSize( 1, 64, M / 16, N );
+  /*
+   * Create one thread per processing element 
+   * to store a part of matrix B in cache memory.
+   */
+  kernel.setWorkSize( 1, numProcessingElements );
   
   size_t constexpr typeSize = sizeof (Type);
   size_t const numResultBytes = typeSize * result.size();
@@ -129,7 +133,8 @@ double Volkov2008Pass::prof( utl::Dim const& dim )
     operandsWritten << lhsWritten << rhsWritten;
     
     // Execute kernel when both operands have been loaded.
-    ocl::Event const multiplyDone = kernel( queue_, operandsWritten, N, L, bufLhs.id(), bufRhs.id(), bufResult.id() );
+    size_t const L2CacheSize = 1024 * 768;
+    ocl::Event const multiplyDone = kernel( queue_, operandsWritten, N, L2CacheSize, bufLhs.id(), bufRhs.id(), bufResult.id() );
     
     // Copy result from device to host.
     ocl::Event const resultRead = bufResult.readAsync( queue_, 0u, result.data(), numResultBytes, ocl::EventList( multiplyDone ) );
@@ -167,10 +172,10 @@ double Volkov2008Pass::prof( utl::Dim const& dim )
 
 
 
-double Volkov2008Pass::ops( utl::Dim const& dim )
+double Djinevski2013Pass::ops( utl::Dim const& dim )
 {
   // N * M * (L + (L - 1))
-  return dim[0] * dim[1] * (2.0 * dim[2] - 1.0);
+  return dim[0] * dim[0] * (2.0 * dim[0] - 1.0);
 }
 
 
@@ -188,7 +193,7 @@ int main( int argc, char** argv )
     {
       utl::ProfilePassManager< Type > mgr;
   
-      mgr << std::make_shared<Volkov2008Pass>( file, utl::Dim( 256, 256, 256 ), utl::Dim( 16, 16, 16 ), utl::Dim( 256, 256, 256 ) );
+      mgr << std::make_shared<Djinevski2013Pass>( file, utl::Dim( 256 ), utl::Dim( 16 ), utl::Dim( 256 ) );
   
       mgr.run();
       mgr.write( std::cout );
