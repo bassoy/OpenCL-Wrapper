@@ -38,7 +38,7 @@ public :
   double ops( utl::Dim const& dim ) override;
   
 private :
-  typedef utl::Matrix< Type, utl::column_major_tag > Matrix; // Volkov uses column-major layout only.
+  typedef utl::Matrix< Type, utl::column_major_tag > Matrix;
   typedef utl::Zeros< Type, utl::column_major_tag > Zeros;
   
   bool          testing_;

@@ -100,3 +100,6 @@ target_link_libraries(volkov_2008 OclWrapper ${OPENCL_LIBRARIES})
 
 add_executable(djinevski_2013 OtherWork/djinevski_2013.cpp)
 target_link_libraries(djinevski_2013 OclWrapper ${OPENCL_LIBRARIES})
+
+add_executable(torres_2011 OtherWork/torres_2011.cpp)
+target_link_libraries(torres_2011 OclWrapper ${OPENCL_LIBRARIES})
