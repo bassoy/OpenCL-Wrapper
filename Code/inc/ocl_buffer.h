@@ -77,16 +77,16 @@ public:
                      CopyHost  = CL_MEM_COPY_HOST_PTR   /*!< memory object will be created on the device and copied from the host memory.*/
                    };
 	explicit Buffer();
-	Buffer (Context&, size_t size_bytes);
+	Buffer (Context&, size_t size_bytes, Access access = ReadWrite);
 	#ifdef __OPENGL__
 	Buffer (Context &, GLuint vbo_desc);
 	#endif
-	explicit Buffer (size_t size_bytes);
+	Buffer (size_t size_bytes, Access access = ReadWrite);
 	~Buffer();
 	Buffer ( const Buffer & other );
 	Buffer ( Buffer && other);
 
-	void create(size_t size_bytes);
+	void create(size_t size_bytes, Access access = ReadWrite);
 	#ifdef __OPENGL__
 	void create(GLuint vbo_desc);
 	#endif

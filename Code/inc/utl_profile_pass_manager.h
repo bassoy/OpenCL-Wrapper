@@ -24,6 +24,7 @@
 #include <vector>
 #include <chrono>
 #include <new>
+#include <memory>
 
 #include <utl_profile_pass.h>
 
@@ -41,21 +42,21 @@ namespace utl {
 template<class T>
 class ProfilePassManager
 {
-    typedef typename std::vector<ProfilePass<T>*>::const_iterator const_iterator;
-    typedef typename std::vector<ProfilePass<T>*>::iterator       iterator;
-    typedef typename std::vector<ProfilePass<T>*>::pointer        pointer;
-    typedef typename std::vector<ProfilePass<T>*>::reference      reference;
+    typedef typename std::vector<std::shared_ptr<ProfilePass<T>>>::const_iterator const_iterator;
+    typedef typename std::vector<std::shared_ptr<ProfilePass<T>>>::iterator       iterator;
+    typedef typename std::vector<std::shared_ptr<ProfilePass<T>>>::pointer        pointer;
+    typedef typename std::vector<std::shared_ptr<ProfilePass<T>>>::reference      reference;
 public:
     ProfilePassManager() {};
 	
-	~ProfilePassManager()
+	/*~ProfilePassManager()
 	{
 		for(iterator it = _passes.begin(); it != _passes.end(); ++it){
 			delete *it;
 		}
-	}
+	}*/
 
-    ProfilePassManager& operator<<(ProfilePass<T> *__p)
+    ProfilePassManager& operator<<(std::shared_ptr<ProfilePass<T>> __p)
 	{
         _passes.push_back(__p);
         return *this;
@@ -98,7 +99,7 @@ public:
 
 private:
 
-    std::vector<ProfilePass<T>*> _passes;
+    std::vector<std::shared_ptr<ProfilePass<T>>> _passes;
 
 };
 

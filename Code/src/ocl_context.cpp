@@ -49,7 +49,7 @@
 	* \param shared if true, creates a shared Context for OpenGL interoperability.
   */
 ocl::Context::Context(cl_context id, bool shared) :
-    _id(id), _programs(), _queues(), _events(), _memories(), _devices(), _samplers(), _activeQueue(NULL), _activeProgram(NULL)
+    _id(id), _programs(), _queues(), _events(), _memories(), _samplers(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
 {
     TRUE_ASSERT(_id != 0, "Context not valid");
 
@@ -75,7 +75,7 @@ ocl::Context::Context(cl_context id, bool shared) :
 	* \param shared if true, creates a shared Context for OpenGL interoperability.
   */
 ocl::Context::Context(const ocl::Device&  device, bool shared) :
-    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _samplers(), _activeQueue(NULL), _activeProgram(NULL)
+    _id(NULL), _programs(), _queues(), _events(), _memories(), _samplers(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
 {
 		_devices.push_back(device);
 	this->create(shared);
@@ -92,7 +92,7 @@ ocl::Context::Context(const ocl::Device&  device, bool shared) :
 	* \param shared if true, creates a shared Context for OpenGL interoperability.
   */
 ocl::Context::Context(const ocl::Device&  device1, const ocl::Device& device2, bool shared) :
-    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _samplers(), _activeQueue(NULL), _activeProgram(NULL)
+    _id(NULL), _programs(), _queues(), _events(), _memories(), _samplers(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
 {
 		_devices.push_back(device1);
 		_devices.push_back(device2);
@@ -105,7 +105,7 @@ ocl::Context::Context(const ocl::Device&  device1, const ocl::Device& device2, b
   * Also provide an active Queue.
   */
 ocl::Context::Context() :
-    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _samplers(), _activeQueue(NULL), _activeProgram(NULL)
+    _id(NULL), _programs(), _queues(), _events(), _memories(), _samplers(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
 {}
 
 
@@ -134,7 +134,7 @@ ocl::Context::Context(const std::vector<Device> & devices, bool shared) :
 	* \param shared if true, creates a shared Context for OpenGL interoperability.
   */
 ocl::Context::Context(const ocl::Platform &p, bool shared) :
-    _id(NULL), _programs(), _queues(), _events(), _memories(), _devices(), _samplers(), _activeQueue(NULL), _activeProgram(NULL)
+    _id(NULL), _programs(), _queues(), _events(), _memories(), _samplers(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
 {
     this->_devices = p.devices();
 	this->create(shared);

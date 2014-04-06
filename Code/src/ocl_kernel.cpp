@@ -586,7 +586,7 @@ std::string ocl::Kernel::specialize(const std::string& kernel, const std::string
     start = fct.find("template", start);
     end   = fct.find(">",end,1);
     TRUE_ASSERT(start < end, "Template not correctly defined.");
-    TRUE_ASSERT(start >= 0, "Template not correctly defined.");
+    //TRUE_ASSERT(start >= 0, "Template not correctly defined.");
 
     fct.erase(start, end - start + 2);
 
