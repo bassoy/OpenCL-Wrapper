@@ -94,7 +94,7 @@ public:
     {
         const __MatrixBase& lhs = *this;
         TRUE_ASSERT(lhs.dim() == rhs.dim(), "Dimensions must be equal");
-        __MatrixBase res(lhs.rows(), lhs.rows());
+        __MatrixBase res(lhs.rows(), lhs.cols());
         std::transform(lhs.begin(), lhs.end(), rhs.begin(), res.begin(), std::plus<T>());
         return res;
     }
@@ -110,7 +110,7 @@ public:
     {
         const __MatrixBase& lhs = *this;
         TRUE_ASSERT(lhs.dim() == rhs.dim(), "Dimensions must be equal");
-        __MatrixBase res(lhs.rows(), lhs.rows());
+        __MatrixBase res(lhs.rows(), lhs.cols());
         std::transform(lhs.begin(), lhs.end(), rhs.begin(), res.begin(), std::minus<T>());
         return res;
     }
