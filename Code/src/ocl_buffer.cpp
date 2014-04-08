@@ -35,10 +35,10 @@
   *
   * \param size_bytes is the size in bytes which are needed for the Memory.
   */
-ocl::Buffer::Buffer (Context& ctxt, size_t size_bytes) :
+ocl::Buffer::Buffer (Context& ctxt, size_t size_bytes, Access access ) :
     Memory(ctxt)
 {
-    create(size_bytes);
+    create(size_bytes,access);
 }
 
 /*! \brief Instantiates this Buffer within a context with size_bytes.
@@ -49,10 +49,10 @@ ocl::Buffer::Buffer (Context& ctxt, size_t size_bytes) :
   *
   * \param size_bytes is the size in bytes which are needed for the Memory.
   */
-ocl::Buffer::Buffer (size_t size_bytes) :
+ocl::Buffer::Buffer (size_t size_bytes, Access access ) :
 	Memory()
 {
-	create(size_bytes);
+	create(size_bytes,access);
 }
 
 /*! \brief Instantiates this Buffer within a context with size_bytes from an OpenGL Buffer.
@@ -123,11 +123,11 @@ ocl::Buffer::Buffer (Buffer && other ) :
   *
   * \param size_bytes Number of bytes to be reserved.
   */
-void ocl::Buffer::create(size_t size_bytes)
+void ocl::Buffer::create(size_t size_bytes, Access access )
 {
     TRUE_ASSERT(this->_context != 0, "Context not valid - cannot create buffer");
 
-    cl_mem_flags flags = ocl::Buffer::ReadWrite;
+    cl_mem_flags flags = access;
 
     if(this->context()->devices().size() == 1 &&
        this->context()->devices().at(0).type() == ocl::device_type::CPU){

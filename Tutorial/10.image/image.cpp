@@ -22,9 +22,9 @@ int main(int argc, char* argv[])
 		utl::Args args(argc, argv);
 		
     const size_t elements = args.size() > 1 ? args.toSizet(1) : 1 << 16;
-    const size_t size_bytes  = elements * sizeof(Type);
+//     const size_t size_bytes  = elements * sizeof(Type);
     const size_t local_size = 256;
-		const size_t execute = 100;
+// 		const size_t execute = 100;
 			
 		
 

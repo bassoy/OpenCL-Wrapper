@@ -67,7 +67,7 @@ ocl::CompileOption::CompileOption(ocl::CompileOption&& c) :
 */
 ocl::CompileOption ocl::CompileOption::operator | (const CompileOption &other)
 {
-    return ocl::CompileOption(this->_options + ", " + other._options);
+    return ocl::CompileOption(this->_options + " " + other._options);
 }
 
 /*! \brief Instantiating a new CompileOption from this CompileOption and another string.
@@ -76,7 +76,8 @@ ocl::CompileOption ocl::CompileOption::operator | (const CompileOption &other)
 */
 ocl::CompileOption ocl::CompileOption::operator | (const std::string& other)
 {
-    return ocl::CompileOption(this->_options + ", " + other);
+    //return ocl::CompileOption(this->_options + ", " + other);
+  return *this | ocl::CompileOption( other );
 }
 
 /*! \brief Returns the string of the CompileOption. */
@@ -90,6 +91,7 @@ ocl::CompileOption& ocl::CompileOption::operator=(const CompileOption &other) {
     return *this;
 }
 
+namespace ocl {
 namespace compile_option{
     ocl::CompileOption SINGLE_CONSTANT("-cl-single-precision-constant");
     ocl::CompileOption NO_DENORMALS("-cl-denorms-are-zero");
@@ -100,6 +102,7 @@ namespace compile_option{
     ocl::CompileOption UNSAFE_MATH_OPT("-cl-unsafe-math-optimizations");
     ocl::CompileOption FINITE_MATH("-cl-finite-math-only");
     ocl::CompileOption FAST_MATH("-cl-fast-relaxed-math");
+}
 }
 
 

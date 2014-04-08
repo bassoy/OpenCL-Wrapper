@@ -73,10 +73,10 @@ int main()
 
     {
         typedef float Type;
-        typedef utl::Matrix <Type,utl::column_major_tag> Matrix;
+//         typedef utl::Matrix <Type,utl::column_major_tag> Matrix;
         typedef utl::Ones <Type,utl::column_major_tag> Ones;
         typedef utl::Zeros <Type,utl::column_major_tag> Zeros;
-        typedef utl::Rand <Type,utl::column_major_tag, utl::uniform_dist_tag> Rand;
+//         typedef utl::Rand <Type,utl::column_major_tag, utl::uniform_dist_tag> Rand;
 
         // get the kernels.
         ocl::Kernel &kernel = program.kernel("copy", utl::type::Single);
@@ -115,8 +115,8 @@ int main()
     {
 
         typedef int Type;
-        typedef utl::Matrix <Type,utl::column_major_tag> Matrix;
-        typedef utl::Ones <Type,utl::column_major_tag> Ones;
+//         typedef utl::Matrix <Type,utl::column_major_tag> Matrix;
+//         typedef utl::Ones <Type,utl::column_major_tag> Ones;
         typedef utl::Zeros <Type,utl::column_major_tag> Zeros;
         typedef utl::Rand <Type,utl::column_major_tag, utl::uniform_dist_tag> Rand;
 
