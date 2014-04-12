@@ -94,15 +94,3 @@ target_link_libraries(minimum OclWrapper ${OPENCL_LIBRARIES})
 
 add_executable(image Tutorial/10.image/image.cpp)
 target_link_libraries(image OclWrapper ${OPENCL_LIBRARIES})
-
-add_executable(volkov_2008 OtherWork/volkov_2008.cpp)
-target_link_libraries(volkov_2008 OclWrapper ${OPENCL_LIBRARIES})
-
-add_executable(djinevski_2013 OtherWork/djinevski_2013.cpp)
-target_link_libraries(djinevski_2013 OclWrapper ${OPENCL_LIBRARIES})
-
-add_executable(torres_2011 OtherWork/torres_2011.cpp)
-target_link_libraries(torres_2011 OclWrapper ${OPENCL_LIBRARIES})
-
-add_executable(matsumoto_2012 OtherWork/matsumoto_2012.cpp)
-target_link_libraries(matsumoto_2012 OclWrapper ${OPENCL_LIBRARIES})

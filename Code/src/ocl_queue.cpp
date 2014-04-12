@@ -112,7 +112,7 @@ void ocl::Queue::create(ocl::Context * ctxt)
   */
 void ocl::Queue::release()
 {
-    if(this->created() /*&& this->reference_count() >= 0*/){
+    if(this->created()){
         OPENCL_SAFE_CALL( clReleaseCommandQueue (_id));
     }
 	_device = 0;
@@ -213,9 +213,9 @@ void ocl::Queue::finish() const
   *
   * clFinish does not return until all previously queued commands in command_queue have been processed and completed.
 */
-void ocl::Queue::barrier(const EventList& /*list*/) const
+void ocl::Queue::barrier(const EventList& list) const
 {
-    //OPENCL_SAFE_CALL(  clEnqueueBarrierWithWaitList (this->id(),  list.size(), list.events().data(), 0) );
+    OPENCL_SAFE_CALL(  clEnqueueBarrierWithWaitList (this->id(),  list.size(), list.events().data(), 0) );
 }
 
 /*! \brief Returns the Context for this Queue.
