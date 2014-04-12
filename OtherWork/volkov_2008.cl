@@ -1,9 +1,10 @@
-__kernel void gemm( size_t const N, size_t const L, __global float const* A, __global float const* B, __global float* C )
+template<class T>
+__kernel void gemm( size_t const N, size_t const L, __global T const* A, __global T const* B, __global T* C )
 {
 #define BLOCKSIZE 16
   
-  private float c[BLOCKSIZE] = { 0.0f }; // This is part of a row of C.
-  local   float b[BLOCKSIZE][BLOCKSIZE]; // This is a block in B.
+  private T c[BLOCKSIZE] = { 0.0f }; // This is part of a row of C.
+  local   T b[BLOCKSIZE][BLOCKSIZE]; // This is a block in B.
   
   // Matrices are stored in column major layout.
   
@@ -11,7 +12,7 @@ __kernel void gemm( size_t const N, size_t const L, __global float const* A, __g
   B += L * BLOCKSIZE * get_group_id( 0 );
   C += N * BLOCKSIZE * get_group_id( 0 ) + get_global_id( 1 );
   
-  global float const* end = B + L;
+  global T const* end = B + L;
   
   do
   {
@@ -30,7 +31,7 @@ __kernel void gemm( size_t const N, size_t const L, __global float const* A, __g
     #pragma unroll 16
     for ( int i = 0; i < BLOCKSIZE; ++i )
     {
-      private float const a = *A;
+      private T const a = *A;
       
       A += N;
       
