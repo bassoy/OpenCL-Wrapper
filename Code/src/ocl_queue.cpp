@@ -215,7 +215,9 @@ void ocl::Queue::finish() const
 */
 void ocl::Queue::barrier(const EventList& list) const
 {
+#ifdef OPENCL_V1_2
     OPENCL_SAFE_CALL(  clEnqueueBarrierWithWaitList (this->id(),  list.size(), list.events().data(), 0) );
+#endif
 }
 
 /*! \brief Returns the Context for this Queue.
