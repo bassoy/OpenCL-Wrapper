@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 	// provides a convient access to the command line arguments
 	utl::Args args(argc, argv);
 
-	const size_t elements = args.size() > 1 ? args.toSizet(1) : 1 << 16;
+	const size_t elements = args.size() > 1 ? args.toSizet(1) : 1 << 4;
 	const size_t local_size = 256;
 	
 

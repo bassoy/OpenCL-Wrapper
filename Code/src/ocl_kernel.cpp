@@ -510,17 +510,21 @@ std::vector<ocl::Kernel::mem_loc> ocl::Kernel::extractMemlocs(const std::string 
     while(pos_after <= end)
     {
         pos_after = kernel.find(",", pos_before) - 1;
-        if(pos_after > end)
-            pos_after = kernel.find(")", pos_before) - 1;
+        if(pos_after > end) pos_after = kernel.find(")", pos_before) - 1;
         if(pos_after > end) return locs;
 
         const string& argument = kernel.substr(pos_before, pos_after - pos_before + 1);
 
-        if( argument.find("global") != argument.npos )     locs.push_back(global);
-        if( argument.find("__global") != argument.npos )     locs.push_back(global);
-        else if( argument.find("local") != argument.npos ) locs.push_back(local);
-        else if( argument.find("__local") != argument.npos ) locs.push_back(local);       
-        else                                                 locs.push_back(host);
+        if( argument.find("global") != argument.npos || argument.find("__global") != argument.npos )
+            locs.push_back(global);
+        else if( argument.find("local") != argument.npos || argument.find("__local") != argument.npos)
+            locs.push_back(local);
+        else if( argument.find("image") != argument.npos)
+            locs.push_back(image);
+        else if( argument.find("sampler") != argument.npos)
+            locs.push_back(sampler);
+        else
+            locs.push_back(host);
         pos_before = pos_after+2;
     }
     return locs;

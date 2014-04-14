@@ -69,7 +69,7 @@ class Kernel
 {
 public:
     /*! \brief Enumeration for the memory locations of the arguments of this Kernel.*/
-    enum mem_loc {global,local,host,constant};
+    enum mem_loc {global,local,host,constant,image,sampler};
     Kernel(const std::string &kernel);
     Kernel(const Program&, const std::string &kernel);
     Kernel(const std::string &kernel, const utl::Type &);
@@ -106,7 +106,7 @@ public:
         setArg(pos, sampler);
         pos++;
         setArg(pos, args ... );
-    }    
+    }
 
     template<class T>
     void setArg(int pos, const T& data);
