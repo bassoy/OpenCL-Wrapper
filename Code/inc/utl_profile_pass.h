@@ -51,8 +51,13 @@ public:
 	ProfilePass(const std::string& str, const Dim& start, const Dim& step, const Dim& end, size_t __iter = 10) :
         _name(str), _start(start), _step(step), _end(end), _iter(__iter), _print_n(true), _print_t(true), _print_o(true), _print_p(true) , _countUp(true)
 	{}
-
-    virtual ~ProfilePass(){}
+	
+	using ValueType = T;
+	
+	ProfilePass() = delete;
+	ProfilePass(const ProfilePass&) = default;
+	ProfilePass(ProfilePass&&) = default;
+  virtual ~ProfilePass(){}
 
 	template<class F>
 	double call(F&& __func)
@@ -67,11 +72,11 @@ public:
 	}
 
 
-    virtual double prof(const Dim& dim) = 0;
-    virtual double ops(const Dim& dim)= 0;
+    virtual double prof(const Dim&) = 0;
+    virtual double ops(const Dim&) = 0;
 
 
-	void prof()
+	void run()
     {
         //size_t j = 0;
 

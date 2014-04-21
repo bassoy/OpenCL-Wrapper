@@ -74,6 +74,7 @@ public :
     std::string  toString(size_t pos)   const;
 	char         toChar(size_t pos)     const;
 	size_t       toSizet(size_t pos)    const;
+	bool         toBool(size_t pos)     const;
 
 private:
 
