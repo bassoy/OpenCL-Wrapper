@@ -111,4 +111,5 @@ unsigned int utl::Args::toUnsigned(size_t pos) const   { _cs(); _ss << this->at(
 std::string  utl::Args::toString(size_t pos)   const   { _cs(); _ss << this->at(pos); std::string n;  _ss >> n; return n;}
 char         utl::Args::toChar(size_t pos)     const   { _cs(); _ss << this->at(pos); char n;         _ss >> n; return n;}
 size_t       utl::Args::toSizet(size_t pos)    const   { _cs(); _ss << this->at(pos); size_t n;       _ss >> n; return n;}
+bool         utl::Args::toBool(size_t pos)    const   { _cs(); _ss << this->at(pos); bool n;          _ss >> n; return n;}
 

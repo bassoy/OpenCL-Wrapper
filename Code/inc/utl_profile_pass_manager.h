@@ -38,29 +38,34 @@ namespace utl {
   * and to run them collectively.
   */
 
-
-template<class T>
+template<class ValueType_>
 class ProfilePassManager
 {
-    typedef typename std::vector<std::shared_ptr<ProfilePass<T>>>::const_iterator const_iterator;
-    typedef typename std::vector<std::shared_ptr<ProfilePass<T>>>::iterator       iterator;
-    typedef typename std::vector<std::shared_ptr<ProfilePass<T>>>::pointer        pointer;
-    typedef typename std::vector<std::shared_ptr<ProfilePass<T>>>::reference      reference;
 public:
-    ProfilePassManager() {};
-	
-	/*~ProfilePassManager()
-	{
-		for(iterator it = _passes.begin(); it != _passes.end(); ++it){
-			delete *it;
-		}
-	}*/
+		using PassType = ProfilePass<ValueType_>;
+		using ValueType = typename PassType::ValueType;
+		
+    using const_iterator = typename std::vector<std::shared_ptr<PassType>>::const_iterator;
+    using iterator       = typename std::vector<std::shared_ptr<PassType>>::iterator;
+    using pointer        = typename std::vector<std::shared_ptr<PassType>>::pointer;
+    using reference      = typename std::vector<std::shared_ptr<PassType>>::reference;
+        
 
-    ProfilePassManager& operator<<(std::shared_ptr<ProfilePass<T>> __p)
+    ProfilePassManager() = default;
+    ~ProfilePassManager() = default;
+
+    ProfilePassManager& operator<<(const std::shared_ptr<PassType>& __p)
 	{
         _passes.push_back(__p);
         return *this;
 	}
+	
+    ProfilePassManager& operator<<(PassType* __p)
+	{
+        _passes.push_back(std::shared_ptr<PassType>(__p));
+        return *this;
+	}	
+	
 
     void setIter(size_t iter)
     {
@@ -80,7 +85,7 @@ public:
 	{
 		for (auto it : _passes){
 			std::cout << "Profiling " << it->name() << std::endl;
-			it->prof();
+			it->run();
 		}
 	}
 
@@ -99,7 +104,7 @@ public:
 
 private:
 
-    std::vector<std::shared_ptr<ProfilePass<T>>> _passes;
+    std::vector<std::shared_ptr<PassType>> _passes;
 
 };
 

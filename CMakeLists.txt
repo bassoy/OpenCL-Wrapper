@@ -94,30 +94,3 @@ target_link_libraries(minimum OclWrapper ${OPENCL_LIBRARIES})
 
 add_executable(image Tutorial/10.image/image.cpp)
 target_link_libraries(image OclWrapper ${OPENCL_LIBRARIES})
-
-add_executable(volkov_2008 OtherWork/volkov_2008.cpp)
-target_link_libraries(volkov_2008 OclWrapper ${OPENCL_LIBRARIES})
-
-add_executable(djinevski_2013 OtherWork/djinevski_2013.cpp)
-target_link_libraries(djinevski_2013 OclWrapper ${OPENCL_LIBRARIES})
-
-add_executable(torres_2011 OtherWork/torres_2011.cpp)
-target_link_libraries(torres_2011 OclWrapper ${OPENCL_LIBRARIES})
-
-add_executable(matsumoto_2012 OtherWork/matsumoto_2012.cpp)
-target_link_libraries(matsumoto_2012 OclWrapper ${OPENCL_LIBRARIES})
-
-find_package(OpenMP REQUIRED)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    
-find_package(MPI REQUIRED)
-
-file(GLOB Muesli_SRCS "OtherWork/Muesli/*.cpp")
-file(GLOB Muesli_HDRS "OtherWork/Muesli/*.h")
-
-add_executable(gemm_in_muesli OtherWork/gemm_in_muesli.cpp ${Muesli_SRCS} ${Muesli_HDRS})
-target_include_directories(gemm_in_muesli PUBLIC ${MPI_INCLUDE_PATH} PRIVATE OtherWork/Muesli)
-# target_compile_definitions(gemm_in_muesli PUBLIC ${MPI_COMPILE_FLAGS})
-
-target_link_libraries(gemm_in_muesli ${MPI_CXX_LIBRARIES})

@@ -21,6 +21,7 @@ endif
 
 GCC_FLAGS=-std=c++11 -Wall $(OCL_VERSION) #-D__OPENGL__ #
 
+
 archive: $(OBJS)
 	ar cr $(TARGET) build/*.o
 

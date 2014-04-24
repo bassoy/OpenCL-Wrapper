@@ -11,7 +11,6 @@
 
 int main()
 {
-
     ocl::printPlatforms();
 
     //ocl::Platform platform(ocl::device_type::GPU);
