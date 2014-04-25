@@ -8,7 +8,7 @@ find_path(OPENCL_INCLUDE_DIR cl.h HINTS /usr/include/CL)
 include_directories(SYSTEM ${OPENCL_INCLUDE_DIR})
 include_directories(Code/inc)
 
-add_definitions(-std=c++11 -Wall -Wextra -Werror -pedantic -pedantic-errors)
+add_definitions(-std=c++11 -Wall -Wextra -pedantic -pedantic-errors)
 
 set(OclWrapper_HDRS
   Code/inc/ocl_buffer.h
@@ -89,7 +89,7 @@ target_link_libraries(events OclWrapper ${OPENCL_LIBRARIES})
 add_executable(matrix Tutorial/8.matrix/matrix.cpp)
 target_link_libraries(matrix OclWrapper ${OPENCL_LIBRARIES})
 
-add_executable(minimum Tutorial/9.minimum/minumum.cpp)
+add_executable(minimum Tutorial/9.minimum/minimum.cpp)
 target_link_libraries(minimum OclWrapper ${OPENCL_LIBRARIES})
 
 add_executable(image Tutorial/10.image/image.cpp)
