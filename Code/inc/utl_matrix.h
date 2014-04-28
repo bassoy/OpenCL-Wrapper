@@ -189,31 +189,37 @@ class Matrix : private __MatrixBase<T>
 template <class T>
 class Matrix<T, column_major_tag> : public __MatrixBase<T>
 {
+    using Base = __MatrixBase<T>;
+
 public :
 
-    typedef typename __MatrixBase<T>::pointer           pointer;
-    typedef typename __MatrixBase<T>::const_pointer     const_pointer;
-    typedef typename __MatrixBase<T>::reference         reference;
-    typedef typename __MatrixBase<T>::const_reference   const_reference;
-    typedef typename __MatrixBase<T>::value_type        value_type;
+    typedef typename Base::pointer           pointer;
+    typedef typename Base::const_pointer     const_pointer;
+    typedef typename Base::reference         reference;
+    typedef typename Base::const_reference   const_reference;
+    typedef typename Base::value_type        value_type;
 
-    typedef typename __MatrixBase<T>::iterator          iterator;
-    typedef typename __MatrixBase<T>::const_iterator    const_iterator;
+    typedef typename Base::iterator          iterator;
+    typedef typename Base::const_iterator    const_iterator;
 
-    Matrix(size_t rows, size_t cols, const_reference value) :  __MatrixBase<T>(rows,cols, value) {}
-    Matrix(size_t rows, size_t cols) :  __MatrixBase<T>(rows,cols) {}
-    Matrix(const Matrix& m) : __MatrixBase<T>(m) {}
-    Matrix(Matrix&& m) : __MatrixBase<T>(std::move(m)) {}
+    Matrix(size_t rows, size_t cols, const_reference value) :  Base(rows,cols, value) {}
+    Matrix(size_t rows, size_t cols) :  Base(rows,cols) {}
+    Matrix(const Matrix& m) : Base(m) {}
+    Matrix(Matrix&& m) : Base(std::move(m)) {}
     Matrix() = default;
     ~Matrix() = default;
 
+    Matrix& operator = (value_type value) { Base::operator=( value ); return *this; }
+    Matrix& operator = (const Matrix& m) { Base::operator=( m ); return *this; }
+    Matrix& operator = (Matrix&& m) { Base::operator=( std::move(m) ) ;  return *this; }
 
-    Matrix operator*(const_reference value) const { return __MatrixBase<T>::operator*(value);  }
-    Matrix operator+(const_reference value) const { return __MatrixBase<T>::operator+(value);  }
-    Matrix operator+(const Matrix& rhs) const     { return __MatrixBase<T>::operator+(rhs);   }
-    Matrix operator-(const_reference value) const { return __MatrixBase<T>::operator-(value); }
-    Matrix operator-(const Matrix& rhs) const     { return __MatrixBase<T>::operator-(rhs);   }
-    Matrix operator/(const_reference value) const { return __MatrixBase<T>::operator/(value); }
+
+    Matrix operator*(const_reference value) const { return Base::operator*(value);  }
+    Matrix operator+(const_reference value) const { return Base::operator+(value);  }
+    Matrix operator+(const Matrix& rhs) const     { return Base::operator+(rhs);   }
+    Matrix operator-(const_reference value) const { return Base::operator-(value); }
+    Matrix operator-(const Matrix& rhs) const     { return Base::operator-(rhs);   }
+    Matrix operator/(const_reference value) const { return Base::operator/(value); }
 
     Matrix operator*(const Matrix& rhs) const
     {
@@ -278,8 +284,8 @@ public :
     }
 
 private:
-    Matrix(__MatrixBase<T> &&base) :
-        __MatrixBase<T>(base)
+    Matrix(Base &&base) :
+        Base(base)
     {
     }
 };
@@ -289,31 +295,37 @@ namespace utl{
 template <class T>
 class Matrix<T, row_major_tag> : public __MatrixBase<T>
 {
+    using Base = __MatrixBase<T>;
 public :
 
-    typedef typename __MatrixBase<T>::pointer           pointer;
-    typedef typename __MatrixBase<T>::const_pointer     const_pointer;
-    typedef typename __MatrixBase<T>::reference         reference;
-    typedef typename __MatrixBase<T>::const_reference   const_reference;
-    typedef typename __MatrixBase<T>::value_type        value_type;
+    typedef typename Base::pointer           pointer;
+    typedef typename Base::const_pointer     const_pointer;
+    typedef typename Base::reference         reference;
+    typedef typename Base::const_reference   const_reference;
+    typedef typename Base::value_type        value_type;
 
-    typedef typename __MatrixBase<T>::iterator          iterator;
-    typedef typename __MatrixBase<T>::const_iterator    const_iterator;
+    typedef typename Base::iterator          iterator;
+    typedef typename Base::const_iterator    const_iterator;
 
-    Matrix(size_t rows, size_t cols, const_reference value) :  __MatrixBase<T>(rows,cols, value) {}
-    Matrix(size_t rows, size_t cols) :  __MatrixBase<T>(rows,cols) {}
-    Matrix(const Matrix& m) : __MatrixBase<T>(m) {}    
-    Matrix(Matrix&& m) : __MatrixBase<T>(std::move(m)) {}
+    Matrix(size_t rows, size_t cols, const_reference value) :  Base(rows,cols, value) {}
+    Matrix(size_t rows, size_t cols) :  Base(rows,cols) {}
+    Matrix(const Matrix& m) : Base(m) {}
+    Matrix(Matrix&& m) : Base(std::move(m)) {}
     Matrix() = default;
     ~Matrix() = default;
 
 
-    Matrix operator*(const_reference value) const { return __MatrixBase<T>::operator*(value); }
-    Matrix operator+(const_reference value) const { return __MatrixBase<T>::operator+(value); }
-    Matrix operator+(const Matrix& rhs) const     { return __MatrixBase<T>::operator+(rhs); }
-    Matrix operator-(const_reference value) const { return __MatrixBase<T>::operator-(value); }
-    Matrix operator-(const Matrix& rhs) const     { return __MatrixBase<T>::operator-(rhs); }
-    Matrix operator/(const_reference value) const { return __MatrixBase<T>::operator/(value); }
+    Matrix& operator = (value_type value) { Base::operator=( value ); return *this; }
+    Matrix& operator = (const Matrix& m) { Base::operator=( m ); return *this; }
+    Matrix& operator = (Matrix&& m) { Base::operator=( std::move(m) ) ;  return *this; }
+
+
+    Matrix operator*(const_reference value) const { return Base::operator*(value); }
+    Matrix operator+(const_reference value) const { return Base::operator+(value); }
+    Matrix operator+(const Matrix& rhs) const     { return Base::operator+(rhs); }
+    Matrix operator-(const_reference value) const { return Base::operator-(value); }
+    Matrix operator-(const Matrix& rhs) const     { return Base::operator-(rhs); }
+    Matrix operator/(const_reference value) const { return Base::operator/(value); }
 
     Matrix operator*(const Matrix& rhs) const
     {
@@ -380,8 +392,8 @@ public :
     }
 private:
 
-    Matrix(__MatrixBase<T> &&base) :
-        __MatrixBase<T>(base)
+    Matrix(Base &&base) :
+        Base(base)
     {
     }
 };
