@@ -257,44 +257,53 @@ cl_platform_id ocl::Device::platform() const
 /*! \brief Returns the version of this Device .*/
 std::string ocl::Device::version() const
 {
-	std::string buffer(100,0);
-	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VERSION,  buffer.size(), &buffer[0], NULL));
+// 	std::string buffer(100,0);
+  char buffer[100];
+  
+	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VERSION,  sizeof buffer, buffer, NULL));
 	return buffer;
 }
 
 /*! \brief Returns the name of this Device .*/
 std::string ocl::Device::name() const
 {
-    std::string buffer(100,0);
-	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_NAME,  buffer.size(), &buffer[0], NULL));
+//     std::string buffer(100,0);
+  char buffer[100];
+  
+	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_NAME,  sizeof buffer, buffer, NULL));
 	return buffer;
 }
 
 /*! \brief Returns the name of the vendor of this Device .*/
 std::string ocl::Device::vendor() const
 {
-    std::string buffer(100,0);
-	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VENDOR,  buffer.size(), &buffer[0], NULL));
+//     std::string buffer(100,0);
+  char buffer[100];
+  
+	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VENDOR,  sizeof buffer, buffer, NULL));
 	return buffer;
 }
 
 /*! \brief Returns all extensions of this Device (support of double precision?) .*/
 std::string ocl::Device::extensions() const
 {
-    std::string buffer(1000,0);
-	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_EXTENSIONS,  buffer.size(), &buffer[0], NULL));
+//     std::string buffer(1000,0);
+  char buffer[1000];
+  
+	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_EXTENSIONS,  sizeof buffer, buffer, NULL));
 	return buffer;
 }
 
 /*! \brief Prints this Device.*/
 void ocl::Device::print() const
 {
-    std::string buffer(100,0);
+//     std::string buffer(100,0);
+    char buffer[100];
     std::cout << "\tDevice " << std::endl;
-    OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VENDOR, buffer.size(), &buffer[0], NULL) );
+    OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VENDOR, sizeof buffer, buffer, NULL) );
     std::cout << "\t\tDevice: " << buffer << std::endl;
-    buffer.assign(100,0);
-    OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_NAME, buffer.size(), &buffer[0], NULL) );
+//     buffer.assign(100,0);
+    OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_NAME, sizeof buffer, buffer, NULL) );
     std::cout << "\t\tName: " <<  buffer << std::endl;
 
 }
