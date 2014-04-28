@@ -57,8 +57,8 @@ public:
 
 
     __MatrixBase& operator = (value_type value) { std::fill(this->begin(), this->end(), value); return *this; }
-    __MatrixBase& operator = (const __MatrixBase& m) { _vector = m._vector; _rows = m._rows; _cols = m._cols; }
-    __MatrixBase& operator = (__MatrixBase&& m) { _vector = std::move(m._vector); _rows = m._rows; _cols = m._cols; }
+    __MatrixBase& operator = (const __MatrixBase& m) { _vector = m._vector; _rows = m._rows; _cols = m._cols; return *this;}
+    __MatrixBase& operator = (__MatrixBase&& m) { _vector = std::move(m._vector); _rows = m._rows; _cols = m._cols; return *this; }
 
 
     bool operator==(const_reference value) {
