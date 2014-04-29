@@ -213,7 +213,11 @@ void ocl::Queue::finish() const
   *
   * clFinish does not return until all previously queued commands in command_queue have been processed and completed.
 */
-void ocl::Queue::barrier(const EventList& list) const
+void ocl::Queue::barrier(const EventList& 
+#ifdef OPENCL_V1_2
+list
+#endif
+) const
 {
 #ifdef OPENCL_V1_2
     OPENCL_SAFE_CALL(  clEnqueueBarrierWithWaitList (this->id(),  list.size(), list.events().data(), 0) );

@@ -124,10 +124,19 @@ namespace type{
 	extern Type Single;
 	extern Type Int;
 	extern Type UInt;
-	extern Type Char;
+	extern Type SChar; // char can be either signed or unsigned depending on the implementation.
 	extern Type UChar;
 	//extern Type Bool;
 }
+
+template< typename T > Type getType(); // No matching type defined.
+template<> inline Type getType< float >() { return type::Single; }
+template<> inline Type getType< double >() { return type::Double; }
+template<> inline Type getType< int >() { return type::Int; }
+template<> inline Type getType< unsigned int >() { return type::UInt; }
+template<> inline Type getType< signed char >() { return type::SChar; }
+template<> inline Type getType< unsigned char >() { return type::UChar; }
+// template<> inline Type getType< bool >() { return type::Bool; }
 }
 
 
