@@ -116,6 +116,7 @@ public:
 	void remove(Sampler*);
 
 	bool has(const Device&)  const;
+	bool has(DeviceType) const;
 
 	bool has(const Program&) const;
 	bool has(const Queue&)   const;

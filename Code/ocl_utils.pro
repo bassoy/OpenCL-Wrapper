@@ -6,7 +6,11 @@ CONFIG -= app_bundle
 TEMPLATE = app
 
 
+OGL_WRAPPER_DIR = $$(HOME)/Desktop/OpenGL-Wrapper/Code
+
 INCLUDEPATH += inc/
+INCLUDEPATH += $$OGL_WRAPPER_DIR/inc
+
 
 SOURCES += \
 	src/ocl_query.cpp \

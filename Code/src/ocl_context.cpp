@@ -584,7 +584,7 @@ ocl::Program& ocl::Context::activeProgram() const
   *
   * User has to set the active Program explicitly.
   */
-void ocl::Context::setActiveProgram(ocl::Program &p)
+void ocl::Context::setActiveProgram(Program &p)
 {
     TRUE_ASSERT(this->has(p), "Program is not within this Context");
     TRUE_ASSERT(p.isBuilt(), "Program not yet created.");
@@ -593,10 +593,20 @@ void ocl::Context::setActiveProgram(ocl::Program &p)
 
 
 /*! \brief Returns true if this Context has the specified Device. */
-bool ocl::Context::has(const ocl::Device& d) const
+bool ocl::Context::has(const Device& d) const
 {
     return std::find(this->devices().begin(),this->devices().end(), d) != this->devices().end();
 }
+
+/*! \brief Returns true if this Context has the specified Device. */
+bool ocl::Context::has(const DeviceType t) const
+{
+	auto pred = [t](const Device &d){ return d.type() == t;};
+	return std::find_if(this->devices().begin(),this->devices().end(), pred) != this->devices().end();
+}
+
+
+
 
 /*! \brief Returns true if this Context has the specified Sampler. */
 bool ocl::Context::has(const ocl::Sampler& s) const

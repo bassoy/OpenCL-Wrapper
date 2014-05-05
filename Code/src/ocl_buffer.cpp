@@ -127,13 +127,14 @@ void ocl::Buffer::create(size_t size_bytes, Access access )
 {
     TRUE_ASSERT(this->_context != 0, "Context not valid - cannot create buffer");
 
+	TURE_ASSERT(this->id() == nullptr, "Cannot create buffer twice. Please release buffer.");
+
     cl_mem_flags flags = access;
 
     if(this->context()->devices().size() == 1 &&
        this->context()->devices().at(0).type() == ocl::device_type::CPU){
        flags |= ocl::Buffer::AllocHost;
-
-    }
+    }	
 
     cl_int status;
 	_id = clCreateBuffer(this->_context->id(), flags,  size_bytes, NULL, &status);

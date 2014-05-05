@@ -168,11 +168,11 @@ cl_mem_flags ocl::Memory::flags () const
   */
 void ocl::Memory::release()
 {
-    if(this->_id != 0){
-        OPENCL_SAFE_CALL( clReleaseMemObject(_id) );
-        _context->remove(const_cast<ocl::Memory*>(this));
-    }
-    this->_id = 0;
+	if(this->_id == 0) return;
+
+	OPENCL_SAFE_CALL( clReleaseMemObject(_id) );
+	_context->remove(const_cast<ocl::Memory*>(this));
+	this->_id = 0;
 }
 
 /*! \brief Unmaps the Device Memory.
