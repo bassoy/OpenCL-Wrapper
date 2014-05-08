@@ -84,42 +84,6 @@ public:
     void setProgram(const Program&);
     Context& context() const;
 
-    template<class T, class ... Types>
-    void setArg(int& pos, const T& data, Types& ... args)
-    {
-        setArg(pos, data);
-        pos++;
-        setArg(pos, args ... );
-    }
-
-    template<class ... Types>
-    void setArg(int& pos, cl_mem mem, const Types& ... args)
-    {
-        setArg(pos, mem);
-        pos++;
-        setArg(pos, args ... );
-    }
-
-    template<class ... Types>
-    void setArg(int& pos, cl_sampler sampler, const Types& ... args)
-    {
-        setArg(pos, sampler);
-        pos++;
-        setArg(pos, args ... );
-    }
-
-    template<class T>
-    void setArg(int pos, const T& data);
-    void setArg(int pos, cl_mem);    
-    void setArg(int pos, cl_sampler);
-
-    template<class ... Types>
-    void setArg(const Types& ... args)
-    {
-        int pos = 0;
-        setArg(pos, args ...);
-    }
-
     /*! \brief Executes this Kernel with arguments and returns an Event by which the execution can be tracked.
       *
       * The number of arguments must be equal to the number of arguments
@@ -129,8 +93,9 @@ public:
 	template<typename ... Types>
     ocl::Event operator()(const Queue &queue, const EventList& list, const Types& ... args)
 	{
-        int pos = 0;
-        if(sizeof...(args) > 0) setArg(pos, args ... );
+        //int pos = 0;
+        //if(sizeof...(args) > 0) setArg(pos, args ... );
+          pushArg( args... );
         return callKernel(queue, list);
 	}
 
@@ -143,8 +108,9 @@ public:
     template<typename ... Types>
     ocl::Event operator()(const Queue &queue, const Types& ... args)
     {
-        int pos = 0;
-        if(sizeof...(args) > 0) setArg(pos, args ... );
+        //int pos = 0;
+        //if(sizeof...(args) > 0) setArg(pos, args ... );
+        pushArg( args ... );
         return callKernel(queue);
     }
 
@@ -157,8 +123,9 @@ public:
     template<typename ... Types>
     ocl::Event operator()(const Types& ... args)
     {
-        int pos = 0;
-        setArg(pos, args ... );
+        //int pos = 0;
+        //setArg(pos, args ... );
+        pushArg( args ... );
         return callKernel();
     }
 
@@ -197,6 +164,40 @@ public:
 
 
 private:
+    template<class T>
+    void setArg(int pos, const T& data);
+    void setArg(int pos, cl_mem);    
+    void setArg(int pos, cl_sampler);
+    
+    template< typename... Types > void pushArg( Types const& ... args )
+    {
+      ArgPusher< sizeof...(args), 0, Types... >( *this, args... );
+    }
+    
+    void pushArg() { /* Do nothing for zero arguments. */ }
+    
+    template< size_t NumArgs, size_t ArgIndex, typename Type, typename... Types >
+    struct ArgPusher
+    {
+      ArgPusher( Kernel& kernel, Type arg, Types... args )
+      {
+        kernel.setArg( ArgIndex, arg );
+        
+        ArgPusher< sizeof...( args ), ArgIndex + 1, Types... >( kernel, args... );
+      }
+    };
+    
+    template< size_t ArgIndex, typename Type>
+    struct ArgPusher< 1, ArgIndex, Type >
+    {
+      ArgPusher( Kernel& kernel, Type arg )
+      {
+        kernel.setArg( ArgIndex, arg );
+        
+        // End recursion.
+      }
+    };
+  
     Kernel();
     const Program * _program;
     cl_kernel _id;

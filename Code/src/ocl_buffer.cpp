@@ -127,7 +127,7 @@ void ocl::Buffer::create(size_t size_bytes, Access access )
 {
     TRUE_ASSERT(this->_context != 0, "Context not valid - cannot create buffer");
 
-	TURE_ASSERT(this->id() == nullptr, "Cannot create buffer twice. Please release buffer.");
+	TRUE_ASSERT(this->id() == nullptr, "Cannot create buffer twice. Please release buffer.");
 
     cl_mem_flags flags = access;
 
