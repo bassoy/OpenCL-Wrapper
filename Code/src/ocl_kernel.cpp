@@ -500,7 +500,7 @@ std::vector<ocl::Kernel::mem_loc> ocl::Kernel::extractMemlocs(const std::string 
 
     const size_t start = kernel.find("(") + 1;
     const size_t end   = kernel.find(")") - 1;
-    TRUE_ASSERT(start < end, "Function not correctly defined.");
+    TRUE_ASSERT((start-1) < (end+1), "Function not correctly defined.");
 
     size_t pos_before = start;
     size_t pos_after = start;

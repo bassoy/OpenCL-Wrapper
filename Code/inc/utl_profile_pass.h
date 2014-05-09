@@ -132,21 +132,24 @@ public:
 	std::string toString(const std::vector<E> &v) const
 	{
 		if(v.empty()) return "[];";
-		std::string s = "[";
-		for(size_t i = 0; i < v.size()-1; ++i)
-		{
-			s += std::to_string(v.at(i));
-			s += ",";
-		}
-		s+= std::to_string(v.back());
-		s+= "];";
-		return s;
+                
+                std::ostringstream oss;
+                oss.precision( std::numeric_limits< E >::digits10 );
+                oss << std::scientific << '[';
+                
+                for ( size_t i = 0; i < v.size()-1u; ++i )
+                {
+                  oss << v.at(i) << ',';
+                }
+                
+                oss << v.back() << "];";
+		return oss.str();
 	}
 
 
 	friend std::ostream& operator <<(std::ostream &out, const ProfilePass<T> *_p)
 	{
-		out.precision(8);
+		out.precision(std::numeric_limits< double >::digits10);
 		out << std::scientific;
 		if(_p->_print_n) out << _p->name() << "_n = " << _p->toString<double>(_p->dims())  << std::endl;
         if(_p->_print_o) out << _p->name() << "_o = " << _p->toString<double>(_p->ops())   << std::endl;
