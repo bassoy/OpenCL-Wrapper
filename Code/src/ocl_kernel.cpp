@@ -464,6 +464,7 @@ template void ocl::Kernel::setArg<size_t>(int pos, const size_t& data);
 template void ocl::Kernel::setArg<float> (int pos, const float& data);
 template void ocl::Kernel::setArg<double>(int pos, const double& data);
 template void ocl::Kernel::setArg<char>  (int pos, const char& data);
+template void ocl::Kernel::setArg<unsigned int>( int pos, unsigned int const& data );
 
 
 /*! \brief Returns the kernel function of this Kernel. */
