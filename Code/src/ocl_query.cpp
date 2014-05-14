@@ -312,12 +312,13 @@ cl_device_type ocl::deviceType(cl_device_id id)
 
 
 /*! brief Auxiliary function for measuring OpenCL kernels. */
-double ocl::execTime(cl_event &event)
+double ocl::execTime(cl_event event)
 {
     cl_ulong start, end;
     
-    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &end, NULL);
-    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &start, NULL);
+   
+    OPENCL_SAFE_CALL( clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &end, NULL) );
+    OPENCL_SAFE_CALL( clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &start, NULL) );
     
     return double(end - start); // returns in nanoseconds
 }

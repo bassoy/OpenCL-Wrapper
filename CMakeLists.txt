@@ -3,7 +3,11 @@ cmake_minimum_required(VERSION 2.8)
 project(OpenCL-Wrapper)
 
 find_library(OPENCL_LIBRARIES OpenCL)
-find_path(OPENCL_INCLUDE_DIR cl.h HINTS /usr/include/CL)
+find_path(OPENCL_INCLUDE_DIR CL/cl.h HINTS 
+  /usr/include 
+  /opt/AMDAPP/include 
+  /usr/local/cuda/include
+  )
 
 include_directories(SYSTEM ${OPENCL_INCLUDE_DIR})
 include_directories(Code/inc)

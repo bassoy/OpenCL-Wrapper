@@ -307,3 +307,13 @@ void ocl::Device::print() const
     std::cout << "\t\tName: " <<  buffer << std::endl;
 
 }
+
+
+bool ocl::Device::imageSupport() const
+{
+  cl_bool support = CL_FALSE;
+  
+  OPENCL_SAFE_CALL( clGetDeviceInfo( this->id(), CL_DEVICE_IMAGE_SUPPORT, sizeof support, &support, NULL ) );
+  
+  return support == CL_TRUE;
+}

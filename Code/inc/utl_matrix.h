@@ -184,6 +184,34 @@ class Matrix : private __MatrixBase<T>
     Matrix() = delete;
 };
 
+namespace detail {
+  
+template< typename T >
+struct isRowMajorImpl
+{
+  constexpr static bool const value = false;
+};
+
+template< typename T > constexpr bool const isRowMajorImpl< T >::value;
+
+template< typename T >
+struct isRowMajorImpl< Matrix< T, row_major_tag > >
+{
+  constexpr static bool const value = true;
+};
+
+template< typename T > constexpr bool const isRowMajorImpl< Matrix< T, row_major_tag > >::value;
+  
+}
+
+
+template< typename Matrix >
+struct isRowMajor
+{
+  constexpr static bool const value = detail::isRowMajorImpl< Matrix >::value;
+};
+
+template< typename Matrix > constexpr bool const isRowMajor< Matrix >::value;
 
 
 template <class T>
@@ -547,7 +575,6 @@ public :
         utl::Matrix<T,F>(rows, cols, value_type(0))
     {}
 };
-
 
 }
 #endif
