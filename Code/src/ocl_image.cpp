@@ -118,10 +118,10 @@ void ocl::Image::create(size_t width, size_t height, ChannelType type, ChannelOr
     format.image_channel_data_type = type;
     cl_int status;
 
-#if defined(OPENCL_V1_0) || defined(OPENCL_V1_1)
+#ifndef CL_VERSION_1_2
     this->_id = clCreateImage2D(this->_context->id(), flags, &format, width, height, 0, NULL, &status);
 #else
-    _cl_image_desc desc;
+    cl_image_desc desc;
     desc.image_type = CL_MEM_OBJECT_IMAGE2D;
     desc.image_height = height;
     desc.image_width = width;
@@ -163,10 +163,10 @@ void ocl::Image::create(size_t width, size_t height, size_t depth, ChannelType t
 
     cl_int status;
 
-#if defined(OPENCL_V1_0) || defined(OPENCL_V1_1)
+#ifndef CL_VERSION_1_2
     this->_id = clCreateImage3D(this->_context->id(), flags, &format, width, height, depth, 0, 0, NULL, &status);
 #else
-    _cl_image_desc desc;
+    cl_image_desc desc;
     desc.image_type = CL_MEM_OBJECT_IMAGE3D;
     desc.image_height = height;
     desc.image_width = width;
@@ -199,7 +199,7 @@ void ocl::Image::create(unsigned int texture, unsigned long texture_target, long
     }
 
     cl_int status;
-#if defined(OPENCL_V1_0) || defined(OPENCL_V1_1)
+#ifndef CL_VERSION_1_2
     this->_id = clCreateFromGLTexture2D(this->_context->id(), flags, texture_target, miplevel, texture, &status);
 #else
     this->_id = clCreateFromGLTexture(this->_context->id(), flags, texture_target, miplevel, texture, &status);
