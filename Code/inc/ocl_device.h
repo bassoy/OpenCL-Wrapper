@@ -83,6 +83,8 @@ public:
 	std::string name()       const;
 	std::string vendor()     const;
 	std::string extensions() const;
+	
+	bool imageSupport() const;
 
 private:
 	cl_device_id _id;

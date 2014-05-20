@@ -17,64 +17,80 @@
 
 #include <utl_timer.h>
 
+template<class R>
+typename utl::Timer<R>::point
+utl::Timer<R>::_start;
 
-utl::Seconds::Seconds (long double m) : _m(m){}
-utl::Seconds::Seconds (const Seconds &s) : _m(s._m){}
-utl::Seconds::Seconds (const MilliSeconds &s) : _m(s._m*1e-3){}
-utl::Seconds::Seconds (const MicroSeconds &s) : _m(s._m*1e-6){}
+template<class R>
+typename utl::Timer<R>::point
+utl::Timer<R>::_stop;
 
-
-
-
-utl::MilliSeconds::MilliSeconds (long double m) : _m(m){}
-utl::MilliSeconds::MilliSeconds (const Seconds &s) : _m(s._m*1e3){}
-utl::MilliSeconds::MilliSeconds (const MilliSeconds &s) : _m(s._m){}
-utl::MilliSeconds::MilliSeconds (const MicroSeconds &s) : _m(s._m*1e-3){}	
-
-
-
-utl::MicroSeconds::MicroSeconds (long double m) : _m(m){}
-utl::MicroSeconds::MicroSeconds (const Seconds &s) : _m(s._m*1e6){}
-utl::MicroSeconds::MicroSeconds (const MilliSeconds &s) : _m(s._m*1e3){}
-utl::MicroSeconds::MicroSeconds (const MicroSeconds &s) : _m(s._m){}		
-
-
-
-utl::Timer::point utl::Timer::_start;
-utl::Timer::point utl::Timer::_stop;
-
-void utl::Timer::tic()
+/*! \brief Use tic() to start time.*/
+template<class R>
+void utl::Timer<R>::tic()
 {
     _start = clock::now();
 }
 
-void utl::Timer::toc()
+
+/*! \brief Use toc() to stop time. */
+template<class R>
+void utl::Timer<R>::toc()
 {
     _stop = clock::now();
 }
 
-utl::MicroSeconds utl::Timer::elapsed()
+
+/*! \brief Returns the duration between tic() and toc()
+ *
+ * Note that after calling elapsed, you need to call count()
+ *
+ * \param OtherResolution Resolution of the duration
+*/
+
+template<class R>
+R utl::Timer<R>::elapsed()
 {
-    const duration &dur = std::chrono::duration_cast<resolution>(_stop - _start);
-    MicroSeconds s = double(dur.count());
-    return s;
+	return std::chrono::duration_cast<R>( _stop - _start );
 }
 
-utl::MicroSeconds utl::Timer::elapsed(size_t run)
-{
-    const duration &dur = std::chrono::duration_cast<resolution>(_stop - _start);
-    // duration in seconds
-    MicroSeconds s = (double(dur.count()) / double(run));
-    return s;
-}
+//template<class OtherResolution, class R>
+//OtherResolution utl::Timer<R>::elapsed()
+//{
+//	return std::chrono::duration_cast<OtherResolution>( _stop - _start );
+//}
 
 
-utl::Timer::point utl::Timer::start()
+
+template<class R>
+typename utl::Timer<R>::point
+utl::Timer<R>::start()
 {
     return _start;
 }
 
-utl::Timer::point utl::Timer::stop()
+template<class R>
+typename utl::Timer<R>::point
+utl::Timer<R>::stop()
 {
     return _stop;
+}
+
+template class utl::Timer<utl::NanoSeconds>;
+template class utl::Timer<utl::MicroSeconds>;
+template class utl::Timer<utl::MilliSeconds>;
+template class utl::Timer<utl::Seconds>;
+
+
+//template<class T>
+//std::ostream& operator<< (std::ostream & out, const T& d)
+//{
+//	out << d.count() << std::endl;
+//	return out;
+//}
+
+std::ostream& operator<< (std::ostream & out, const utl::Seconds& d)
+{
+	out << d.count();
+	return out;
 }

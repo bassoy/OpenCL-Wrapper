@@ -163,12 +163,13 @@ public:
 	static bool templated(const std::string& kernel);
 
 
-private:
+
     template<class T>
     void setArg(int pos, const T& data);
     void setArg(int pos, cl_mem);    
     void setArg(int pos, cl_sampler);
-    
+
+private:
     template< typename... Types > void pushArg( Types const& ... args )
     {
       ArgPusher< sizeof...(args), 0, Types... >( *this, args... );

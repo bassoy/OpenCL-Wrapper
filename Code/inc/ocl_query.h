@@ -90,7 +90,7 @@ namespace ocl
 
 
     void safe_call(cl_int status, const std::string file, const std::string function, const int line);
-    double execTime(cl_event &event);
+	double execTime(cl_event event);
 
 
 }

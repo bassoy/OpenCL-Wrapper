@@ -59,6 +59,8 @@ ocl::EventList::EventList ( const EventList & other ) :
   * Context of the Event and EventList must be the same.
   *
   * \param event to be inserted into the EventList.
+  *
+  * \warning The event object must still be in scope!!!!
   */
 void ocl::EventList::append ( const ocl::Event & event )
 {

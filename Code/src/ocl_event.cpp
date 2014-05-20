@@ -89,7 +89,28 @@ ocl::Event::Event( const Event & other ) : _id(other._id), _ctxt(other._ctxt)
 {
     TRUE_ASSERT(_id != 0, "Event not valid (id == 0)");
     TRUE_ASSERT(_ctxt != 0, "Event not valid (ctxt == 0)");
+
+	OPENCL_SAFE_CALL( clRetainEvent( _id ) );
 }
+
+
+ocl::Event& ocl::Event::operator =( ocl::Event const& other )
+{
+
+	if ( this == &other ) return *this;
+
+	TRUE_ASSERT(other._id != 0, "Event not valid (id == 0)");
+	TRUE_ASSERT(other._ctxt != 0, "Event not valid (ctxt == 0)");
+
+	release();
+
+	_id   = other._id;
+	_ctxt = other._ctxt;
+
+	clRetainEvent( _id );
+	return *this;
+}
+
 
 /*! \brief Destructs the Event.
   *

@@ -78,6 +78,8 @@ public:
 
 	bool 	operator!= ( const Event & other ) const;
 	bool 	operator== ( const Event & other ) const;
+	
+	Event& operator =(const Event & other); 
 
 private:
 	cl_event _id;
