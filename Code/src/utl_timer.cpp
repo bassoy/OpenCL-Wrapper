@@ -54,14 +54,6 @@ R utl::Timer<R>::elapsed()
 	return std::chrono::duration_cast<R>( _stop - _start );
 }
 
-//template<class OtherResolution, class R>
-//OtherResolution utl::Timer<R>::elapsed()
-//{
-//	return std::chrono::duration_cast<OtherResolution>( _stop - _start );
-//}
-
-
-
 template<class R>
 typename utl::Timer<R>::point
 utl::Timer<R>::start()
@@ -81,16 +73,26 @@ template class utl::Timer<utl::MicroSeconds>;
 template class utl::Timer<utl::MilliSeconds>;
 template class utl::Timer<utl::Seconds>;
 
-
-//template<class T>
-//std::ostream& operator<< (std::ostream & out, const T& d)
-//{
-//	out << d.count() << std::endl;
-//	return out;
-//}
-
 std::ostream& operator<< (std::ostream & out, const utl::Seconds& d)
 {
 	out << d.count();
 	return out;
+}
+
+std::ostream& operator<< (std::ostream & out, const utl::MilliSeconds& d)
+{
+    out << d.count();
+    return out;
+}
+
+std::ostream& operator<< (std::ostream & out, const utl::MicroSeconds& d)
+{
+    out << d.count();
+    return out;
+}
+
+std::ostream& operator<< (std::ostream & out, const utl::NanoSeconds& d)
+{
+    out << d.count();
+    return out;
 }

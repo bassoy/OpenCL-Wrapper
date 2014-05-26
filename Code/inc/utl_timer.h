@@ -47,6 +47,10 @@ class Timer
 public :
 	using Resolution = _Resolution;
 
+    Timer() = delete;
+    Timer(const Timer&) = delete;
+    Timer& operator =(const Timer&) = delete;
+
     static void tic();
     static void toc();
 
@@ -58,8 +62,7 @@ public :
 		return std::chrono::duration_cast<OtherResolution>( _stop - _start );
 	}
 
-private:
-    explicit Timer(){}
+private:    
 
 	static point start();
 	static point stop();
@@ -71,7 +74,8 @@ private:
 }
 
 std::ostream& operator<< (std::ostream & out, const utl::Seconds&);
+std::ostream& operator<< (std::ostream & out, const utl::MilliSeconds&);
+std::ostream& operator<< (std::ostream & out, const utl::MicroSeconds&);
+std::ostream& operator<< (std::ostream & out, const utl::NanoSeconds&);
 
-//template<class T>
-//std::ostream& operator<< (std::ostream & out, const T&);
 #endif
