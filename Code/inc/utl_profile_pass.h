@@ -135,9 +135,9 @@ public:
 		oss << '[';
 		for ( size_t i = 0, size = v.size()-1u; i < size; ++i )
 		{
-			oss << v.at(i) << ',';
+			indirection( oss, v.at(i) ) << ',';
 		}
-		oss << v.back() << "];";
+		indirection( oss,  v.back() ) << "];";
 		return oss.str();
 	}
 
@@ -166,6 +166,14 @@ protected:
 
     bool _countUp;
 
+private :
+  template< typename S >
+  static std::ostream& indirection( std::ostream& os, S const& t )
+  { return os << t; }
+  
+  template< typename S >
+  static std::ostream& indirection( std::ostream& os, std::chrono::duration<S> const& t )
+  { return os << std::chrono::duration_cast< std::chrono::seconds >( t ).count(); }
 };
 
 }

@@ -212,7 +212,6 @@ class Matrix : private __MatrixBase<T>
 {
     Matrix() = delete;
 };
-}
 
 
 namespace detail {
@@ -243,6 +242,8 @@ struct isRowMajor
 };
 
 template< typename Matrix > constexpr bool const isRowMajor< Matrix >::value;
+
+}
 
 namespace utl{
 
