@@ -578,7 +578,7 @@ std::string ocl::Kernel::extractName(const string &kernel)
 std::string ocl::Kernel::specialize(const std::string& kernel, const std::string& type)//const utl::Type &type)
 {
 
-    const string &temp_param = ocl::Kernel::extractParameter(kernel);
+    const string temp_param = ocl::Kernel::extractParameter(kernel);
 
     if(temp_param.empty()) return kernel;
 
@@ -603,6 +603,8 @@ std::string ocl::Kernel::specialize(const std::string& kernel, const std::string
 
 
     size_t pos = 0;
+    
+    pos = fct.find("void", pos);
 
     pos = fct.find("(", pos, 1);
     TRUE_ASSERT(pos < fct.length(), "Could not find the fct.");

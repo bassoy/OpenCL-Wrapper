@@ -266,7 +266,7 @@ void ocl::Program::build()
     std::stringstream stream;
 
     this->print(stream);
-    const std::string &t = stream.str();
+    std::string t = stream.str();
 
     cl_int status;
     const char * file_char = t.c_str(); // stream.str().c_str();
