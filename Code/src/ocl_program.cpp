@@ -175,8 +175,15 @@ ocl::Program::~Program()
 */
 void ocl::Program::release()
 {
-   if(this->isBuilt())
+   if(this->isBuilt()){
         OPENCL_SAFE_CALL( clReleaseProgram (_id));
+
+		for(auto &map : _kernels){
+			auto *kernel = map.second;
+			TRUE_ASSERT(kernel != nullptr, "Kernel should not be null");
+			kernel->release();
+		}
+   }
     _id = 0;
 
 //	if(_context)
