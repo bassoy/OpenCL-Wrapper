@@ -20,16 +20,13 @@
 
 #include <ostream>
 #include <iostream>
-#include <string>
 #include <vector>
-#include <chrono>
-#include <new>
 #include <memory>
-
-#include <utl_profile_pass.h>
 
 
 namespace utl {
+
+class ProfilePass;
 
 /*! \class ProfilePassManager utl_profile_pass_manager.h "inc/utl_profile_pass_manager.h"
   * \brief Utility class to handle profile classes.
@@ -38,73 +35,22 @@ namespace utl {
   * and to run them collectively.
   */
 
-template<class ValueType_>
 class ProfilePassManager
 {
+	using uPPassPtr = std::unique_ptr<ProfilePass> ;
 public:
-		using PassType = ProfilePass<ValueType_>;
-		using ValueType = typename PassType::ValueType;
-		
-    using const_iterator = typename std::vector<std::shared_ptr<PassType>>::const_iterator;
-    using iterator       = typename std::vector<std::shared_ptr<PassType>>::iterator;
-    using pointer        = typename std::vector<std::shared_ptr<PassType>>::pointer;
-    using reference      = typename std::vector<std::shared_ptr<PassType>>::reference;
-        
 
     ProfilePassManager() = default;
     ~ProfilePassManager() = default;
-
-    ProfilePassManager& operator<<(const std::shared_ptr<PassType>& __p)
-	{
-        _passes.push_back(__p);
-        return *this;
-	}
+	ProfilePassManager(const ProfilePassManager&) = delete;
 	
-    ProfilePassManager& operator<<(PassType* __p)
-	{
-        _passes.push_back(std::shared_ptr<PassType>(__p));
-        return *this;
-	}	
-	
-
-    void setIter(size_t iter)
-    {
-        for (auto it : _passes){
-            it->setIter(iter);
-        }
-    }
-
-    void setPrint(bool print_n, bool print_t, bool print_o, bool print_p)
-    {
-        for (auto it : _passes){
-            it->setPrint(print_n, print_t, print_o, print_p);
-        }
-    }
-
-	void run()
-	{
-		for (auto it : _passes){
-			std::cout << "Profiling " << it->name() << std::endl;
-			it->run();
-		}
-	}
-
-	void write(std::ostream& out) const
-	{
-		for (auto it : _passes)
-			out << it;
-		out << std::endl;
-	}
-
-	void write(const std::string &filename) const
-	{
-		std::ofstream out(filename.c_str());
-		_passes.write(out);
-	}
+	ProfilePassManager& operator<<(ProfilePass* p);
+	void run();
+	void write(std::ostream& out) const;
 
 private:
 
-    std::vector<std::shared_ptr<PassType>> _passes;
+	std::vector<uPPassPtr> _passes;
 
 };
 

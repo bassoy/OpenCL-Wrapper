@@ -15,8 +15,8 @@
 //You should have received a copy of the GNU General Public License
 //along with OpenCL Utility Toolkit.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef UTL_TIME_H
-#define UTL_TIME_H
+#ifndef UTL_TIMER_H
+#define UTL_TIMER_H
 
 #include <chrono>
 #include <iostream>
@@ -38,14 +38,13 @@ using MicroSeconds = std::chrono::duration<double, std::micro>;
 using MilliSeconds = std::chrono::duration<double, std::milli>;
 using Seconds      = std::chrono::duration<double, std::ratio<1,1>>;
 
-template<class _Resolution>
+template<class _Duration>
 class Timer
 {
 	typedef std::chrono::high_resolution_clock clock;
-	typedef typename clock::duration duration;
 	typedef typename clock::time_point point;
 public :
-	using Resolution = _Resolution;
+	using Duration = _Duration;
 
     Timer() = delete;
     Timer(const Timer&) = delete;
@@ -54,12 +53,12 @@ public :
     static void tic();
     static void toc();
 
-	static Resolution elapsed();
+	static Duration elapsed();
 
-	template<class OtherResolution>
-	static OtherResolution elapsed()
+	template<class OtherDuration>
+	static OtherDuration elapsed()
 	{
-		return std::chrono::duration_cast<OtherResolution>( _stop - _start );
+		return std::chrono::duration_cast<OtherDuration>( _stop - _start );
 	}
 
 private:    
@@ -73,9 +72,12 @@ private:
 
 }
 
-std::ostream& operator<< (std::ostream & out, const utl::Seconds&);
-std::ostream& operator<< (std::ostream & out, const utl::MilliSeconds&);
-std::ostream& operator<< (std::ostream & out, const utl::MicroSeconds&);
-std::ostream& operator<< (std::ostream & out, const utl::NanoSeconds&);
+std::ostream& operator<< (std::ostream & out, utl::Seconds d);
+std::ostream& operator<< (std::ostream & out, utl::MilliSeconds d);
+std::ostream& operator<< (std::ostream & out, utl::MicroSeconds d);
+std::ostream& operator<< (std::ostream & out, utl::NanoSeconds d);
+
+
+
 
 #endif

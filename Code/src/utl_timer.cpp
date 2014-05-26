@@ -17,25 +17,24 @@
 
 #include <utl_timer.h>
 
-template<class R>
-typename utl::Timer<R>::point
-utl::Timer<R>::_start;
+template<class D>
+typename utl::Timer<D>::point
+utl::Timer<D>::_start;
 
-template<class R>
-typename utl::Timer<R>::point
-utl::Timer<R>::_stop;
+template<class D>
+typename utl::Timer<D>::point utl::Timer<D>::_stop;
 
 /*! \brief Use tic() to start time.*/
-template<class R>
-void utl::Timer<R>::tic()
+template<class D>
+void utl::Timer<D>::tic()
 {
     _start = clock::now();
 }
 
 
 /*! \brief Use toc() to stop time. */
-template<class R>
-void utl::Timer<R>::toc()
+template<class D>
+void utl::Timer<D>::toc()
 {
     _stop = clock::now();
 }
@@ -48,22 +47,22 @@ void utl::Timer<R>::toc()
  * \param OtherResolution Resolution of the duration
 */
 
-template<class R>
-R utl::Timer<R>::elapsed()
+template<class D>
+D utl::Timer<D>::elapsed()
 {
-	return std::chrono::duration_cast<R>( _stop - _start );
+	return std::chrono::duration_cast<D>( _stop - _start );
 }
 
-template<class R>
-typename utl::Timer<R>::point
-utl::Timer<R>::start()
+template<class D>
+typename utl::Timer<D>::point
+utl::Timer<D>::start()
 {
     return _start;
 }
 
-template<class R>
-typename utl::Timer<R>::point
-utl::Timer<R>::stop()
+template<class D>
+typename utl::Timer<D>::point
+utl::Timer<D>::stop()
 {
     return _stop;
 }
@@ -73,26 +72,26 @@ template class utl::Timer<utl::MicroSeconds>;
 template class utl::Timer<utl::MilliSeconds>;
 template class utl::Timer<utl::Seconds>;
 
-std::ostream& operator<< (std::ostream & out, const utl::Seconds& d)
+std::ostream& operator<< (std::ostream & out, utl::Seconds d)
 {
 	out << d.count();
 	return out;
 }
 
-std::ostream& operator<< (std::ostream & out, const utl::MilliSeconds& d)
+std::ostream& operator<< (std::ostream & out, utl::MilliSeconds d)
 {
-    out << d.count();
-    return out;
+	out << d.count();
+	return out;
 }
 
-std::ostream& operator<< (std::ostream & out, const utl::MicroSeconds& d)
+std::ostream& operator<< (std::ostream & out, utl::MicroSeconds d)
 {
-    out << d.count();
-    return out;
+	out << d.count();
+	return out;
 }
 
-std::ostream& operator<< (std::ostream & out, const utl::NanoSeconds& d)
+std::ostream& operator<< (std::ostream & out, utl::NanoSeconds d)
 {
-    out << d.count();
-    return out;
+	out << d.count();
+	return out;
 }

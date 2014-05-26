@@ -50,7 +50,9 @@ SOURCES += \
 	src/utl_storage.cpp \
 	src/utl_args.cpp \
 	src/utl_dim.cpp \
-	src/utl_timer.cpp
+	src/utl_timer.cpp \
+	src/utl_profile_pass_manager.cpp \
+	src/utl_profile_pass.cpp
 
 HEADERS += \
 	inc/utl_utils.h \
