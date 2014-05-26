@@ -498,9 +498,10 @@ bool ocl::Kernel::templated(const std::string &kernel)
 
 std::vector<ocl::Kernel::mem_loc> ocl::Kernel::extractMemlocs(const std::string & kernel)
 {
+    const auto afterAttributes = kernel.find("void");
 
-    const size_t start = kernel.find("(") + 1;
-    const size_t end   = kernel.find(")") - 1;
+    const size_t start = kernel.find("(",afterAttributes) + 1;
+    const size_t end   = kernel.find(")",start) - 1;
 	//TRUE_ASSERT(start < end, "Function not correctly defined.");
 	TRUE_ASSERT((start-1) < (end+1), "Function not correctly defined.");
 
