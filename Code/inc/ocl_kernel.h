@@ -161,16 +161,15 @@ public:
 	static std::string extractName(const std::string &kernel);
 	static std::string extractParameter(const std::string& kernel);
 	static bool templated(const std::string& kernel);
-        
-        
+
+
+
     template<class T>
     void setArg(int pos, const T& data);
     void setArg(int pos, cl_mem);    
     void setArg(int pos, cl_sampler);
 
-
 private:
-    
     template< typename... Types > void pushArg( Types const& ... args )
     {
       ArgPusher< sizeof...(args), 0, Types... >( *this, args... );

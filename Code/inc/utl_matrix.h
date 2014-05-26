@@ -46,14 +46,14 @@ class __MatrixBase
 {
 public:
 
-    typedef typename std::vector<T>::pointer           pointer;
-    typedef typename std::vector<T>::const_pointer     const_pointer;
-    typedef typename std::vector<T>::reference         reference;
-    typedef typename std::vector<T>::const_reference   const_reference;
-    typedef typename std::vector<T>::value_type        value_type;
+	typedef typename std::vector<T>::pointer           pointer;
+	typedef typename std::vector<T>::const_pointer     const_pointer;
+	typedef typename std::vector<T>::reference         reference;
+	typedef typename std::vector<T>::const_reference   const_reference;
+	typedef typename std::vector<T>::value_type        value_type;
 
-    typedef typename std::vector<T>::iterator          iterator;
-    typedef typename std::vector<T>::const_iterator    const_iterator;
+	typedef typename std::vector<T>::iterator          iterator;
+	typedef typename std::vector<T>::const_iterator    const_iterator;
 
 
     __MatrixBase& operator = (value_type value) { std::fill(this->begin(), this->end(), value); return *this; }
@@ -65,16 +65,30 @@ public:
         return std::all_of(this->begin(), this->end(), [value](const_reference ref){return ref == value;});
     }
 
+	bool operator!=(const_reference value) {
+		return std::all_of(this->begin(), this->end(), [value](const_reference ref){return ref != value;});
+	}
+
 
     bool operator==(const __MatrixBase& m) const {
         if(m.dim() != this->dim()) return false;
         return std::equal(this->begin(), this->end(), m.begin());
     }
 
+	bool operator!=(const __MatrixBase& m) const {
+		if(m.dim() != this->dim()) return true;
+		return std::equal(this->begin(), this->end(), m.begin(), std::not_equal_to<value_type>() );
+	}
+
     bool operator==(__MatrixBase&& m) {
         if(m.dim() != this->dim()) return false;
         return std::equal(this->begin(), this->end(), m.begin());
     }
+
+	bool operator!=(__MatrixBase&& m) {
+		if(m.dim() != this->dim()) return true;
+		return std::equal(this->begin(), this->end(), m.begin(), std::not_equal_to<value_type>());
+	}
 
     __MatrixBase operator*(const_reference value) const
     {
@@ -82,6 +96,7 @@ public:
         std::for_each(res.begin(), res.end(), [value]( reference r){ r *= value; });
         return res;
     }
+
 
     __MatrixBase operator+(const_reference value) const
     {
@@ -171,18 +186,34 @@ protected:
     size_t _cols;
 };
 
+}
+
+
+
+
+namespace utl{
+
 ///  Marking column_major matrices.
 struct column_major_tag { };
 
 ///  Marking row_major matrices.
 struct row_major_tag  { };
 
+}
+
+
+
+
+
+namespace utl{
 
 template <class T, class F>
 class Matrix : private __MatrixBase<T>
 {
     Matrix() = delete;
 };
+}
+
 
 namespace detail {
   
@@ -213,6 +244,8 @@ struct isRowMajor
 
 template< typename Matrix > constexpr bool const isRowMajor< Matrix >::value;
 
+namespace utl{
+
 
 template <class T>
 class Matrix<T, column_major_tag> : public __MatrixBase<T>
@@ -240,6 +273,13 @@ public :
     Matrix& operator = (value_type value) { Base::operator=( value ); return *this; }
     Matrix& operator = (const Matrix& m) { Base::operator=( m ); return *this; }
     Matrix& operator = (Matrix&& m) { Base::operator=( std::move(m) ) ;  return *this; }
+
+
+	bool operator==(const Matrix& m) const { return Base::operator ==( m ); }
+	bool operator!=(const Matrix& m) const { return Base::operator !=( m ); }
+
+	bool operator==(Matrix&& m) { return Base::operator ==( std::move(m) ); }
+	bool operator!=(Matrix&& m) { return Base::operator !=( std::move(m) ); }
 
 
     Matrix operator*(const_reference value) const { return Base::operator*(value);  }
@@ -319,6 +359,18 @@ private:
 };
 }
 
+
+template<class T>
+bool operator==(typename utl::Matrix<T,utl::column_major_tag>::const_reference value, const utl::Matrix<T,utl::column_major_tag>& matrix) {
+	return matrix == value;
+}
+
+template<class T>
+bool operator!=(typename utl::Matrix<T,utl::column_major_tag>::const_reference value, const utl::Matrix<T,utl::column_major_tag>& matrix) {
+	return matrix != value;
+}
+
+
 namespace utl{
 template <class T>
 class Matrix<T, row_major_tag> : public __MatrixBase<T>
@@ -341,6 +393,13 @@ public :
     Matrix(Matrix&& m) : Base(std::move(m)) {}
     Matrix() = default;
     ~Matrix() = default;
+
+	bool operator==(const Matrix& m) const { return Base::operator ==( m ); }
+	bool operator!=(const Matrix& m) const { return Base::operator !=( m ); }
+
+	bool operator==(Matrix&& m) { return Base::operator ==( std::move(m) ); }
+	bool operator!=(Matrix&& m) { return Base::operator !=( std::move(m) ); }
+
 
 
     Matrix& operator = (value_type value) { Base::operator=( value ); return *this; }
@@ -426,6 +485,18 @@ private:
     }
 };
 }
+
+
+template<class T>
+bool operator==(typename utl::Matrix<T,utl::row_major_tag>::const_reference value, const utl::Matrix<T,utl::row_major_tag>& matrix) {
+	return matrix == value;
+}
+
+template<class T>
+bool operator!=(typename utl::Matrix<T,utl::row_major_tag>::const_reference value, const utl::Matrix<T,utl::row_major_tag>& matrix) {
+	return matrix != value;
+}
+
 
 #include <random>
 #include <limits>

@@ -159,7 +159,14 @@ ocl::Program::Program() :
 /*! \brief Destructs this Program.*/
 ocl::Program::~Program()
 {
-    release();
+
+	if(_context != nullptr)
+		_context->release(this);
+
+   removeKernels();
+   this->release();
+   _context = 0;
+	_id = 0;
 }
 
 /*! \brief Releases this Program.
@@ -168,16 +175,20 @@ ocl::Program::~Program()
 */
 void ocl::Program::release()
 {
-    if(_context)
-        _context->release(this);
-
-   if(this->isBuilt()){
-        removeKernels();
+   if(this->isBuilt())
         OPENCL_SAFE_CALL( clReleaseProgram (_id));
-
-    }
-    _context = 0;
     _id = 0;
+
+//	if(_context)
+//        _context->release(this);
+
+//   if(this->isBuilt()){
+//        removeKernels();
+//        OPENCL_SAFE_CALL( clReleaseProgram (_id));
+
+//    }
+//    _context = 0;
+//    _id = 0;
 }
 
 

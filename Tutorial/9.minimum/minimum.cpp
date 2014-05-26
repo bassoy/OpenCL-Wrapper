@@ -25,8 +25,10 @@ int main(int argc, char* argv[])
     const size_t size_bytes_in  = elements_in * sizeof(Type);
     const size_t local_size = 256;
     const size_t elements_out = std::max(elements_in/local_size, 1ul);
-		const size_t size_bytes_out = elements_out * sizeof(Type);
-		const size_t execute = 100;
+	const size_t size_bytes_out = elements_out * sizeof(Type);
+	const size_t execute = 100;
+
+	using Timer = utl::Timer<utl::Seconds>;
 			
 		
 
@@ -67,7 +69,7 @@ int main(int argc, char* argv[])
 
     // execute both kernels only if the event_write is completed.
     // note that kernel executions are always asynchronous.
-    utl::Timer::tic();
+	Timer::tic();
     for(size_t i = 0; i < execute; ++i){
 	    kernel(queue, int(elements_in), d_matrix_in.id(), 0, 1, d_matrix_out.id(), local_size * sizeof(Type));
     	queue.finish();
@@ -75,20 +77,20 @@ int main(int argc, char* argv[])
     // copy data from device buffers to host buffers
     d_matrix_out.read(queue, h_matrix_out.data(), size_bytes_out);       
     float min_gpu = std::min_element(h_matrix_out.begin(), h_matrix_out.end())[0];
-    utl::Timer::toc();
-    std::cout << "Minimum[GPU]: " << min_gpu << ", Time[GPU] = " << utl::Seconds(utl::Timer::elapsed(execute)) << std::endl;
+	Timer::toc();
+	std::cout << "Minimum[GPU]: " << min_gpu << ", Time[GPU] = " << Timer::elapsed() << std::endl;
 	
 		
-		float min_cpu;
+	float min_cpu;
+	min_cpu = std::min_element(h_matrix_in.begin(), h_matrix_in.end())[0];
+	min_cpu = std::min_element(h_matrix_in.begin(), h_matrix_in.end())[0];
+
+	Timer::tic();
+	for(size_t i = 0; i < execute; ++i){
 		min_cpu = std::min_element(h_matrix_in.begin(), h_matrix_in.end())[0];
-		min_cpu = std::min_element(h_matrix_in.begin(), h_matrix_in.end())[0];
-		
-		utl::Timer::tic();		
-		for(size_t i = 0; i < execute; ++i){
-	    min_cpu = std::min_element(h_matrix_in.begin(), h_matrix_in.end())[0];
-	  }
-    utl::Timer::toc();
-    std::cout << "Minimum[CPU]: " << min_cpu << ", Time[CPU] = " << utl::Seconds(utl::Timer::elapsed(execute)) << std::endl;
+	}
+	Timer::toc();
+	std::cout << "Minimum[CPU]: " << min_cpu << ", Time[CPU] = " << Timer::elapsed() << std::endl;
     
 
 	return 0;
