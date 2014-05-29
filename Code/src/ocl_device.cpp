@@ -54,7 +54,13 @@ ocl::Device::Device() :
   */
 ocl::Device::~Device()
 {
-
+  if ( _id )
+  {
+#ifdef CL_VERSION_1_2
+    OPENCL_SAFE_CALL( clReleaseDevice( _id ) );
+#endif
+    _id = 0;
+  }
 }
 
 
@@ -67,6 +73,9 @@ ocl::Device::~Device()
 ocl::Device::Device(const Device& dev) :
     _id(dev._id), _type(dev._type)
 {
+#ifdef CL_VERSION_1_2
+  OPENCL_SAFE_CALL( clRetainDevice( _id ) );
+#endif
 }
 
 /*! \brief Copies from other device to this device
@@ -77,9 +86,17 @@ ocl::Device::Device(const Device& dev) :
   */
 ocl::Device& ocl::Device::operator =(const ocl::Device &dev)
 {
+  if ( this != &dev )
+  {
     _id = dev._id;
     _type = dev._type;
-    return *this;
+    
+#ifdef CL_VERSION_1_2
+    OPENCL_SAFE_CALL( clRetainDevice( _id ) );
+#endif
+  }
+  
+  return *this;
 }
 
 
