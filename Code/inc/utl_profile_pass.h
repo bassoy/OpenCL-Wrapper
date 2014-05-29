@@ -55,11 +55,11 @@ public:
 	virtual ~ProfilePass() = default;
 
 	template<class F>
-	Seconds call(F&& __func)
+	Seconds call(F&& func)
 	{
 		_Timer::tic();
 		for (size_t j = 0; j < _iter; j++){
-			__func();
+			func();
 		}
 		_Timer::toc();
 		return _Timer::elapsed() / _iter;

@@ -107,7 +107,7 @@ class Program
 public:
     Program();
 	~Program();
-    explicit Program(ocl::Context& ctxt, const utl::Types&, const CompileOption & o = CompileOption());
+	explicit Program(ocl::Context& ctxt, const utl::Types&, const CompileOption & o = CompileOption());
     explicit Program(ocl::Context& ctxt, const CompileOption & o = CompileOption());
 
     void build();

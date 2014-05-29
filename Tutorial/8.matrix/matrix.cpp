@@ -14,62 +14,32 @@ namespace kernel_strings {
 
 const std::string kernels =
 R"(
-
 template<class Type>
-__kernel void copy_cmajor(int rows, int cols, __global Type *dst, __global Type *src)
+__kernel void copy(int rows, int cols, __global Type *dst, __global Type *src)
 {
-	int id0 = get_global_id(0); // x
-	int id1 = get_global_id(1); // y
+	int col = get_global_id(0); // x
+	int row = get_global_id(1); // y
 
-	if(id0 >= rows || id1 >= cols) return;
+	if(col >= cols || row >= rows) return;
 
-    int index = id0 + id1*rows;
+	int index = col + row*cols;
 
     dst[index] = src[index];
 }
 
 template<class Type>
-__kernel void addc_cmajor(int rows, int cols, __global Type *dst, __global Type *src, Type c)
+__kernel void addc(int rows, int cols, __global Type *dst, __global Type *src, Type c)
 {
-	int id0 = get_global_id(0); // x
-	int id1 = get_global_id(1); // y
+	int col = get_global_id(0); // x
+	int row = get_global_id(1); // y
 
-	if(id0 >= rows || id1 >= cols) return;
+	if(col >= cols || row >= rows) return;
 
-    int index = id0 + id1*rows;
+	int index = col + row*cols;
 
     dst[index] = src[index] + c;
 }
-
-
-
-template<class Type>
-__kernel void copy_rmajor(int rows, int cols, __global Type *dst, __global Type *src)
-{
-	int id0 = get_global_id(0); // x
-	int id1 = get_global_id(1); // y
-
-	if(id0 >= cols || id1 >= rows) return;
-
-	int index = id0*rows + id1;
-
-	dst[index] = src[index];
-}
-
-template<class Type>
-__kernel void addc_rmajor(int rows, int cols, __global Type *dst, __global Type *src, Type c)
-{
-	int id0 = get_global_id(0); // x
-	int id1 = get_global_id(1); // y
-
-	if(id0 >= cols || id1 >= rows) return;
-
-	int index = id0*rows + id1;
-
-	dst[index] = src[index] + c;
-}
 )";
-
 }
 
 int main()
@@ -107,9 +77,9 @@ int main()
 //		 typedef utl::Rand <Type,utl::column_major_tag, utl::uniform_dist_tag> Rand;
 
         // get the kernels.
-		ocl::Kernel &kernel = program.kernel("copy_cmajor", utl::type::Single);
+		ocl::Kernel &kernel = program.kernel("copy", utl::type::Single);
 
-        size_t rows = 1<<2, cols = 1<<3;
+		size_t rows = 1<<5, cols = 1<<7;
 
         size_t elements = rows * cols;
         size_t size_bytes = elements * sizeof(Type);
@@ -117,7 +87,7 @@ int main()
         // set the index space for the kernels
 		// WorkGroupSize (x,y) = (16,16)
 		// GlobalSize (x,y) = (Rows + Rows%16, Cols + Cols%16)
-		kernel.setWorkSize(16, 16, rows, cols);
+		kernel.setWorkSize(16, 16, cols, rows);
 
         // create host matrices
 		auto h_matrix_in  = Ones(rows,cols);
@@ -157,9 +127,9 @@ int main()
 //        typedef utl::Rand <Type,utl::column_major_tag, utl::uniform_dist_tag> Rand;
 
         // get the kernels.
-		ocl::Kernel &kernel = program.kernel("addc_cmajor", utl::type::Int);
+		ocl::Kernel &kernel = program.kernel("addc", utl::type::Int);
 
-        size_t rows = 1<<2, cols = 1<<3;
+		size_t rows = 1<<5, cols = 1<<6;
 
         size_t elements = rows * cols;
         size_t size_bytes = elements * sizeof(Type);
@@ -167,7 +137,7 @@ int main()
         // set the index space for the kernels
 		// WorkGroupSize (x,y) = (16,16)
 		// GlobalSize (x,y) = (Rows + Rows%16, Cols + Cols%16)
-		kernel.setWorkSize(16, 16, rows, cols);
+		kernel.setWorkSize(16, 16, cols, rows);
 
         // create host matrices
 		auto h_matrix_in  = Ones(rows,cols);
@@ -210,9 +180,9 @@ int main()
 //		 typedef utl::Rand <Type,utl::row_major_tag, utl::uniform_dist_tag> Rand;
 
 		// get the kernels.
-		ocl::Kernel &kernel = program.kernel("copy_rmajor", utl::type::Single);
+		ocl::Kernel &kernel = program.kernel("copy", utl::type::Single);
 
-		size_t rows = 1<<2, cols = 1<<3;
+		size_t rows = 1<<5, cols = 1<<7;
 
 		size_t elements = rows * cols;
 		size_t size_bytes = elements * sizeof(Type);
@@ -259,16 +229,15 @@ int main()
 //		typedef utl::Rand <Type,utl::row_major_tag, utl::uniform_dist_tag> Rand;
 
 		// get the kernels.
-		ocl::Kernel &kernel = program.kernel("addc_rmajor", utl::type::Int);
+		ocl::Kernel &kernel = program.kernel("addc", utl::type::Int);
 
-		size_t rows = 1<<2, cols = 1<<3;
+		size_t rows = 1<<8, cols = 1<<6;
 
 		size_t elements = rows * cols;
 		size_t size_bytes = elements * sizeof(Type);
 
 		// set the index space for the kernels
 		// WorkGroupSize (x,y) = (16,16)
-		// GlobalSize (x,y) = (Cols + Cols%16, Rows + Rows%16)
 		kernel.setWorkSize(16, 16, cols, rows);
 
 		// create host matrices

@@ -23,6 +23,7 @@ void utl::ProfilePassManager::write(std::ostream& out) const
 {
 	for (const uPPassPtr &it : _passes){
 		out << *it;
+		out << std::endl;
 	}
 	out << std::endl;
 }
