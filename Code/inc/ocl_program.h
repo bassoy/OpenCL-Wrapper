@@ -18,7 +18,8 @@
 #ifndef OCL_PROGRAM_H
 #define OCL_PROGRAM_H
 
-#include <map>
+// #include <map>
+#include <memory>
 #include <string>
 
 #ifdef __APPLE__
@@ -100,8 +101,9 @@ class Context;
 
 class Program
 {
-	typedef std::map<std::string, Kernel*> Kernels;
-//	typedef std::vector<Kernel*> Kernels;
+// 	typedef std::map<std::string, Kernel*> Kernels;
+// 	typedef std::vector<Kernel*> Kernels;
+  typedef std::vector< std::unique_ptr< Kernel > > Kernels;
 	typedef Kernels::const_iterator const_iterator;
 	typedef Kernels::iterator iterator;
 public:
@@ -128,11 +130,11 @@ public:
 	bool exists(const std::string &kernel_name) const;
 	void release();
     bool isBuilt() const;
-    Kernel& kernel(const std::string &name) const;
-    Kernel& kernel(const std::string &name, const utl::Type &) const;
+    Kernel& kernel(const std::string &name);
+    Kernel& kernel(const std::string &name, const utl::Type &);
 
     template<class T>
-    Kernel& kernel(const std::string &name) const;
+    Kernel& kernel(const std::string &name);
 
     bool operator==(const Program &other) const;
     bool operator!=(const Program &other) const;
@@ -150,6 +152,15 @@ private:
 	std::string nextKernel(const std::string &kernels, size_t pos);
 	void eraseComments(std::string &file_string) const;
     void checkBuild(cl_int buildErr) const;
+    
+    /**
+     * Code common to all kernels.
+     * 
+     * Constraint: commonCodeBlocks_.size() == _kernels.size() + 1
+     */
+    std::vector< std::string > commonCodeBlocks_;
+    
+    void checkConstraints() const;
 };
 }
 

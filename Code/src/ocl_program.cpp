@@ -17,10 +17,12 @@
 
 // System includes
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <vector>
 #include <fstream>
+#include <stdexcept>
 
 #include <ocl_query.h>
 #include <ocl_program.h>
@@ -123,10 +125,12 @@ namespace compile_option{
     * \param options defines a valid CompileOption for build process.
 */
 ocl::Program::Program(ocl::Context& ctxt, const utl::Types &types, const ocl::CompileOption &options) :
-    _id(NULL), _context(&ctxt), _types(types), _options(options)
+    _id(NULL), _context(&ctxt), _types(types), _options(options), commonCodeBlocks_( 1u, std::string() )
 {
     TRUE_ASSERT(!_types.empty(), "no types selected.");
     _context->insert(this);
+    
+    checkConstraints();
 }
 
 /*! \brief Instantiates this Program for a given Context and CompileOption.
@@ -139,9 +143,11 @@ ocl::Program::Program(ocl::Context& ctxt, const utl::Types &types, const ocl::Co
     * \param options defines a valid CompileOption for build process.
 */
 ocl::Program::Program(ocl::Context& ctxt, const ocl::CompileOption &options) :
-    _id(NULL), _context(&ctxt), _types(), _options(options)
+    _id(NULL), _context(&ctxt), _types(), _options(options), commonCodeBlocks_( 1u, std::string() )
 {
     _context->insert(this);
+    
+    checkConstraints();
 }
 
 /*! \brief Instantiates this Program for a given Context and CompileOption.
@@ -151,8 +157,9 @@ ocl::Program::Program(ocl::Context& ctxt, const ocl::CompileOption &options) :
     * functions and to build it.
 */
 ocl::Program::Program() :
-    _id(NULL), _context(), _types(), _options()
+    _id(NULL), _context(), _types(), _options(), commonCodeBlocks_( 1u, std::string() )
 {
+  checkConstraints();
 }
 
 
@@ -198,10 +205,16 @@ void ocl::Program::release()
 */
 void ocl::Program::removeKernels()
 {
-    while(!_kernels.empty()){
+    /*while(!_kernels.empty()){
         delete  _kernels.begin()->second;
         _kernels.erase( _kernels.begin());
-    }
+    }*/
+    _kernels.clear();
+    
+    commonCodeBlocks_.resize( 1u );
+    commonCodeBlocks_[0].clear();
+    
+    checkConstraints();
 }
 
 /*! \brief Sets the Types for the Kernel objects.
@@ -267,6 +280,8 @@ void ocl::Program::build()
 
     this->print(stream);
     std::string t = stream.str();
+    
+//     std::cout << t;
 
     cl_int status;
     const char * file_char = t.c_str(); // stream.str().c_str();
@@ -275,8 +290,8 @@ void ocl::Program::build()
     cl_int buildErr = clBuildProgram(_id, 0, NULL, _options().c_str(), NULL, NULL);
     checkBuild(buildErr);
 
-    for(auto k : _kernels){
-        k.second->create();
+    for(auto& k : _kernels){
+        k->create();
     }
 }
 
@@ -316,12 +331,24 @@ bool ocl::Program::isBuilt() const
 /*! \brief Prints the Kernel functions of this Program. */
 void ocl::Program::print(std::ostream& out) const
 {
+#if 0
+  
     for(auto k : _kernels)
     {
         const ocl::Kernel &kernel = *(k.second);
         out << kernel.toString() << std::endl;
     }
     out << std::endl;
+#else
+  auto it = commonCodeBlocks_.begin();
+  
+  out << *it++ << '\n';
+  
+  for ( auto& k : _kernels )
+  {
+    out << k->toString() << '\n' << *it++ << '\n';
+  }
+#endif
 }
 
 /*! \brief Reads kernel functions from a string into this Program.
@@ -340,31 +367,63 @@ ocl::Program& ocl::Program::operator << (const std::string &k)
     std::string kernels = k;
     eraseComments(kernels);
 
+//     filterCommonCode( k );
     //DEBUG_COMMENT(kernels);
+    
+//     commonCodeBlocks_.clear();
 
     size_t pos = 0;
     while(pos < kernels.npos){
         const std::string& next = nextKernel(kernels, pos);
-        if(next.empty()) return *this;
-        pos += next.length();
+        if(next.empty()) break;
+        pos += next.length() + commonCodeBlocks_.back().length();
+        
+        
+//         std::cout << "COMMON CODE: " << commonCodeBlocks_.back();
+//         std::cout << "KERNEL CODE: " << next;
 
         if(_types.empty() || !ocl::Kernel::templated(next)){
-            ocl::Kernel *kernel = new ocl::Kernel(*this, next);
+            std::unique_ptr< ocl::Kernel > kernel( new ocl::Kernel(*this, next) );
             if(this->isBuilt()) kernel->create();
             //DEBUG_COMMENT("Creating kernel " << kernel->name() << std::endl << kernel->toString() );
+#if 0
             _kernels[kernel->name()] = kernel;
+#else
+            auto t = std::find_if( _kernels.begin(), _kernels.end(), [&kernel]( std::unique_ptr< Kernel > const& k ){
+              return kernel->name() == k->name();
+            } );
+            
+            if ( t != _kernels.end() )
+              t->swap( kernel );
+            else
+              _kernels.push_back( std::move( kernel ) );
+#endif
             continue;
         }
 
         for(utl::Types::const_iterator it = _types.begin(); it != _types.end(); ++it)
         {
             const utl::Type &type = **it;
-            ocl::Kernel *kernel = new ocl::Kernel(*this, next, type);
+            std::unique_ptr< ocl::Kernel > kernel( new ocl::Kernel(*this, next, type) );
             if(this->isBuilt()) kernel->create();
             //DEBUG_COMMENT("Creating kernel " << kernel->name() << std::endl << kernel->toString() );
+#if 0
             _kernels[kernel->name()] = kernel;
+#else
+            auto t = std::find_if( _kernels.begin(), _kernels.end(), [&kernel]( std::unique_ptr< Kernel > const& k ){
+              return kernel->name() == k->name();
+            } );
+            
+            if ( t != _kernels.end() )
+              t->swap( kernel );
+            else
+              _kernels.push_back( std::move( kernel ) );
+#endif
         }
     }
+    
+    checkConstraints();
+    
     return *this;
 }
 
@@ -404,30 +463,36 @@ bool ocl::Program::operator !=(const Program& other) const
 
 
 /*! \brief Returns the Kernel from this Program by providing the Kernel's function name.*/
-ocl::Kernel& ocl::Program::kernel(const std::string &name) const
+ocl::Kernel& ocl::Program::kernel(const std::string &name)
 {
+#if 0
     const_iterator it = _kernels.find(name);
+#else
+  auto it = std::find_if( _kernels.begin(), _kernels.end(), [&name]( std::unique_ptr< Kernel > const& k ){
+    return k->name() == name;
+  } );
+#endif
     TRUE_ASSERT(it != _kernels.end(), "Kernel " << name << " does not exist yet");
-	return *(it->second);
+	return *it->get();
 }
 
 /*! \brief Returns the Kernel from this Program by providing the Kernel's function name and its Type.*/
 template<class T>
-ocl::Kernel& ocl::Program::kernel(const std::string &name) const
+ocl::Kernel& ocl::Program::kernel(const std::string &name)
 {
     const utl::Type& t = utl::Type::type<T>();
     return kernel(name, t);
 }
 
-template ocl::Kernel& ocl::Program::kernel<char>(const std::string &name) const;
-template ocl::Kernel& ocl::Program::kernel<int>(const std::string &name) const;
-template ocl::Kernel& ocl::Program::kernel<size_t>(const std::string &name) const;
-template ocl::Kernel& ocl::Program::kernel<double>(const std::string &name) const;
-template ocl::Kernel& ocl::Program::kernel<float>(const std::string &name) const;
+template ocl::Kernel & ocl::Program::kernel<char>(const std::string &name) ;
+template ocl::Kernel & ocl::Program::kernel<int>(const std::string &name) ;
+template ocl::Kernel & ocl::Program::kernel<size_t>(const std::string &name) ;
+template ocl::Kernel & ocl::Program::kernel<double>(const std::string &name) ;
+template ocl::Kernel & ocl::Program::kernel<float>(const std::string &name) ;
 
 
 /*! \brief Returns the Kernel from this Program by providing the Kernel's function name and its Type.*/
-ocl::Kernel& ocl::Program::kernel(const std::string &name, const utl::Type &t) const
+ocl::Kernel & ocl::Program::kernel(const std::string &name, const utl::Type &t) 
 {
     TRUE_ASSERT(_types.contains(t), "Type "<< t.name() <<" not found.");
     std::string n = name; n+= "_"; n+= t.name();
@@ -437,17 +502,24 @@ ocl::Kernel& ocl::Program::kernel(const std::string &name, const utl::Type &t) c
 /*! \brief Returns true if the Kernel specified by its function name exist.*/
 bool ocl::Program::exists(const std::string &name) const
 {
-    return _kernels.find(name) != _kernels.end();
+    return std::find_if( _kernels.begin(), _kernels.end(), [&name]( std::unique_ptr< Kernel > const& k ){
+      return k->name() == name;
+    }) != _kernels.end();
 }
 
 /*! \brief Destroys the Kernel specified by its function name. */
 void ocl::Program::deleteKernel(const std::string &name)
 {
-    iterator it = _kernels.find(name);
+    iterator it = std::find_if( _kernels.begin(), _kernels.end(), [&name]( std::unique_ptr< Kernel > const& k ){
+      return k->name() == name;
+    });
+    
     TRUE_ASSERT(it != _kernels.end(), "Kernel " << name << " does not exist yet");
-	const Kernel *__k = it->second;
-	delete __k;
+	/*const Kernel *__k = it->second;
+	delete __k;*/
 	_kernels.erase(it);
+        
+  checkConstraints();
 }
 
 
@@ -458,7 +530,49 @@ void ocl::Program::deleteKernel(const std::string &name)
   * you do not have to call this function.
 */
 std::string ocl::Program::nextKernel(const std::string &kernels, size_t pos)
-{
+{ 
+  if ( pos >= kernels.size() )
+    return "";
+  
+  constexpr char const kernelKeyword1[]  = "__kernel";
+  constexpr char const kernelKeyword2[]  = "kernel";
+  constexpr char const templateKeyword[] = "template";
+  
+  auto const startTemplate    = kernels.find( templateKeyword, pos );
+  auto const startNonTemplate = std::min( kernels.find( kernelKeyword1, pos ), kernels.find( kernelKeyword2, pos ) );
+  
+  size_t end = 0u, start = 0u;
+  
+  if ( startTemplate < startNonTemplate )
+  {
+    start = startTemplate;
+    
+    auto const step = std::max( kernels.find( kernelKeyword1, start ), kernels.find( kernelKeyword2, start ) ) + 1u;
+    auto const end1 = kernels.find( templateKeyword, step );
+    auto const end2 = std::min( kernels.find( kernelKeyword1, step ), kernels.find( kernelKeyword2, step ) );
+    
+    end  = std::min( end1, end2 );
+  }
+  else if ( startTemplate > startNonTemplate )
+  {
+    start = startNonTemplate;
+    
+    auto const off  = start + sizeof templateKeyword - 1u;
+    auto const end1 = kernels.find( templateKeyword, off );
+    auto const end2 = std::min( kernels.find( kernelKeyword1, off ), kernels.find( kernelKeyword2, off ) );
+    
+    end  = std::min( end1, end2 );
+  }
+  else // startTemplate == startNonTemplate == std::string::npos
+  {
+    return "";
+  }
+    
+  commonCodeBlocks_.push_back( kernels.substr( pos, start - pos ) );
+    
+  return kernels.substr( start, end - start );
+  
+#if 0
     if(pos == kernels.npos) return "";
 
 
@@ -498,7 +612,7 @@ std::string ocl::Program::nextKernel(const std::string &kernels, size_t pos)
         return kernels.substr(start, end - start);
     }
     return "";
-
+#endif
 }
 
 
@@ -557,3 +671,8 @@ void ocl::Program::checkBuild(cl_int buildErr) const
 	exit(-1);
 }
 
+void ocl::Program::checkConstraints() const
+{
+  if ( _kernels.size() + 1u != commonCodeBlocks_.size() )
+    throw std::runtime_error( "constraint violated" );
+}
