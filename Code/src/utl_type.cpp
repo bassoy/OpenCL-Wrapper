@@ -98,40 +98,46 @@ namespace type{
 ////////////////////////////////////
 
 utl::Types::Types() :
-    set<const Type*>()
+//     set<const Type*>()
+  types_()
 {
 }
 
 utl::Types::Types(const Type& _Type) :
-    set<const Type*>()
+//     set<const Type*>()
+  types_()
 {
-    this->insert(&_Type);
+    types_.insert(&_Type);
 }
 
 utl::Types::Types(const Types& _Types) :
-    set<const Type*>(_Types)
+//     set<const Type*>(_Types)
+  types_( _Types.types_ )
 {
 }
 
 utl::Types::Types(Types&& _Types) :
-    set<const Type*>(std::move(_Types))
+//     set<const Type*>(std::move(_Types))
+  types_()
 {
+  std::swap( _Types.types_, types_ );
 }
 
 bool utl::Types::contains(const Type &_Type)   const
 {
-    return this->find(&_Type) != this->end();
+    return types_.find(&_Type) != types_.end();
 }
 
 bool utl::Types::contains(const Types &_Types) const
 {
-    return std::includes(this->begin(), this->end(), _Types.begin(), _Types.end());
+//     return std::includes(this->begin(), this->end(), _Types.begin(), _Types.end());
+  return std::includes( types_.begin(), types_.end(), _Types.types_.begin(), _Types.types_.end() );
 }
 
 std::set<std::string> utl::Types::names() const
 {
 	std::set<std::string> __s;
-    for(const_iterator it = this->begin(); it != this->end(); ++it){
+    for(const_iterator it = types_.begin(); it != types_.end(); ++it){
 		__s.insert((*it)->name() );
 	}
 	return __s;
@@ -140,9 +146,9 @@ std::set<std::string> utl::Types::names() const
 std::string utl::Types::toString() const
 {
     std::string __s;
-    if(this->empty()) return __s;
+    if(types_.empty()) return __s;
     const_iterator it;
-    for(it = this->begin(); it != this->end(); ++it){
+    for(it = types_.begin(); it != types_.end(); ++it){
         __s += (*it)->name();
         __s += ", ";
     }
@@ -151,48 +157,58 @@ std::string utl::Types::toString() const
 
 utl::Types& utl::Types::operator=(const Types &t)
 {
-    std::set<const Type*>::operator =(t);
+//     std::set<const Type*>::operator =(t);
+    if ( this != &t )
+    {
+      types_ = t.types_;
+    }
+    
     return *this;
 }
 
 utl::Types& utl::Types::operator=(Types &&t)
 {
-    std::set<const Type*>::operator =(std::move(t));
+//     std::set<const Type*>::operator =(std::move(t));
+  
+    if ( this != &t )
+    {
+      types_ = std::move( t.types_ );
+    }
+  
     return *this;
 }
 
 bool utl::Types::operator==(const Types &t) const
 {
-    return *this == t;
+  return types_ == t.types_;
+//     return *this == t;
 }
 
 bool utl::Types::operator!=(const Types &t) const
 {
-    return *this != t;
+    return !(*this == t);
 }
 
 utl::Types& utl::Types::operator|(const Type  &__rhs)
 {
-    this->insert(&__rhs);
+    types_.insert(&__rhs);
 	return *this;
 }
 
 utl::Types& utl::Types::operator|(const Types &__rhs)
 {
-    this->insert(__rhs.begin(), __rhs.end());
+    types_.insert(__rhs.types_.begin(), __rhs.types_.end());
 	return *this;
 }
 
 
 utl::Types& utl::Types::operator<<(const Type &__t)
 {
-    this->insert(&__t);
-	return *this;
+    return *this | __t;
 }
 utl::Types& utl::Types::operator<<(const Types &__t)
 {
-    this->insert(__t.begin(), __t.end());
-	return *this;
+    return *this | __t;
 }
 
 

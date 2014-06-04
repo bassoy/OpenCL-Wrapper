@@ -403,7 +403,7 @@ ocl::Program& ocl::Program::operator << (const std::string &k)
 
         for(utl::Types::const_iterator it = _types.begin(); it != _types.end(); ++it)
         {
-            const utl::Type &type = **it;
+            const utl::Type& type = **it;
             std::unique_ptr< ocl::Kernel > kernel( new ocl::Kernel(*this, next, type) );
             if(this->isBuilt()) kernel->create();
             //DEBUG_COMMENT("Creating kernel " << kernel->name() << std::endl << kernel->toString() );
@@ -423,6 +423,8 @@ ocl::Program& ocl::Program::operator << (const std::string &k)
     }
     
     checkConstraints();
+    
+//     TRUE_ASSERT( !_types.empty(), "Lost types in this function?" );
     
     return *this;
 }
@@ -494,6 +496,7 @@ template ocl::Kernel & ocl::Program::kernel<float>(const std::string &name) ;
 /*! \brief Returns the Kernel from this Program by providing the Kernel's function name and its Type.*/
 ocl::Kernel & ocl::Program::kernel(const std::string &name, const utl::Type &t) 
 {
+  TRUE_ASSERT( !_types.empty(), "Need types to specialize the kernels." );
     TRUE_ASSERT(_types.contains(t), "Type "<< t.name() <<" not found.");
     std::string n = name; n+= "_"; n+= t.name();
 	return this->kernel(n);
@@ -656,17 +659,19 @@ void ocl::Program::checkBuild(cl_int buildErr) const
 	if(buildErr == CL_SUCCESS) return;
     std::cerr << "Program failed to build." << std::endl;
 	cl_build_status buildStatus;
-    std::string buildLog;
+//     std::string buildLog;
 	size_t size = 0;
     for(auto device : _context->devices()){
         clGetProgramBuildInfo(_id, device.id(), CL_PROGRAM_BUILD_STATUS, sizeof(cl_build_status), &buildStatus, NULL);
 		if(buildStatus == CL_SUCCESS) continue;
 
 		clGetProgramBuildInfo(_id, device.id(), CL_PROGRAM_BUILD_LOG,  0, NULL, &size);
-		buildLog.assign((unsigned int)size, 0);
+// 		buildLog.assign((unsigned int)size, 0);
+                
+                std::unique_ptr< cl_char[] > buildLog( new cl_char[size] );
 
-		clGetProgramBuildInfo(_id, device.id(), CL_PROGRAM_BUILD_LOG,  size, &buildLog[0], NULL);
-        std::cerr << "Device " << device.name() << " Build Log:" << std::endl << buildLog << std::endl;
+		clGetProgramBuildInfo(_id, device.id(), CL_PROGRAM_BUILD_LOG,  size, buildLog.get(), NULL);
+        std::cerr << "Device " << device.name() << " Build Log:\n" << buildLog.get() << std::endl;
 	}
 	exit(-1);
 }

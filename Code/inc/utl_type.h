@@ -40,8 +40,9 @@ class Type;
   * Define your type in order to query types at runtime.
   */
 
-class Types : public std::set<const Type*>
+class Types //: public std::set<const Type*>
 {
+  std::set< Type const* > types_;
 public:
 	typedef typename std::set<const Type*>::iterator iterator;
 	typedef typename std::set<const Type*>::const_iterator const_iterator;
@@ -54,13 +55,18 @@ public:
     Types(Types&&);
 
     template<typename ... Ts>
-    Types(Ts ... args) : std::set<const Type*>()
+    Types(Ts ... args) //: std::set<const Type*>()
     {
         std::vector<const Type*> __v = {args...};
         for(auto e : __v)
-            this->insert(e);
+            types_.insert(e);
     }
 
+    bool empty() const { return types_.empty(); }
+    
+    const_iterator begin() const { return types_.begin(); }
+    
+    const_iterator end() const { return types_.end(); }
 
     bool contains(const Type &) const;
     bool contains(const Types &) const;
@@ -112,6 +118,13 @@ public:
         for(auto __t : _allTypes) { if(*__t == typeid(T)) return *__t; }
         TRUE_ASSERT(0, "Type with id " << typeid(T).name() << " not found");
     }
+    
+    Type( Type const& ) = delete;
+    Type( Type&& ) = delete;
+    
+    Type& operator =( Type const& ) = delete;
+    Type& operator =( Type&& ) = delete;
+    
 private:
 	std::string _name;
 	const std::type_info* _info;
@@ -129,13 +142,13 @@ namespace type{
 	//extern Type Bool;
 }
 
-template< typename T > Type getType(); // No matching type defined.
-template<> inline Type getType< float >() { return type::Single; }
-template<> inline Type getType< double >() { return type::Double; }
-template<> inline Type getType< int >() { return type::Int; }
-template<> inline Type getType< unsigned int >() { return type::UInt; }
-template<> inline Type getType< signed char >() { return type::SChar; }
-template<> inline Type getType< unsigned char >() { return type::UChar; }
+template< typename T > Type& getType(); // No matching type defined.
+template<> inline Type& getType< float >() { return type::Single; }
+template<> inline Type& getType< double >() { return type::Double; }
+template<> inline Type& getType< int >() { return type::Int; }
+template<> inline Type& getType< unsigned int >() { return type::UInt; }
+template<> inline Type& getType< signed char >() { return type::SChar; }
+template<> inline Type& getType< unsigned char >() { return type::UChar; }
 // template<> inline Type getType< bool >() { return type::Bool; }
 }
 
