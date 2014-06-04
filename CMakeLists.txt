@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 project(OpenCL-Wrapper)
 
-# find_library(OPENCL_LIBRARIES OpenCL)
+find_library(OPENCL_LIBRARIES OpenCL)
 # find_library(OPENCL_LIBRARIES cuda)
-set(OPENCL_LIBRARIES /usr/local/cuda-6.0/targets/x86_64-linux/lib/libOpenCL.so)
+# set(OPENCL_LIBRARIES /usr/local/cuda-6.0/targets/x86_64-linux/lib/libOpenCL.so)
 
 find_path(OPENCL_INCLUDE_DIR CL/cl.h HINTS 
 	/usr/include 
