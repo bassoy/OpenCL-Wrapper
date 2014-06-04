@@ -12,7 +12,7 @@
 typedef float Type;
 
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char** /*argv*/)
 {
 
 	// provides a convient access to the command line arguments

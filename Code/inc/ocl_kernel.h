@@ -168,6 +168,8 @@ public:
     void setArg(int pos, const T& data);
     void setArg(int pos, cl_mem);    
     void setArg(int pos, cl_sampler);
+    
+    Kernel& operator =( Kernel const& ) = delete;
 
 private:
     template< typename... Types > void pushArg( Types const& ... args )

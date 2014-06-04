@@ -74,6 +74,8 @@ public:
   AdressingMode addressingMode() const;
   FilterMode filterMode() const;
   
+  Sampler& operator =( Sampler const& ) = delete;
+  Sampler( Sampler const& ) = delete;
   
 private:
   Context *_context;

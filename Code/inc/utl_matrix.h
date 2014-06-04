@@ -167,7 +167,7 @@ public:
     bool is_vector() const { return !is_scalar() && (_rows == 1 || _cols == 1); }
     bool is_matrix() const { return _rows > 1 && _cols > 1; }
 
-    ~__MatrixBase() = default;
+    virtual ~__MatrixBase(){};
 
 protected:
 

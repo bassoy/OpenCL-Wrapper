@@ -54,7 +54,7 @@ ocl::Kernel::Kernel() :
   * should not be built yet.
   */
 ocl::Kernel::Kernel(const ocl::Program &p, const std::string &kernel) :
-    _program(&p), _id(0), _workDim(1)
+    _program(&p), _id(0), _workDim(1), _kernelfunc(), _name(), _memlocs()
 {
     TRUE_ASSERT(!_program->isBuilt(), "Program is already built.");
     this->_kernelfunc = kernel;
@@ -70,7 +70,7 @@ ocl::Kernel::Kernel(const ocl::Program &p, const std::string &kernel) :
   * Kernel and built it.
   */
 ocl::Kernel::Kernel(const std::string &kernel) :
-    _program(0), _id(0), _workDim(1)
+    _program(0), _id(0), _workDim(1), _kernelfunc(), _name(), _memlocs()
 {
     this->_kernelfunc = kernel;
     this->_name = this->extractName(kernel);
@@ -84,7 +84,7 @@ ocl::Kernel::Kernel(const std::string &kernel) :
   * The Program should not be built yet.
 */
 ocl::Kernel::Kernel(const ocl::Program &p, const std::string &kernel, const utl::Type & type) :
-    _program(&p), _id(0), _workDim(1)
+    _program(&p), _id(0), _workDim(1), _kernelfunc(), _name(), _memlocs()
 {
 
     if(this->templated(kernel))  this->_kernelfunc = this->specialize(kernel, type.name());
@@ -103,7 +103,7 @@ ocl::Kernel::Kernel(const ocl::Program &p, const std::string &kernel, const utl:
   * Kernel and built it.
 */
 ocl::Kernel::Kernel(const std::string &kernel, const utl::Type & type) :
-    _program(0), _id(0), _workDim(1)
+    _program(0), _id(0), _workDim(1), _kernelfunc(), _name(), _memlocs()
 {
 
     if(this->templated(kernel))  this->_kernelfunc = this->specialize(kernel, type.name());

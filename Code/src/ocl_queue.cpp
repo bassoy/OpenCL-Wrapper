@@ -56,7 +56,7 @@ ocl::Queue::Queue(const ocl::Device& dev, const Queue::props props) :
   * \param props Properties with which the Queue is created.
   */
 ocl::Queue::Queue(ocl::Context& ctxt, const ocl::Device& dev, Queue::props props) :
-	_device(&dev), _context(&ctxt), _props(props)
+	_device(&dev), _context(&ctxt), _props(props), _id(0)
 {
 
 	this->create();

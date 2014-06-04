@@ -124,7 +124,11 @@ public:
     static Platform* activePlatform();
 
 
-private:
+    // Delete copying due to pointer data members.
+    Platform& operator =( Platform const& ) = delete;
+    Platform( Platform const& ) = delete;
+    
+private: 
 
     static Platform *_activePlatform;
 

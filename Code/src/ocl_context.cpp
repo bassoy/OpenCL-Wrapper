@@ -118,7 +118,7 @@ ocl::Context::Context() :
 	* \param shared if true, creates a shared Context for OpenGL interoperability.
   */
 ocl::Context::Context(const std::vector<Device> & devices, bool shared) :
-		_id(NULL), _programs(), _queues(), _events(), _memories(), _devices(devices), _activeQueue(NULL), _activeProgram(NULL)
+		_id(NULL), _programs(), _queues(), _events(), _memories(), _samplers(), _devices(devices), _activeQueue(NULL), _activeProgram(NULL)
 {
 	TRUE_ASSERT(!devices.empty(), "No Devices specified. Cannot create context without devices.");
 	this->create(shared);

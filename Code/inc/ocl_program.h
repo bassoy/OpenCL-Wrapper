@@ -139,6 +139,10 @@ public:
     bool operator==(const Program &other) const;
     bool operator!=(const Program &other) const;
 
+    Program& operator =( Program const& ) = delete;
+    
+    Program( Program const& ) = delete;
+     
 private:
 
 

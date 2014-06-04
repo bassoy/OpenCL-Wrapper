@@ -125,7 +125,7 @@ namespace compile_option{
     * \param options defines a valid CompileOption for build process.
 */
 ocl::Program::Program(ocl::Context& ctxt, const utl::Types &types, const ocl::CompileOption &options) :
-    _id(NULL), _context(&ctxt), _types(types), _options(options), commonCodeBlocks_( 1u, std::string() )
+    _id(NULL), _context(&ctxt), _kernels(), _types(types), _options(options), commonCodeBlocks_( 1u, std::string() )
 {
     TRUE_ASSERT(!_types.empty(), "no types selected.");
     _context->insert(this);
@@ -143,7 +143,7 @@ ocl::Program::Program(ocl::Context& ctxt, const utl::Types &types, const ocl::Co
     * \param options defines a valid CompileOption for build process.
 */
 ocl::Program::Program(ocl::Context& ctxt, const ocl::CompileOption &options) :
-    _id(NULL), _context(&ctxt), _types(), _options(options), commonCodeBlocks_( 1u, std::string() )
+    _id(NULL), _context(&ctxt), _kernels(), _types(), _options(options), commonCodeBlocks_( 1u, std::string() )
 {
     _context->insert(this);
     
@@ -157,7 +157,7 @@ ocl::Program::Program(ocl::Context& ctxt, const ocl::CompileOption &options) :
     * functions and to build it.
 */
 ocl::Program::Program() :
-    _id(NULL), _context(), _types(), _options(), commonCodeBlocks_( 1u, std::string() )
+    _id(NULL), _context(), _kernels(), _types(), _options(), commonCodeBlocks_( 1u, std::string() )
 {
   checkConstraints();
 }
