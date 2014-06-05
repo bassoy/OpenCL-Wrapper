@@ -171,9 +171,9 @@ private :
   static std::ostream& indirection( std::ostream& os, S const& t )
   { return os << t; }
   
-  template< typename S >
-  static std::ostream& indirection( std::ostream& os, std::chrono::duration<S> const& t )
-  { return os << std::chrono::duration_cast< std::chrono::seconds >( t ).count(); }
+  template< typename S, typename U >
+  static std::ostream& indirection( std::ostream& os, std::chrono::duration<S,U> const& t )
+  { return os << std::chrono::duration_cast< std::chrono::duration< S > >( t ).count(); }
 };
 
 }
