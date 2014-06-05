@@ -132,7 +132,8 @@ public:
 		if(v.empty()) return "[];";
 
 		std::ostringstream oss;
-		oss << '[';
+                oss.precision( std::numeric_limits< E >::digits10 );
+		oss << std::scientific << '[';
 		for ( size_t i = 0, size = v.size()-1u; i < size; ++i )
 		{
 			indirection( oss, v.at(i) ) << ',';
