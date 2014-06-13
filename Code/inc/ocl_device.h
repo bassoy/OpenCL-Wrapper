@@ -85,6 +85,7 @@ public:
 	std::string extensions() const;
 	
 	bool imageSupport() const;
+  bool doubleSupport() const;
 
 private:
 	cl_device_id _id;

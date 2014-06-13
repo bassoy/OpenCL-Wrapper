@@ -15,6 +15,9 @@
 //You should have received a copy of the GNU General Public License
 //along with OpenCL Utility Toolkit.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <algorithm>
+#include <cstring>
+
 #include <ocl_device.h>
 #include <ocl_query.h>
 #include <ocl_queue.h>
@@ -22,7 +25,6 @@
 
 #include <utl_assert.h>
 
-#include <algorithm>
 
 
 /*! \brief Instantiates this Device.
@@ -304,11 +306,14 @@ std::string ocl::Device::vendor() const
 /*! \brief Returns all extensions of this Device (support of double precision?) .*/
 std::string ocl::Device::extensions() const
 {
-//     std::string buffer(1000,0);
-  char buffer[1000];
+  std::size_t size = 0u;
+  OPENCL_SAFE_CALL( clGetDeviceInfo( this->id(), CL_DEVICE_EXTENSIONS, 0u, nullptr, &size ) );
   
-	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_EXTENSIONS,  sizeof buffer, buffer, NULL));
-	return buffer;
+  std::unique_ptr< char[] > buffer( new char[size] );
+  
+  OPENCL_SAFE_CALL( clGetDeviceInfo( this->id(), CL_DEVICE_EXTENSIONS, size, buffer.get(), nullptr ) );
+  
+  return buffer.get();
 }
 
 /*! \brief Prints this Device.*/
@@ -326,10 +331,41 @@ void ocl::Device::print() const
 }
 
 
-/*! \brief Return true if this Device support images.*/
+/*! \brief Return true if this Device supports images.*/
 bool ocl::Device::imageSupport() const
 {
 	cl_bool support = CL_FALSE;
 	OPENCL_SAFE_CALL( clGetDeviceInfo( this->id(), CL_DEVICE_IMAGE_SUPPORT, sizeof support, &support, NULL ) );
 	return support == CL_TRUE;
+}
+
+
+
+static bool supportsExtension( std::string const& extensionsString, char const* extension )
+{
+  auto const len = std::strlen( extension );
+  auto       p   = extensionsString.c_str();
+  
+  while ( *p != '\0' )
+  {
+    auto const n = std::strcspn( p, " " );
+    
+    if ( n == len && 0 == strncmp( p, extension, n ) )
+      return true;
+    
+    p += ++n;
+  }
+  
+  return false;
+}
+
+
+
+/** 
+ * @retval true If this device supports double data type (cl_khr_fp64).
+ * @retval false Otherwise.
+ */
+bool ocl::Device::doubleSupport() const
+{
+  return supportsExtension( extensions(), "cl_khr_fp64" );
 }
