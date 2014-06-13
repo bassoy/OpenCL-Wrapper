@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <memory>
 
 #include <ocl_device.h>
 #include <ocl_query.h>
@@ -348,9 +349,9 @@ static bool supportsExtension( std::string const& extensionsString, char const* 
   
   while ( *p != '\0' )
   {
-    auto const n = std::strcspn( p, " " );
+    auto n = std::strcspn( p, " " );
     
-    if ( n == len && 0 == strncmp( p, extension, n ) )
+    if ( len == n && 0 == strncmp( p, extension, n ) )
       return true;
     
     p += ++n;
