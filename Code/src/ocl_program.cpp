@@ -364,6 +364,12 @@ void ocl::Program::print(std::ostream& out) const
 */
 ocl::Program& ocl::Program::operator << (const std::string &k)
 {
+//   std::cout << "kernels: " << _kernels.size() << " blocks: " << commonCodeBlocks_.size() << std::endl;
+//   if ( _kernels.empty() )
+//   {
+//     commonCodeBlocks_.resize( 0 );
+//   }
+  
     std::string kernels = k;
     eraseComments(kernels);
 
@@ -421,6 +427,25 @@ ocl::Program& ocl::Program::operator << (const std::string &k)
 #endif
         }
     }
+    
+    /*if ( _kernels.empty() )
+    {
+      commonCodeBlocks_.resize( 1 );
+    }*/
+    
+    /*for ( auto c : commonCodeBlocks_ )
+    {
+      std::cout << "BEGIN BLOCK" << c << "END BLOCK\n";
+    }*/
+    
+    /*for ( auto& c : _kernels )
+    {
+      std::cout << "BEGIN KERNEL" << c->toString() << "END KERNEL\n";
+    }*/
+    
+    commonCodeBlocks_.push_back( "" );
+    
+//     std::cout << "kernels: " << _kernels.size() << " blocks: " << commonCodeBlocks_.size() << std::endl;
     
     checkConstraints();
     
@@ -550,30 +575,56 @@ std::string ocl::Program::nextKernel(const std::string &kernels, size_t pos)
   {
     start = startTemplate;
     
-    auto const step = std::max( kernels.find( kernelKeyword1, start ), kernels.find( kernelKeyword2, start ) ) + 1u;
+    /*auto const step = std::max( kernels.find( kernelKeyword1, start ), kernels.find( kernelKeyword2, start ) ) + 1u;
     auto const end1 = kernels.find( templateKeyword, step );
     auto const end2 = std::min( kernels.find( kernelKeyword1, step ), kernels.find( kernelKeyword2, step ) );
     
-    end  = std::min( end1, end2 );
+    end  = std::min( end1, end2 );*/
   }
   else if ( startTemplate > startNonTemplate )
   {
     start = startNonTemplate;
     
-    auto const off  = start + sizeof templateKeyword - 1u;
+    /*auto const off  = start + sizeof templateKeyword - 1u;
     auto const end1 = kernels.find( templateKeyword, off );
     auto const end2 = std::min( kernels.find( kernelKeyword1, off ), kernels.find( kernelKeyword2, off ) );
     
-    end  = std::min( end1, end2 );
+    end  = std::min( end1, end2 );*/
   }
   else // startTemplate == startNonTemplate == std::string::npos
   {
     return "";
   }
+  
+  auto braceFinder = kernels.find( '{', start );
     
-  commonCodeBlocks_.push_back( kernels.substr( pos, start - pos ) );
+  if ( braceFinder == std::string::npos )
+    return "";
+  
+  size_t numOpenBraces = 1;
+  
+  while ( numOpenBraces != 0 )
+  {
+    ++braceFinder;
     
-  return kernels.substr( start, end - start );
+    if ( braceFinder == kernels.size() )
+      return "";
+    
+    switch ( kernels[braceFinder] )
+    {
+    case '{' : ++numOpenBraces; break;
+    case '}' : --numOpenBraces; break;
+    }
+  }
+  
+  end = braceFinder;
+    
+  if ( _kernels.empty() )
+    commonCodeBlocks_[0] = kernels.substr( pos, start - pos );
+  else
+    commonCodeBlocks_.push_back( kernels.substr( pos, start - pos ) );
+    
+  return kernels.substr( start, end - start +1 );
   
 #if 0
     if(pos == kernels.npos) return "";
