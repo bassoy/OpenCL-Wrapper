@@ -217,6 +217,21 @@ private:
 
 };
 
+
+
+/**
+ * Round @c x to the next multiple of @c y.
+ * 
+ * This is usefull if one wants to fully populate all wavefronts/warps.
+ */
+template< typename T >
+T roundNextMultiple( T x, T y )
+{
+  auto const tmp = x % y;
+  
+  return tmp ? x + y - tmp : x;
+}
+
 }
 
 #endif
