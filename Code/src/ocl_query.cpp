@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 #include <ocl_query.h>
 
@@ -124,72 +125,47 @@ void ocl::printPlatform(cl_platform_id id,
     }
 }
 
+static std::string getPlatformInfo(cl_platform_id id, cl_platform_info info)
+{
+	TRUE_ASSERT(id != 0, "Invalid Platform");
+  size_t size = 0;
+  OPENCL_SAFE_CALL( clGetPlatformInfo(id, info,  0, 0, &size));
+  TRUE_ASSERT(size > 0, "Cannot retrieve platform profile");
+
+	std::unique_ptr< char[] > buffer( new char[size] );
+	OPENCL_SAFE_CALL( clGetPlatformInfo(id, info, size, buffer.get(), NULL));
+	return buffer.get();
+}
+
 
 /*! \brief Returns the profile of the specified OpenCL platform. */
-string ocl::profile(cl_platform_id id)
+std::string ocl::profile(cl_platform_id id)
 {
-    TRUE_ASSERT(id != 0, "Invalid Platform");
-    size_t buffer_size = 0;
-    OPENCL_SAFE_CALL( clGetPlatformInfo(id, CL_PLATFORM_PROFILE,  0, 0, &buffer_size));
-    TRUE_ASSERT(buffer_size > 0, "Cannot retrieve platform profile");
-
-
-    string buffer(buffer_size,' ');
-    OPENCL_SAFE_CALL( clGetPlatformInfo(id, CL_PLATFORM_PROFILE,  buffer.size(), &buffer[0], NULL));
-    return buffer;
+	return getPlatformInfo(id,CL_PLATFORM_PROFILE);
 }
 
 /*! \brief Returns the version of the specified OpenCL platform. */
-string ocl::version(cl_platform_id id)
+std::string ocl::version(cl_platform_id id)
 {
-    TRUE_ASSERT(id != 0, "Invalid Platform");
-    size_t buffer_size = 0;
-    OPENCL_SAFE_CALL( clGetPlatformInfo(id, CL_PLATFORM_VERSION,  0, 0, &buffer_size));
-    TRUE_ASSERT(buffer_size > 0, "Cannot retrieve platform version");
-
-
-    string buffer(buffer_size,' ');
-    OPENCL_SAFE_CALL( clGetPlatformInfo(id, CL_PLATFORM_VERSION,  buffer.size(), &buffer[0], NULL));
-    return buffer;
+	return getPlatformInfo(id,CL_PLATFORM_VERSION);
 }
 
 /*! \brief Returns the name of the specified OpenCL platform. */
-string ocl::name(cl_platform_id id)
+std::string ocl::name(cl_platform_id id)
 {
-    TRUE_ASSERT(id != 0, "Invalid Platform");
-    size_t buffer_size = 0;
-    OPENCL_SAFE_CALL( clGetPlatformInfo(id, CL_PLATFORM_NAME,  0, 0, &buffer_size));
-    TRUE_ASSERT(buffer_size > 0, "Cannot retrieve platform name");
-
-    string buffer(buffer_size,' ');
-    OPENCL_SAFE_CALL( clGetPlatformInfo(id, CL_PLATFORM_NAME,  buffer.size(), &buffer[0], NULL));
-    return buffer;
+	return getPlatformInfo(id,CL_PLATFORM_NAME);
 }
 
 /*! \brief Returns the vendor of the specified OpenCL platform. */
-string ocl::vendor(cl_platform_id id)
+std::string ocl::vendor(cl_platform_id id)
 {
-    TRUE_ASSERT(id != 0, "Invalid Platform");
-    size_t buffer_size = 0;
-    OPENCL_SAFE_CALL( clGetPlatformInfo(id, CL_PLATFORM_VENDOR,  0, 0, &buffer_size));
-    TRUE_ASSERT(buffer_size > 0, "Cannot retrieve platform vendor");
-
-    string buffer(buffer_size,' ');
-    OPENCL_SAFE_CALL( clGetPlatformInfo(id, CL_PLATFORM_VENDOR,  buffer.size(), &buffer[0], NULL));
-    return buffer;
+	return getPlatformInfo(id,CL_PLATFORM_VENDOR);
 }
 
 /*! \brief Returns the extensions of the specified OpenCL platform. */
-string ocl::extensions(cl_platform_id id)
+std::string ocl::extensions(cl_platform_id id)
 {
-    TRUE_ASSERT(id != 0, "Invalid Platform");
-    size_t buffer_size = 0;
-    OPENCL_SAFE_CALL( clGetPlatformInfo(id, CL_PLATFORM_EXTENSIONS,  0, 0, &buffer_size));
-    TRUE_ASSERT(buffer_size > 0, "Cannot retrieve platform extensions");
-
-    string buffer(buffer_size,' ');
-    OPENCL_SAFE_CALL( clGetPlatformInfo(id, CL_PLATFORM_EXTENSIONS,  buffer.size(), &buffer[0], NULL));
-    return buffer;
+	return getPlatformInfo(id,CL_PLATFORM_EXTENSIONS);
 }
 
 
@@ -231,82 +207,57 @@ void ocl::printDevice(cl_device_id id,
     if(print_extensions) out << "Device Extensions : " << ocl::extensions(id) << endl;
 }
 
+static std::string getDeviceInfo(cl_device_id id, cl_device_info info)
+{
+	TRUE_ASSERT(id != 0, "Invalid device");
+  size_t size = 0;
+  OPENCL_SAFE_CALL( clGetDeviceInfo(id, info,  0, 0, &size));
+  TRUE_ASSERT(size > 0, "Cannot retrieve device information");
+
+	std::unique_ptr< char[] > buffer( new char[size] );
+	OPENCL_SAFE_CALL( clGetDeviceInfo(id, info, size, buffer.get(), NULL));
+	return buffer.get();
+}
+
 
 /*! \brief Returns the profile of the specified OpenCL device. */
-string ocl::profile(cl_device_id id)
+std::string ocl::profile(cl_device_id id)
 {
-    TRUE_ASSERT(id != 0, "Invalid device");
-    size_t buffer_size = 0;
-    OPENCL_SAFE_CALL( clGetDeviceInfo(id, CL_DEVICE_PROFILE,  0, 0, &buffer_size));
-    TRUE_ASSERT(buffer_size > 0, "Cannot retrieve device profile");
-
-
-    string buffer(buffer_size,' ');
-    OPENCL_SAFE_CALL( clGetDeviceInfo(id, CL_DEVICE_PROFILE,  buffer.size(), &buffer[0], NULL));
-    return buffer;
+	return getDeviceInfo(id,CL_DEVICE_PROFILE);
 }
 
 /*! \brief Returns the version of the specified OpenCL device. */
-string ocl::version(cl_device_id id)
+std::string ocl::version(cl_device_id id)
 {
-    TRUE_ASSERT(id != 0, "Invalid device");
-    size_t buffer_size = 0;
-    OPENCL_SAFE_CALL( clGetDeviceInfo(id, CL_DEVICE_VERSION,  0, 0, &buffer_size));
-    TRUE_ASSERT(buffer_size > 0, "Cannot retrieve platform version");
-
-
-    string buffer(buffer_size,' ');
-    OPENCL_SAFE_CALL( clGetDeviceInfo(id, CL_DEVICE_VERSION,  buffer.size(), &buffer[0], NULL));
-    return buffer;
+	return getDeviceInfo(id,CL_DEVICE_VERSION);	
 }
 
 /*! \brief Returns the name of the specified OpenCL device. */
-string ocl::name(cl_device_id id)
+std::string ocl::name(cl_device_id id)
 {
-    TRUE_ASSERT(id != 0, "Invalid device");
-    size_t buffer_size = 0;
-    OPENCL_SAFE_CALL( clGetDeviceInfo(id, CL_DEVICE_NAME,  0, 0, &buffer_size));
-    TRUE_ASSERT(buffer_size > 0, "Cannot retrieve device name");
-
-    string buffer(buffer_size,' ');
-    OPENCL_SAFE_CALL( clGetDeviceInfo(id, CL_DEVICE_NAME,  buffer.size(), &buffer[0], NULL));
-    return buffer;
+	return getDeviceInfo(id,CL_DEVICE_NAME);
 }
 
 /*! \brief Returns the vendor of the specified OpenCL device. */
-string ocl::vendor(cl_device_id id)
+std::string ocl::vendor(cl_device_id id)
 {
-    TRUE_ASSERT(id != 0, "Invalid Device");
-    size_t buffer_size = 0;
-    OPENCL_SAFE_CALL( clGetDeviceInfo(id, CL_DEVICE_VENDOR,  0, 0, &buffer_size));
-    TRUE_ASSERT(buffer_size > 0, "Cannot retrieve device vendor");
-
-    string buffer(buffer_size,' ');
-    OPENCL_SAFE_CALL( clGetDeviceInfo(id, CL_DEVICE_VENDOR,  buffer.size(), &buffer[0], NULL));
-    return buffer;
+	return getDeviceInfo(id,CL_DEVICE_VENDOR);
 }
 
 /*! \brief Returns the extensions of the specified OpenCL device. */
-string ocl::extensions(cl_device_id id)
+std::string ocl::extensions(cl_device_id id)
 {
-    TRUE_ASSERT(id != 0, "Invalid device");
-    size_t buffer_size = 0;
-    OPENCL_SAFE_CALL( clGetDeviceInfo(id, CL_DEVICE_EXTENSIONS,  0, 0, &buffer_size));
-    TRUE_ASSERT(buffer_size > 0, "Cannot retrieve device extensions");
-
-    string buffer(buffer_size,' ');
-    OPENCL_SAFE_CALL( clGetDeviceInfo(id, CL_DEVICE_EXTENSIONS,  buffer.size(), &buffer[0], NULL));
-    return buffer;
+	return getDeviceInfo(id,CL_DEVICE_EXTENSIONS);
 }
 
 
 /*! \brief Returns the device_type for a given device. */
 cl_device_type ocl::deviceType(cl_device_id id)
 {
-    TRUE_ASSERT(id != 0, "Invalid Device");
-    cl_device_type t;
+	TRUE_ASSERT(id != 0, "Invalid Device");
+	cl_device_type t;
 	OPENCL_SAFE_CALL( clGetDeviceInfo (id,CL_DEVICE_TYPE, sizeof(t), &t, NULL) );
-    return t;
+	return t;
 }
 
 

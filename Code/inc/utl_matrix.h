@@ -61,6 +61,7 @@ public:
     __MatrixBase& operator = (__MatrixBase&& m) { _vector = std::move(m._vector); _rows = m._rows; _cols = m._cols; return *this; }
 
 
+
 	bool operator==(const_reference value) const {
         return std::all_of(this->begin(), this->end(), [value](const_reference ref){return ref == value;});
     }
@@ -167,7 +168,7 @@ public:
     bool is_vector() const { return !is_scalar() && (_rows == 1 || _cols == 1); }
     bool is_matrix() const { return _rows > 1 && _cols > 1; }
 
-    ~__MatrixBase() = default;
+    virtual ~__MatrixBase() {};
 
 protected:
 
@@ -175,7 +176,7 @@ protected:
     __MatrixBase(size_t rows, size_t cols) :  _vector(rows*cols), _rows(rows), _cols(cols) {}
     __MatrixBase(const __MatrixBase& m) : _vector(m._vector), _rows(m._rows), _cols(m._cols) {}
     __MatrixBase(__MatrixBase&& m) : _vector(std::move(m._vector)), _rows(m._rows), _cols(m._cols) {}
-	__MatrixBase() : _vector(), _rows(0u), _cols(0u) {}
+		__MatrixBase() : _vector(), _rows(0u), _cols(0u) {}
 
 
 

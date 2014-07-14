@@ -40,7 +40,7 @@ using namespace std;
   * for this Device.
   */
 ocl::Platform::Platform() :
-    _devices(), _id(0)
+    _devices(), _id(0), _activeContext(), _contexts()
 {
 }
 
@@ -51,7 +51,7 @@ ocl::Platform::Platform() :
   * \param id is the Platform ID with which this
   */
 ocl::Platform::Platform(cl_platform_id id) :
-    _devices(), _id(0)
+    _devices(), _id(0), _activeContext(), _contexts()
 {
     TRUE_ASSERT(ocl::exists(id), "Platform does not exist");
     this->create(id);
@@ -69,7 +69,7 @@ ocl::Platform::Platform(cl_platform_id id) :
   * \param type DeviceType which is searched for within all Platform objects.
   */
 ocl::Platform::Platform(const ocl::DeviceType &type) :
-    _devices(), _id(0)
+    _devices(), _id(0), _activeContext(), _contexts()
 {
     cl_platform_id id = ocl::Platform::id(type);
     TRUE_ASSERT(id != 0, "Could not find any platform for type " << type.name());
@@ -87,7 +87,7 @@ ocl::Platform::Platform(const ocl::DeviceType &type) :
   */
 
 ocl::Platform::Platform(const ocl::DeviceTypes &types) :
-    _devices(), _id(0)
+    _devices(), _id(0), _activeContext(), _contexts()
 {
     cl_platform_id id = ocl::Platform::id(types);
     TRUE_ASSERT(id != 0, "Could not find any platform for type");

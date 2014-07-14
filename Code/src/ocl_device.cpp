@@ -15,6 +15,9 @@
 //You should have received a copy of the GNU General Public License
 //along with OpenCL Utility Toolkit.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <memory>
+#include <cstring>
+
 #include <ocl_device.h>
 #include <ocl_query.h>
 #include <ocl_queue.h>
@@ -22,7 +25,7 @@
 
 #include <utl_assert.h>
 
-#include <algorithm>
+//#include <algorithm>
 
 
 /*! \brief Instantiates this Device.
@@ -54,7 +57,13 @@ ocl::Device::Device() :
   */
 ocl::Device::~Device()
 {
-
+	if ( _id )
+	{
+		#ifdef OPENCL_V1_2
+		OPENCL_SAFE_CALL( clReleaseDevice( _id ) );
+		#endif
+		_id = 0;
+	}
 }
 
 
@@ -67,6 +76,9 @@ ocl::Device::~Device()
 ocl::Device::Device(const Device& dev) :
     _id(dev._id), _type(dev._type)
 {
+	#ifdef OPENCL_V1_2
+	OPENCL_SAFE_CALL( clRetainDevice( _id ) );
+	#endif
 }
 
 /*! \brief Copies from other device to this device
@@ -77,8 +89,15 @@ ocl::Device::Device(const Device& dev) :
   */
 ocl::Device& ocl::Device::operator =(const ocl::Device &dev)
 {
+ if ( this == &dev ) return *this;
+
     _id = dev._id;
     _type = dev._type;
+
+#ifdef OPENCL_V1_2
+	OPENCL_SAFE_CALL( clRetainDevice( _id ) );
+#endif
+
     return *this;
 }
 
@@ -254,58 +273,76 @@ cl_platform_id ocl::Device::platform() const
 	return _pl;
 }
 
+static std::string 
+getDeviceInfo(cl_device_id id, cl_device_info info)
+{
+	size_t size = 0u;
+	OPENCL_SAFE_CALL( clGetDeviceInfo(id, info, 0u, nullptr, &size ) );
+	std::unique_ptr< char[] > buffer( new char[size] );
+ 
+	OPENCL_SAFE_CALL( clGetDeviceInfo(id, info,  size, buffer.get(), NULL));
+	return buffer.get();
+}
+
 /*! \brief Returns the version of this Device .*/
 std::string ocl::Device::version() const
 {
-// 	std::string buffer(100,0);
-  char buffer[100];
-  
-	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VERSION,  sizeof buffer, buffer, NULL));
-	return buffer;
+	return getDeviceInfo(this->id(),CL_DEVICE_VERSION);
 }
 
 /*! \brief Returns the name of this Device .*/
 std::string ocl::Device::name() const
 {
-//     std::string buffer(100,0);
-  char buffer[100];
-  
-	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_NAME,  sizeof buffer, buffer, NULL));
-	return buffer;
+	return getDeviceInfo(this->id(),CL_DEVICE_NAME);
 }
 
 /*! \brief Returns the name of the vendor of this Device .*/
 std::string ocl::Device::vendor() const
 {
-//     std::string buffer(100,0);
-  char buffer[100];
-  
-	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VENDOR,  sizeof buffer, buffer, NULL));
-	return buffer;
+	return getDeviceInfo(this->id(),CL_DEVICE_VENDOR);
 }
 
 /*! \brief Returns all extensions of this Device (support of double precision?) .*/
 std::string ocl::Device::extensions() const
 {
-//     std::string buffer(1000,0);
-  char buffer[1000];
-  
-	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_EXTENSIONS,  sizeof buffer, buffer, NULL));
-	return buffer;
+	return getDeviceInfo(this->id(),CL_DEVICE_EXTENSIONS);
 }
 
 /*! \brief Prints this Device.*/
 void ocl::Device::print() const
 {
-//     std::string buffer(100,0);
-    char buffer[100];
     std::cout << "\tDevice " << std::endl;
-    OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VENDOR, sizeof buffer, buffer, NULL) );
-    std::cout << "\t\tDevice: " << buffer << std::endl;
-//     buffer.assign(100,0);
-    OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_NAME, sizeof buffer, buffer, NULL) );
-    std::cout << "\t\tName: " <<  buffer << std::endl;
+    std::cout << "\t\tVendor: " << this->vendor() << std::endl;
+    std::cout << "\t\tName: " <<  this->name() << std::endl;
+}
 
+static bool supportsExtension( std::string const& extensionsString, char const* extension )
+{
+ auto const len = std::strlen( extension );
+ auto p = extensionsString.c_str();
+
+ while ( *p != '\0' )
+ {
+		auto n = std::strcspn( p, " " );
+
+		if ( len == n && 0 == strncmp( p, extension, n ) ) return true;
+		p += ++n;
+	}
+
+ return false;
+}
+
+bool ocl::Device::doubleSupport() const
+{
+ return supportsExtension( extensions(), "cl_khr_fp64" );
+}
+
+bool ocl::Device::supportsVersion(float other_version) const
+{
+	std::string this_version = this->version();
+	auto pos = this_version.find(' ');
+	TRUE_ASSERT(pos != std::string::npos, "could not find the version");
+	return other_version == std::stof(this_version.substr(pos+1,3u));
 }
 
 

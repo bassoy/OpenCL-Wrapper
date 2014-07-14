@@ -32,6 +32,6 @@ bool utl::Storage::operator !=(const utl::Storage &f) const { return ! this->ope
 const std::string& utl::Storage::name() const { return this->_name; }
 utl::Storage::Storage(const std::string& n) : _name(n), _myid(_globalid++) {}
 
-utl::Storage::Storage() {}
-utl::Storage::Storage(const utl::Storage &) {}
+utl::Storage::Storage(): _name(), _myid() {}
+utl::Storage::Storage(const utl::Storage &): _name(), _myid() {}
 

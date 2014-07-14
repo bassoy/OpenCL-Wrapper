@@ -84,6 +84,9 @@ public:
 
 	~Context();
 
+	Context( Context const& ) = delete;
+	Context& operator =( Context const& ) = delete;
+
 	void setDevices(const Platform&);
 	void setDevices(const std::vector<Device>&);
 	void setDevices(const Device&);

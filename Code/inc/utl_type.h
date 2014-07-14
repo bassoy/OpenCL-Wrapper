@@ -40,7 +40,7 @@ class Type;
   * Define your type in order to query types at runtime.
   */
 
-class Types : public std::set<const Type*>
+class Types
 {
 public:
 	typedef typename std::set<const Type*>::iterator iterator;
@@ -48,18 +48,24 @@ public:
 	typedef typename std::set<const Type*>::const_pointer const_pointer;
 	typedef typename std::set<const Type*>::const_reference const_reference;
 
+	 std::set< Type const* > types_;
+
 	Types();
 	Types(const Type &);
 	Types(const Types&);
 	Types(Types&&);
 
 	template<typename ... Ts>
-	Types(Ts ... args) : std::set<const Type*>()
+	Types(Ts ... args)
 	{
 		std::vector<const Type*> __v = {args...};
 		for(auto e : __v)
-			this->insert(e);
+			types_.insert(e);
 	}
+
+	bool empty() const { return types_.empty(); }
+	const_iterator begin() const { return types_.begin(); }
+	const_iterator end() const { return types_.end(); }
 
 
 	bool contains(const Type &) const;
@@ -93,6 +99,12 @@ class Type
 {
 public:
 	Type(const std::string &name, const std::type_info &info);
+
+	Type( Type const& ) = delete;
+	Type( Type&& ) = delete;
+
+	Type& operator =( Type const& ) = delete;
+	Type& operator =( Type&& ) = delete;
 
 	bool operator==(const Type &) const;
 	bool operator!=(const Type &) const;

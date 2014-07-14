@@ -75,9 +75,13 @@ class Platform
 {
 public:
     Platform();
-	explicit Platform(cl_platform_id);
+		explicit Platform(cl_platform_id);
     explicit Platform(const DeviceType&);
     explicit Platform(const DeviceTypes&);
+ 	// Delete copying due to pointer data members.
+	Platform& operator =( Platform const& ) = delete;
+	Platform( Platform const& ) = delete;
+
 
 	~Platform();
 

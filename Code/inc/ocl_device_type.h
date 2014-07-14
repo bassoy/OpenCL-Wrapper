@@ -84,7 +84,7 @@ public:
 	~DeviceType(){}
 	std::string name() const;
 private:
-	DeviceType(){}
+	DeviceType(): _type(), _name() {}
 	static std::vector<DeviceType> _allTypes;
 	cl_device_type _type;
 	std::string _name;

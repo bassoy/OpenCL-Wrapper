@@ -118,7 +118,7 @@ ocl::Context::Context() :
 	* \param shared if true, creates a shared Context for OpenGL interoperability.
   */
 ocl::Context::Context(const std::vector<Device> & devices, bool shared) :
-		_id(NULL), _programs(), _queues(), _events(), _memories(), _devices(devices), _activeQueue(NULL), _activeProgram(NULL)
+		_id(NULL), _programs(), _queues(), _events(), _memories(), _samplers(), _devices(devices), _activeQueue(NULL), _activeProgram(NULL)
 {
 	TRUE_ASSERT(!devices.empty(), "No Devices specified. Cannot create context without devices.");
 	this->create(shared);
@@ -278,6 +278,8 @@ void ocl::Context::release()
         ocl::Sampler *m = *it; ++it;
         this->release(m);
     }
+
+		OPENCL_SAFE_CALL( clReleaseContext( _id ) );
 
     this->_activeProgram = 0;
     this->_activeQueue = 0;

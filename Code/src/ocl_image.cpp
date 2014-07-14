@@ -125,7 +125,7 @@ void ocl::Image::create(size_t width, size_t height, ChannelType type, ChannelOr
     desc.image_type = CL_MEM_OBJECT_IMAGE2D;
     desc.image_height = height;
     desc.image_width = width;
-    desc.image_depth = 0;
+    desc.image_depth = 1;
     desc.image_array_size = 1;
     desc.image_row_pitch = 0;
     desc.image_slice_pitch = 0;

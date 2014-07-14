@@ -32,7 +32,7 @@
   * Note: no Device and Context chosen. No OpenCL Queue is created. Must do this later.
   */
 ocl::Queue::Queue() :
-    _device(NULL), _context(NULL), _props(0), _id(NULL)
+    _device(nullptr), _context(nullptr), _props(0), _id(nullptr)
 {
 }
 
@@ -43,7 +43,7 @@ ocl::Queue::Queue() :
   * \param props Properties with which the Queue is created.
   */
 ocl::Queue::Queue(const ocl::Device& dev, const Queue::props props) :
-	_device(&dev), _context(NULL), _props(props), _id(NULL)
+	_device(&dev), _context(nullptr), _props(props), _id(nullptr)
 {
 }
 
@@ -56,7 +56,7 @@ ocl::Queue::Queue(const ocl::Device& dev, const Queue::props props) :
   * \param props Properties with which the Queue is created.
   */
 ocl::Queue::Queue(ocl::Context& ctxt, const ocl::Device& dev, Queue::props props) :
-	_device(&dev), _context(&ctxt), _props(props)
+	_device(&dev), _context(&ctxt), _props(props), _id(nullptr)
 {
 
 	this->create();
