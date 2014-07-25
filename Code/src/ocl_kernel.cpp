@@ -549,7 +549,7 @@ std::string ocl::Kernel::extractParameter(const std::string& kernel)
     const string &substr = kernel.substr(start, end - start + 1);
 
     start = substr.find_first_not_of(" ");
-    end = substr.find_last_not_of(" ");
+    end = substr.find_last_not_of(" ");	
 
     //if(start == end) return "";
     return substr.substr(start, end - start + 1);

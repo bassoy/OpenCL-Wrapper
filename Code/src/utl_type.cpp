@@ -41,9 +41,9 @@ const std::type_info& utl::Type::info() const
 }
 
 utl::Types utl::Type::operator|(const utl::Type  &__rhs)
-{
+{	
 	Types __lhs(*this);
-	__lhs << __rhs;
+	__lhs << __rhs;	
 	return __lhs;
 }
 
@@ -112,12 +112,16 @@ utl::Types::Types(const Type& other) :
 utl::Types::Types(const Types& other) :
 	types_(other.types_)
 {
+
+	DEBUG_COMMENT(this->toString());
 }
 
 utl::Types::Types(Types&& other) :
 	types_()
 {
 	std::swap( other.types_, types_ );
+
+	DEBUG_COMMENT(this->toString());
 }
 
 bool utl::Types::contains(const Type &type)   const
@@ -141,7 +145,7 @@ std::set<std::string> utl::Types::names() const
 
 std::string utl::Types::toString() const
 {
-	std::string str;
+	std::string str("");
 	if(types_.empty()) return str;
 	const_iterator it;
 	for(it = types_.begin(); it != types_.end(); ++it){
@@ -159,7 +163,7 @@ utl::Types& utl::Types::operator=(const Types &other)
 
 utl::Types& utl::Types::operator=(Types &&other)
 {
-	if( this == &other) types_ = std::move(other.types_);
+	if( this != &other) types_ = std::move(other.types_);
 	return *this;
 }
 
@@ -188,11 +192,11 @@ utl::Types& utl::Types::operator|(const Types &other)
 
 utl::Types& utl::Types::operator<<(const Type &type)
 {
-	return *this | type;
+	return  ( (*this) | type );
 }
 utl::Types& utl::Types::operator<<(const Types &other)
 {
-	return *this | other;
+	return ( (*this) | other );
 }
 
 

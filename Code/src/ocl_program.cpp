@@ -221,7 +221,6 @@ void ocl::Program::setTypes(const utl::Types& types)
     TRUE_ASSERT(!types.empty(), "Types should not be empty");
     TRUE_ASSERT(!this->isBuilt(), "Program already built.");
     _types = types;
-
 }
 
 /*! \brief Sets the Types for the Kernel objects.
@@ -359,17 +358,18 @@ ocl::Program& ocl::Program::operator << (const std::string &k)
         if(_types.empty() || !ocl::Kernel::templated(next)){
             ocl::Kernel *kernel = new ocl::Kernel(*this, next);
             if(this->isBuilt()) kernel->create();
-            //DEBUG_COMMENT("Creating kernel " << kernel->name() << std::endl << kernel->toString() );
+//			DEBUG_COMMENT("Creating kernel " << kernel->name() << std::endl << kernel->toString() );
             _kernels[kernel->name()] = kernel;
             continue;
         }
+
 
         for(utl::Types::const_iterator it = _types.begin(); it != _types.end(); ++it)
         {
             const utl::Type &type = **it;
             ocl::Kernel *kernel = new ocl::Kernel(*this, next, type);
             if(this->isBuilt()) kernel->create();
-            //DEBUG_COMMENT("Creating kernel " << kernel->name() << std::endl << kernel->toString() );
+//			DEBUG_COMMENT("Creating kernel template" << kernel->name() << std::endl << kernel->toString() );
             _kernels[kernel->name()] = kernel;
         }
     }
@@ -468,8 +468,6 @@ void ocl::Program::deleteKernel(const std::string &name)
 std::string ocl::Program::nextKernel(const std::string &kernels, size_t pos)
 {
     if(pos == kernels.npos) return "";
-
-
 
     size_t start_template = kernels.find("template", pos);
     size_t start_non_template = kernels.find("__kernel",pos);
