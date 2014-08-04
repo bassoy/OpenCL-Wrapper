@@ -281,7 +281,7 @@ void ocl::Program::build()
     this->print(stream);
     std::string t = stream.str();
     
-//     std::cout << t;
+//     std::cout << t << std::endl;
 
     cl_int status;
     const char * file_char = t.c_str(); // stream.str().c_str();
@@ -342,11 +342,14 @@ void ocl::Program::print(std::ostream& out) const
 #else
   auto it = commonCodeBlocks_.begin();
   
-  out << *it++ << '\n';
-  
   for ( auto& k : _kernels )
   {
-    out << k->toString() << '\n' << *it++ << '\n';
+    out << *it++ << k->toString();
+  }
+  
+  if ( it != commonCodeBlocks_.end() )
+  {
+    out << *it++;
   }
 #endif
 }
@@ -381,7 +384,10 @@ ocl::Program& ocl::Program::operator << (const std::string &k)
     size_t pos = 0;
     while(pos < kernels.npos){
         const std::string& next = nextKernel(kernels, pos);
-        if(next.empty()) break;
+        if(next.empty()) {
+	  commonCodeBlocks_.push_back( kernels.substr( pos ) );
+	  break;
+	}
         pos += next.length() + commonCodeBlocks_.back().length();
         
         
@@ -729,6 +735,9 @@ void ocl::Program::checkBuild(cl_int buildErr) const
 
 void ocl::Program::checkConstraints() const
 {
-  if ( _kernels.size() + 1u != commonCodeBlocks_.size() )
+  size_t const numKernels = _kernels.size();
+  size_t const numCodeBlocks = commonCodeBlocks_.size();
+  
+  if ( !(numKernels + 1u == numCodeBlocks || numKernels + 2u == numCodeBlocks) )
     throw std::runtime_error( "constraint violated" );
 }

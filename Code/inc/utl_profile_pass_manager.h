@@ -101,6 +101,12 @@ public:
 		std::ofstream out(filename.c_str());
 		_passes.write(out);
 	}
+	
+	
+  std::shared_ptr< PassType > getPass( size_t index )
+  {
+    return _passes.at( index );
+  }
 
 private:
 
