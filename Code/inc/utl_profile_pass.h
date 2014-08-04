@@ -73,8 +73,21 @@ public:
 	}
 
 
+	/**
+         * Profile.
+         * 
+         * @param dim Current dimension.
+         * 
+         * @return Execution time.
+         */
 	virtual _Resolution prof(const Dim&) = 0;
-    virtual double ops(const Dim&) = 0;
+        
+        /**
+         * Calculate number of operations needed for the dimension @c dim.
+         * 
+         * @param dim Current dimension.
+         */
+    virtual double ops(const Dim& dim) = 0;
 
 
 	void run()
