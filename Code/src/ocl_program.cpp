@@ -344,7 +344,7 @@ void ocl::Program::print(std::ostream& out) const
   
   for ( auto& k : _kernels )
   {
-    out << *it++ << k->toString();
+    out << *it++ << k->toString() << '\n';
   }
   
   if ( it != commonCodeBlocks_.end() )
@@ -691,20 +691,40 @@ void ocl::Program::eraseComments(std::string &kernels) const
             if(end_pos >= kernels.length()) break;
             TRUE_ASSERT(pos < end_pos, pos << " >= " << end_pos);
 //		cout << "Erasing substring : " << kernels.substr(start_pos, end_pos-start_pos+2) <<  "-ENDEND" << endl;
-            kernels.erase(pos, end_pos-pos+2);
-            pos += 2;
+            
+            size_t numLineBreaks = std::count(
+              kernels.begin() + pos,
+              kernels.begin() + end_pos + 2,
+              '\n'
+            );
+            
+            kernels.replace( 
+              kernels.begin() + pos,
+              kernels.begin() + end_pos + 2,
+              numLineBreaks, '\n' 
+            );
+            
+            pos += numLineBreaks;
+            
+//             kernels.erase(pos, end_pos-pos+2);
+//             pos += 2;
 	}
         pos = 0;
         while(pos < kernels.length()){
             pos = kernels.find("//", pos,2);
-            end_pos = kernels.find("\n", pos); std::string s("\n");
+            end_pos = kernels.find("\n", pos); //std::string s("\n");
             if(pos >= kernels.length()) break;
             if(end_pos >= kernels.length()) break;
             TRUE_ASSERT(pos < end_pos, pos << " >= " << end_pos);
             //		cout << "Erasing substring : " << kernels.substr(start_pos, end_pos-start_pos) <<  "-ENDEND" << endl;
             kernels.erase(pos, end_pos-pos);
+//             kernels.replace(
+//               kernels.begin() + pos,
+//               kernels.begin() + end_pos + 1u,
+//               1u, '\n'
+//             );
             pos++;
-	}
+         }
 }
 
 
