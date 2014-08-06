@@ -733,6 +733,7 @@ void ocl::Program::eraseComments(std::string &kernels) const
 /*! \brief Checks whether the build process was successfull or not.*/
 void ocl::Program::checkBuild(cl_int buildErr) const
 {
+#if 0
 	if(buildErr == CL_SUCCESS) return;
     std::cerr << "Program failed to build." << std::endl;
 	cl_build_status buildStatus;
@@ -751,6 +752,37 @@ void ocl::Program::checkBuild(cl_int buildErr) const
         std::cerr << "Device " << device.name() << " Build Log:\n" << buildLog.get() << std::endl;
 	}
 	exit(-1);
+#else
+  // Exiting the program is not acceptable.
+  if ( buildErr == CL_SUCCESS )
+    return;
+  
+  std::ostringstream oss;
+  
+  oss << "Program failed to build.\n";
+  
+  for ( auto const& device : _context->devices() )
+  {
+    cl_build_status buildStatus = CL_SUCCESS;
+    
+    clGetProgramBuildInfo( _id, device.id(), CL_PROGRAM_BUILD_STATUS, sizeof buildStatus, &buildStatus, nullptr );
+    
+    if ( buildStatus != CL_SUCCESS ) 
+    {
+      size_t size = 0u;
+      
+      clGetProgramBuildInfo( _id, device.id(), CL_PROGRAM_BUILD_LOG, 0u, nullptr, &size );
+      
+      std::unique_ptr< cl_char[] > buildLog( new cl_char[size] );
+      
+      clGetProgramBuildInfo( _id, device.id(), CL_PROGRAM_BUILD_LOG, size, buildLog.get(), nullptr );
+      
+      oss << "Device " << device.name() << " Build Log:\n" << buildLog.get() << '\n';
+    }
+  }
+  
+  throw std::runtime_error( oss.str() );
+#endif
 }
 
 void ocl::Program::checkConstraints() const

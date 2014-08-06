@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cstring>
 #include <memory>
+#include <stdexcept>
 
 #include <ocl_device.h>
 #include <ocl_query.h>
@@ -369,4 +370,23 @@ static bool supportsExtension( std::string const& extensionsString, char const* 
 bool ocl::Device::doubleSupport() const
 {
   return supportsExtension( extensions(), "cl_khr_fp64" );
+}
+
+
+/**
+ * Get the size in bytes of the L2 cache of the device.
+ * This is done by name look up.
+ */
+size_t ocl::Device::getL2CacheSize() const
+{
+  std::string const n = name();
+  
+  if ( n == "" )
+  {
+    return 0;
+  }
+  else
+  {
+    throw std::runtime_error( "don't know size of L2 cache for device " + n );
+  }
 }
