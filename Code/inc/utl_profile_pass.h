@@ -104,6 +104,8 @@ public:
 
         for(Dim i = _start; compare(i, _end); advance(i,_step))
         {
+          try
+          {
 //			TRUE_COMMENT("start : " << this->_start.toString() << ", _end : " << this->_end.toString() << ", _step = " << this->_step.toString() << ", i " << i.toString() << ", comp = "  << compare(i,_end));
 
 			Seconds time = this->prof(i);
@@ -114,6 +116,11 @@ public:
             this->_times.push_back(time) ;
             this->_ops.push_back(op) ; // 2 * n^2 + n
             this->_perf.push_back(perf);
+          }
+          catch ( std::exception& )
+          {
+            // Absorb error to not exit profiling at all.
+          }
 		}
 
 	}

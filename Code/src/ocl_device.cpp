@@ -381,9 +381,9 @@ size_t ocl::Device::getL2CacheSize() const
 {
   std::string const n = name();
   
-  if ( n == "" )
+  if ( n == "Tahiti" )
   {
-    return 0;
+    return 768u * 1024u;
   }
   else
   {
