@@ -117,9 +117,10 @@ public:
             this->_ops.push_back(op) ; // 2 * n^2 + n
             this->_perf.push_back(perf);
           }
-          catch ( std::exception& )
+          catch ( std::exception& e )
           {
             // Absorb error to not exit profiling at all.
+            std::cerr << "Profile \"" << name() << "\" pass aborted due to " << e.what() << std::endl;
           }
 		}
 
