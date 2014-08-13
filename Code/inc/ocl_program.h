@@ -50,6 +50,7 @@ public:
     CompileOption(CompileOption&&);
     CompileOption operator | (const CompileOption&);
     CompileOption operator | (const std::string&);
+    CompileOption& operator |= ( CompileOption const& opt ) { return *this = *this | opt; }
     const std::string& operator()() const;
     CompileOption& operator=(const CompileOption &);
 

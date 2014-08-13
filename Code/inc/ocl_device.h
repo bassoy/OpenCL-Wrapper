@@ -79,6 +79,9 @@ public:
 	size_t maxWorkGroupSize() const;
         
         size_t getL2CacheSize() const;
+        
+        size_t wavefrontSize() const;
+        size_t warpSize() const { return wavefrontSize(); }
 
 	cl_platform_id platform() const;
 	std::string version()    const;

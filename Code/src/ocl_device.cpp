@@ -385,8 +385,39 @@ size_t ocl::Device::getL2CacheSize() const
   {
     return 768u * 1024u;
   }
+  else if ( n == "Tesla C2050" )
+  {
+    return 786432u;
+  }
+  /*else if ( n == "" ) // Reserved for Xeon Phi
+  {
+    return ;
+  }*/
   else
   {
     throw std::runtime_error( "don't know size of L2 cache for device " + n );
+  }
+}
+
+
+size_t ocl::Device::wavefrontSize() const
+{
+  std::string const n = name();
+  
+  if ( n == "Tahiti" )
+  {
+    return 64u;
+  }
+  else if ( n == "Tesla C2050" )
+  {
+    return 32u;
+  }
+  /*else if ( n == "" ) // Reserved for Xeon Phi
+  {
+    return ;
+  }*/
+  else
+  {
+    throw std::runtime_error( "don't know wavefront size for device " + n );
   }
 }
