@@ -67,7 +67,7 @@ ocl::CompileOption::CompileOption(ocl::CompileOption&& c) :
   *
   * The strings of CompileOption objects are concatinated.
 */
-ocl::CompileOption ocl::CompileOption::operator | (const CompileOption &other)
+ocl::CompileOption ocl::CompileOption::operator | (const CompileOption &other) const
 {
     return ocl::CompileOption(this->_options + " " + other._options);
 }
@@ -76,7 +76,7 @@ ocl::CompileOption ocl::CompileOption::operator | (const CompileOption &other)
   *
   * The strings are concatinated.
 */
-ocl::CompileOption ocl::CompileOption::operator | (const std::string& other)
+ocl::CompileOption ocl::CompileOption::operator | (const std::string& other) const
 {
     //return ocl::CompileOption(this->_options + ", " + other);
   return *this | ocl::CompileOption( other );
@@ -89,7 +89,8 @@ const std::string& ocl::CompileOption::operator ()() const
 }
 
 ocl::CompileOption& ocl::CompileOption::operator=(const CompileOption &other) {
-    _options = other._options;
+    if ( this != &other )
+      _options = other._options;
     return *this;
 }
 

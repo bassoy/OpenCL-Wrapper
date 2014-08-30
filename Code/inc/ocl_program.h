@@ -48,8 +48,8 @@ public:
     CompileOption(const std::string&);
     CompileOption(const CompileOption&);
     CompileOption(CompileOption&&);
-    CompileOption operator | (const CompileOption&);
-    CompileOption operator | (const std::string&);
+    CompileOption operator | (const CompileOption&) const;
+    CompileOption operator | (const std::string&) const;
     CompileOption& operator |= ( CompileOption const& opt ) { return *this = *this | opt; }
     const std::string& operator()() const;
     CompileOption& operator=(const CompileOption &);
