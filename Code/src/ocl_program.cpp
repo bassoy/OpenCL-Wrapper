@@ -89,7 +89,8 @@ const std::string& ocl::CompileOption::operator ()() const
 }
 
 ocl::CompileOption& ocl::CompileOption::operator=(const CompileOption &other) {
-    _options = other._options;
+    if ( this != &other )
+      _options = other._options;
     return *this;
 }
 
