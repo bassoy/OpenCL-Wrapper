@@ -428,7 +428,7 @@ size_t ocl::Device::wavefrontSize() const
  */
 size_t ocl::Device::maxWorkItemRegs() const
 {
-  std::size_t const n = name();
+  std::string const n = name();
   
   if ( n == "Tahiti" )
   {
@@ -437,5 +437,23 @@ size_t ocl::Device::maxWorkItemRegs() const
   else
   {
     throw std::runtime_error( "don't know maximum number of registers per work item for device " + n );
+  }
+}
+
+
+/**
+ * Get the maximum number of bytes a work-group can allocate as local memory.
+ */
+size_t ocl::Device::maxLocalMemAllocSize() const
+{
+  std::string const n = name();
+  
+  if ( n == "Tahiti" )
+  {
+    return 32u * 1024u;
+  }
+  else
+  {
+    throw std::runtime_error( "don't know maximum size to allocate for local memory for device " + n );
   }
 }

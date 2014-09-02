@@ -199,6 +199,15 @@ struct column_major_tag { };
 ///  Marking row_major matrices.
 struct row_major_tag  { };
 
+template< typename >
+std::string getFormatName();
+
+template<>
+std::string getFormatName<column_major_tag>() { return "column_major"; }
+
+template<>
+std::string getFormatName<row_major_tag>() { return "row_major"; }
+
 }
 
 

@@ -84,6 +84,8 @@ public:
         size_t warpSize() const { return wavefrontSize(); }
         
         size_t maxWorkItemRegs() const;
+        
+        size_t maxLocalMemAllocSize() const;
 
 	cl_platform_id platform() const;
 	std::string version()    const;
