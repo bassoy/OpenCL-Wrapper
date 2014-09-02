@@ -82,6 +82,8 @@ public:
         
         size_t wavefrontSize() const;
         size_t warpSize() const { return wavefrontSize(); }
+        
+        size_t maxWorkItemRegs() const;
 
 	cl_platform_id platform() const;
 	std::string version()    const;

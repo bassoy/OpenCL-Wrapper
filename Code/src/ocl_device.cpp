@@ -421,3 +421,21 @@ size_t ocl::Device::wavefrontSize() const
     throw std::runtime_error( "don't know wavefront size for device " + n );
   }
 }
+
+
+/**
+ * Get the number of registers available per work-item such that the number of wavefronts per compute unit is not affected.
+ */
+size_t ocl::Device::maxWorkItemRegs() const
+{
+  std::size_t const n = name();
+  
+  if ( n == "Tahiti" )
+  {
+    return 25u;
+  }
+  else
+  {
+    throw std::runtime_error( "don't know maximum number of registers per work item for device " + n );
+  }
+}
