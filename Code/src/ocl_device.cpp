@@ -412,6 +412,13 @@ size_t ocl::Device::wavefrontSize() const
   {
     return 32u;
   }
+  // https://software.intel.com/sites/products/documentation/ioclsdk/2013/OG/Intel_R__SDK_for_OpenCL_Applications_2013_-_Optimization_Guide.pdf
+  else if ( n == "        Intel(R) Core(TM) i5-2500 CPU @ 3.30GHz" )
+  {
+//     don't know wavefront size for device         Intel(R) Core(TM) i5-2500 CPU @ 3.30GHz
+
+    return 64u;
+  }
   /*else if ( n == "" ) // Reserved for Xeon Phi
   {
     return ;
@@ -434,6 +441,10 @@ size_t ocl::Device::maxWorkItemRegs() const
   {
     return 25u;
   }
+  else if ( n == "        Intel(R) Core(TM) i5-2500 CPU @ 3.30GHz" )
+  {
+    return 128; // Don't know, but should be many.
+  }
   else
   {
     throw std::runtime_error( "don't know maximum number of registers per work item for device " + n );
@@ -451,6 +462,10 @@ size_t ocl::Device::maxLocalMemAllocSize() const
   if ( n == "Tahiti" )
   {
     return 32u * 1024u;
+  }
+  else if ( n == "        Intel(R) Core(TM) i5-2500 CPU @ 3.30GHz" )
+  {
+    return 128u * 1024u; // This is for Intel HD Graphics
   }
   else
   {
