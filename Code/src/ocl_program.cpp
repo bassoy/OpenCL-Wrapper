@@ -18,6 +18,7 @@
 // System includes
 
 #include <algorithm>
+#include <cassert>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -184,7 +185,13 @@ ocl::Program::~Program()
 void ocl::Program::release()
 {
    if(this->isBuilt())
+   {
+     for ( auto& k : _kernels )
+       k->release();
+     
         OPENCL_SAFE_CALL( clReleaseProgram (_id));
+   }
+   
     _id = 0;
 
 //	if(_context)
@@ -193,7 +200,7 @@ void ocl::Program::release()
 //   if(this->isBuilt()){
 //        removeKernels();
 //        OPENCL_SAFE_CALL( clReleaseProgram (_id));
-
+// 
 //    }
 //    _context = 0;
 //    _id = 0;
@@ -341,11 +348,18 @@ void ocl::Program::print(std::ostream& out) const
     }
     out << std::endl;
 #else
+  checkConstraints();
+  
   auto it = commonCodeBlocks_.begin();
   
   for ( auto& k : _kernels )
   {
-    out << *it++ << k->toString() << '\n';
+    assert( k != nullptr );
+    assert( it != commonCodeBlocks_.end() );
+    
+    out << *it++;
+    out << k->toString();
+    out << '\n';
   }
   
   if ( it != commonCodeBlocks_.end() )
