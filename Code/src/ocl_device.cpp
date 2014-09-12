@@ -389,10 +389,13 @@ size_t ocl::Device::getL2CacheSize() const
   {
     return 786432u;
   }
-  /*else if ( n == "" ) // Reserved for Xeon Phi
+  // see: https://software.intel.com/sites/default/files/article/393195/intel-xeon-phi-core-micro-architecture.pdf
+  else if ( n == "Intel(R) Many Integrated Core Acceleration Card" ) // Reserved for Xeon Phi
   {
-    return ;
-  }*/
+    // Each of the 60 cores has 512KB L2 cache. Thus the
+    // L2 cache is not shared among the cores.
+    return 512u * 1024u;
+  }
   else
   {
     throw std::runtime_error( "don't know size of L2 cache for device " + n );
