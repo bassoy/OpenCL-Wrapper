@@ -15,7 +15,7 @@ find_path(OPENCL_INCLUDE_DIR CL/cl.h HINTS
 include_directories(SYSTEM ${OPENCL_INCLUDE_DIR})
 include_directories(Code/inc)
 
-add_definitions(-std=c++11 -Wall -Wextra -Werror -Weffc++ -pedantic -pedantic-errors)
+add_definitions(-std=c++1y -Wall -Wextra -Werror -Weffc++ -pedantic -pedantic-errors -O2)
 
 set(OclWrapper_HDRS
   Code/inc/ocl_buffer.h
