@@ -390,11 +390,19 @@ size_t ocl::Device::getL2CacheSize() const
     return 786432u;
   }
   // see: https://software.intel.com/sites/default/files/article/393195/intel-xeon-phi-core-micro-architecture.pdf
-  else if ( n == "Intel(R) Many Integrated Core Acceleration Card" ) // Reserved for Xeon Phi
+  else if ( n == "Intel(R) Many Integrated Core Acceleration Card" )
   {
     // Each of the 60 cores has 512KB L2 cache. Thus the
     // L2 cache is not shared among the cores.
     return 512u * 1024u;
+  }
+  else if ( n == "        Intel(R) Core(TM) i5-2500 CPU @ 3.30GHz" || 
+            n == "        Intel(R) Core(TM) i5-2300 CPU @ 2.80GHz")
+  {
+    // As for Intel Xeon Phi L2 cache is dedicated to each core.
+    // L3 cache involves sharing.
+    // see: http://www.intel.com/content/dam/www/public/us/en/documents/datasheets/2nd-gen-core-desktop-vol-1-datasheet.pdf
+    return 256u * 1024u;
   }
   else
   {
@@ -418,8 +426,6 @@ size_t ocl::Device::wavefrontSize() const
   // https://software.intel.com/sites/products/documentation/ioclsdk/2013/OG/Intel_R__SDK_for_OpenCL_Applications_2013_-_Optimization_Guide.pdf
   else if ( n == "        Intel(R) Core(TM) i5-2500 CPU @ 3.30GHz" )
   {
-//     don't know wavefront size for device         Intel(R) Core(TM) i5-2500 CPU @ 3.30GHz
-
     return 64u;
   }
   /*else if ( n == "" ) // Reserved for Xeon Phi
