@@ -428,10 +428,12 @@ size_t ocl::Device::wavefrontSize() const
   {
     return 64u;
   }
-  /*else if ( n == "" ) // Reserved for Xeon Phi
+  // https://software.intel.com/en-us/articles/opencl-design-and-programming-guide-for-the-intel-xeon-phi-coprocessor
+  // Intel calls this "vector size"
+  else if ( n == "Intel(R) Many Integrated Core Acceleration Card" )
   {
-    return ;
-  }*/
+    return 16u;
+  }
   else
   {
     throw std::runtime_error( "don't know wavefront size for device " + n );
@@ -454,6 +456,17 @@ size_t ocl::Device::maxWorkItemRegs() const
   {
     return 128; // Don't know, but should be many.
   }
+  // Tesla C2050 is compute capability 2.0
+  // see: https://developer.nvidia.com/cuda-gpus
+  // Use the CUDA_Occupancy_calculator.xls
+  else if ( n == "Tesla C2050" )
+  {
+    return 16;
+  }
+  else if ( n == "Intel (R) Many Integrated Core Acceleration Card" )
+  {
+    return ;
+  }
   else
   {
     throw std::runtime_error( "don't know maximum number of registers per work item for device " + n );
@@ -475,6 +488,11 @@ size_t ocl::Device::maxLocalMemAllocSize() const
   else if ( n == "        Intel(R) Core(TM) i5-2500 CPU @ 3.30GHz" )
   {
     return 128u * 1024u; // This is for Intel HD Graphics
+  }
+  else if ( n == "Intel(R) Many Integrated Core Acceleration Card" )
+  {
+    // Intel Xeon Phi does not really have limitations on local memory :(
+    return localMemSize();
   }
   else
   {
