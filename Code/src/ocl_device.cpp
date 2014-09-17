@@ -463,7 +463,7 @@ size_t ocl::Device::maxWorkItemRegs() const
   {
     return 16;
   }
-  // see: www.prace-ri.eu/best-practice-guide-intel-xeon-phi-html/#id-1.3.2.2
+  // see: https://software.intel.com/sites/default/files/article/393195/intel-xeon-phi-core-micro-architecture.pdf
   else if ( n == "Intel (R) Many Integrated Core Acceleration Card" )
   {
     return 32u;
