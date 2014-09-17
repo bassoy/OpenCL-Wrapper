@@ -464,7 +464,7 @@ size_t ocl::Device::maxWorkItemRegs() const
     return 16;
   }
   // see: https://software.intel.com/sites/default/files/article/393195/intel-xeon-phi-core-micro-architecture.pdf
-  else if ( n == "Intel (R) Many Integrated Core Acceleration Card" )
+  else if ( n == "Intel(R) Many Integrated Core Acceleration Card" )
   {
     return 32u;
   }
@@ -489,6 +489,12 @@ size_t ocl::Device::maxLocalMemAllocSize() const
   else if ( n == "        Intel(R) Core(TM) i5-2500 CPU @ 3.30GHz" )
   {
     return 128u * 1024u; // This is for Intel HD Graphics
+  }
+  // Tesla has configurable shared memory, which can be either 16KB or 48KB.
+  // 48KB is the default value and the remaining KB are used for L1 caching.
+  else if ( n == "Tesla C2050" )
+  {
+    return 48u * 1024u;
   }
   else if ( n == "Intel(R) Many Integrated Core Acceleration Card" )
   {
