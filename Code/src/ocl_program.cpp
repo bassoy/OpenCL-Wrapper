@@ -561,10 +561,19 @@ std::string ocl::Program::nextKernel(const std::string &kernels, size_t pos)
 { 
   if ( pos >= kernels.size() )
     return "";
-  
-  constexpr char const kernelKeyword1[]  = "__kernel";
-  constexpr char const kernelKeyword2[]  = "kernel";
-  constexpr char const templateKeyword[] = "template";
+
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+  constexpr 
+#endif
+    char const kernelKeyword1[]  = "__kernel";
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+  constexpr
+#endif 
+    char const kernelKeyword2[]  = "kernel";
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+    constexpr
+#endif 
+      char const templateKeyword[] = "template";
   
   auto const startTemplate    = kernels.find( templateKeyword, pos );
   auto const startNonTemplate = std::min( kernels.find( kernelKeyword1, pos ), kernels.find( kernelKeyword2, pos ) );

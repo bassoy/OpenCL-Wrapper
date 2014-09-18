@@ -16,7 +16,8 @@
 //along with OpenCL Utility Toolkit.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <algorithm>
-#include <limits.h>
+#include <functional>
+#include <climits>
 #include <sstream>
 
 #include <utl_dim.h>

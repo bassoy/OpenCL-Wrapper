@@ -44,20 +44,20 @@ class Types //: public std::set<const Type*>
 {
   std::set< Type const* > types_;
 public:
-	typedef typename std::set<const Type*>::iterator iterator;
-	typedef typename std::set<const Type*>::const_iterator const_iterator;
-	typedef typename std::set<const Type*>::const_pointer const_pointer;
-	typedef typename std::set<const Type*>::const_reference const_reference;
+	typedef /*typename*/ std::set<const Type*>::iterator iterator;
+	typedef /*typename*/ std::set<const Type*>::const_iterator const_iterator;
+	typedef /*typename*/ std::set<const Type*>::const_pointer const_pointer;
+	typedef /*typename*/ std::set<const Type*>::const_reference const_reference;
 
     Types();
     Types(const Type &);
     Types(const Types&);
     Types(Types&&);
 
-    template<typename ... Ts>
-    Types(Ts ... args) //: std::set<const Type*>()
+    template<typename T, typename ... Ts>
+    Types(T arg0, Ts ... args) //: std::set<const Type*>()
     {
-        std::vector<const Type*> __v = {args...};
+        std::vector<const Type*> __v = {arg0, args...};
         for(auto e : __v)
             types_.insert(e);
     }

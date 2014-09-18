@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <functional>
 
 #include <ocl_wrapper.h>
 #include <utl_utils.h>
@@ -15,7 +16,7 @@ namespace kernel_strings {
 const std::string copy =
 R"(
 
-__kernel void copy(int num, __global float *dst, __global float *src)
+__kernel void copy(unsigned num, __global float *dst, __global float *src)
 {
     int id = get_global_id(0);
     if(id >= num) return;
@@ -78,8 +79,9 @@ int main()
 
     // execute both kernels only if the event_write is completed.
     // note that kernel executions are always asynchronous.
-    const ocl::Event& event_exec1 = kernel(queue1, list_write, int(elements), d_buffer1_out.id(), d_buffer_in.id());
-    const ocl::Event& event_exec2 = kernel(queue2, list_write, int(elements), d_buffer2_out.id(), d_buffer_in.id());
+    unsigned num = elements;
+    const ocl::Event& event_exec1 = kernel(queue1, list_write, num, d_buffer1_out.id(), d_buffer_in.id());
+    const ocl::Event& event_exec2 = kernel(queue2, list_write, num, d_buffer2_out.id(), d_buffer_in.id());
 
     // create an event list which tracks the executions.
     ocl::EventList list_exec; list_exec << event_exec1 << event_exec2;

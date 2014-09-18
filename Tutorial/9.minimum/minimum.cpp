@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <functional>
 
 #include <ocl_wrapper.h>
 #include <utl_utils.h>
@@ -24,7 +25,7 @@ int main(int argc, char* argv[])
     const size_t elements_in = args.size() > 1 ? args.toSizet(1) : 1 << 22;
     const size_t size_bytes_in  = elements_in * sizeof(Type);
     const size_t local_size = 256;
-    const size_t elements_out = std::max(elements_in/local_size, 1ul);
+    const size_t elements_out = std::max(elements_in/local_size, static_cast<size_t>(1ul));
 	const size_t size_bytes_out = elements_out * sizeof(Type);
 	const size_t execute = 100;
 
