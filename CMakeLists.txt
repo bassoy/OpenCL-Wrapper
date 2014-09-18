@@ -17,7 +17,7 @@ include_directories(SYSTEM ${OPENCL_INCLUDE_DIR})
 include_directories(Code/inc)
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-  add_definitions(-Wall -Wextra -Werror -pedantic -pedantic-errors)
+  add_definitions(-Wall -Wextra -Werror -pedantic -pedantic-errors -O2)
 
   if(CMAKE_COMPILER_IS_GNUCXX)
     add_definitions(-std=c++11 -Weffc++)

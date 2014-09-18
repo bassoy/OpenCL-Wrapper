@@ -18,6 +18,7 @@
 // System includes
 
 #include <algorithm>
+#include <cassert>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -67,7 +68,7 @@ ocl::CompileOption::CompileOption(ocl::CompileOption&& c) :
   *
   * The strings of CompileOption objects are concatinated.
 */
-ocl::CompileOption ocl::CompileOption::operator | (const CompileOption &other)
+ocl::CompileOption ocl::CompileOption::operator | (const CompileOption &other) const
 {
     return ocl::CompileOption(this->_options + " " + other._options);
 }
@@ -76,7 +77,7 @@ ocl::CompileOption ocl::CompileOption::operator | (const CompileOption &other)
   *
   * The strings are concatinated.
 */
-ocl::CompileOption ocl::CompileOption::operator | (const std::string& other)
+ocl::CompileOption ocl::CompileOption::operator | (const std::string& other) const
 {
     //return ocl::CompileOption(this->_options + ", " + other);
   return *this | ocl::CompileOption( other );
@@ -89,7 +90,8 @@ const std::string& ocl::CompileOption::operator ()() const
 }
 
 ocl::CompileOption& ocl::CompileOption::operator=(const CompileOption &other) {
-    _options = other._options;
+    if ( this != &other )
+      _options = other._options;
     return *this;
 }
 
@@ -183,7 +185,13 @@ ocl::Program::~Program()
 void ocl::Program::release()
 {
    if(this->isBuilt())
+   {
+     for ( auto& k : _kernels )
+       k->release();
+     
         OPENCL_SAFE_CALL( clReleaseProgram (_id));
+   }
+   
     _id = 0;
 
 //	if(_context)
@@ -192,7 +200,7 @@ void ocl::Program::release()
 //   if(this->isBuilt()){
 //        removeKernels();
 //        OPENCL_SAFE_CALL( clReleaseProgram (_id));
-
+// 
 //    }
 //    _context = 0;
 //    _id = 0;
@@ -281,7 +289,7 @@ void ocl::Program::build()
     this->print(stream);
     std::string t = stream.str();
     
-//     std::cout << t;
+//     std::cout << t << std::endl;
 
     cl_int status;
     const char * file_char = t.c_str(); // stream.str().c_str();
@@ -340,13 +348,23 @@ void ocl::Program::print(std::ostream& out) const
     }
     out << std::endl;
 #else
-  auto it = commonCodeBlocks_.begin();
+  checkConstraints();
   
-  out << *it++ << '\n';
+  auto it = commonCodeBlocks_.begin();
   
   for ( auto& k : _kernels )
   {
-    out << k->toString() << '\n' << *it++ << '\n';
+    assert( k != nullptr );
+    assert( it != commonCodeBlocks_.end() );
+    
+    out << *it++;
+    out << k->toString();
+    out << '\n';
+  }
+  
+  if ( it != commonCodeBlocks_.end() )
+  {
+    out << *it++;
   }
 #endif
 }
@@ -381,7 +399,10 @@ ocl::Program& ocl::Program::operator << (const std::string &k)
     size_t pos = 0;
     while(pos < kernels.npos){
         const std::string& next = nextKernel(kernels, pos);
-        if(next.empty()) break;
+        if(next.empty()) {
+	  commonCodeBlocks_.push_back( kernels.substr( pos ) );
+	  break;
+	}
         pos += next.length() + commonCodeBlocks_.back().length();
         
         
@@ -694,20 +715,40 @@ void ocl::Program::eraseComments(std::string &kernels) const
             if(end_pos >= kernels.length()) break;
             TRUE_ASSERT(pos < end_pos, pos << " >= " << end_pos);
 //		cout << "Erasing substring : " << kernels.substr(start_pos, end_pos-start_pos+2) <<  "-ENDEND" << endl;
-            kernels.erase(pos, end_pos-pos+2);
-            pos += 2;
+            
+            size_t numLineBreaks = std::count(
+              kernels.begin() + pos,
+              kernels.begin() + end_pos + 2,
+              '\n'
+            );
+            
+            kernels.replace( 
+              kernels.begin() + pos,
+              kernels.begin() + end_pos + 2,
+              numLineBreaks, '\n' 
+            );
+            
+            pos += numLineBreaks;
+            
+//             kernels.erase(pos, end_pos-pos+2);
+//             pos += 2;
 	}
         pos = 0;
         while(pos < kernels.length()){
             pos = kernels.find("//", pos,2);
-            end_pos = kernels.find("\n", pos); std::string s("\n");
+            end_pos = kernels.find("\n", pos); //std::string s("\n");
             if(pos >= kernels.length()) break;
             if(end_pos >= kernels.length()) break;
             TRUE_ASSERT(pos < end_pos, pos << " >= " << end_pos);
             //		cout << "Erasing substring : " << kernels.substr(start_pos, end_pos-start_pos) <<  "-ENDEND" << endl;
             kernels.erase(pos, end_pos-pos);
+//             kernels.replace(
+//               kernels.begin() + pos,
+//               kernels.begin() + end_pos + 1u,
+//               1u, '\n'
+//             );
             pos++;
-	}
+         }
 }
 
 
@@ -716,6 +757,7 @@ void ocl::Program::eraseComments(std::string &kernels) const
 /*! \brief Checks whether the build process was successfull or not.*/
 void ocl::Program::checkBuild(cl_int buildErr) const
 {
+#if 0
 	if(buildErr == CL_SUCCESS) return;
     std::cerr << "Program failed to build." << std::endl;
 	cl_build_status buildStatus;
@@ -734,10 +776,44 @@ void ocl::Program::checkBuild(cl_int buildErr) const
         std::cerr << "Device " << device.name() << " Build Log:\n" << buildLog.get() << std::endl;
 	}
 	exit(-1);
+#else
+  // Exiting the program is not acceptable.
+  if ( buildErr == CL_SUCCESS )
+    return;
+  
+  std::ostringstream oss;
+  
+  oss << "Program failed to build.\n";
+  
+  for ( auto const& device : _context->devices() )
+  {
+    cl_build_status buildStatus = CL_SUCCESS;
+    
+    clGetProgramBuildInfo( _id, device.id(), CL_PROGRAM_BUILD_STATUS, sizeof buildStatus, &buildStatus, nullptr );
+    
+    if ( buildStatus != CL_SUCCESS ) 
+    {
+      size_t size = 0u;
+      
+      clGetProgramBuildInfo( _id, device.id(), CL_PROGRAM_BUILD_LOG, 0u, nullptr, &size );
+      
+      std::unique_ptr< cl_char[] > buildLog( new cl_char[size] );
+      
+      clGetProgramBuildInfo( _id, device.id(), CL_PROGRAM_BUILD_LOG, size, buildLog.get(), nullptr );
+      
+      oss << "Device " << device.name() << " Build Log:\n" << buildLog.get() << '\n';
+    }
+  }
+  
+  throw std::runtime_error( oss.str() );
+#endif
 }
 
 void ocl::Program::checkConstraints() const
 {
-  if ( _kernels.size() + 1u != commonCodeBlocks_.size() )
+  size_t const numKernels = _kernels.size();
+  size_t const numCodeBlocks = commonCodeBlocks_.size();
+  
+  if ( !(numKernels + 1u == numCodeBlocks || numKernels + 2u == numCodeBlocks) )
     throw std::runtime_error( "constraint violated" );
 }

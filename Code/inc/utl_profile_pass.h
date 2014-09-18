@@ -76,8 +76,21 @@ public:
 	}
 
 
+	/**
+         * Profile.
+         * 
+         * @param dim Current dimension.
+         * 
+         * @return Execution time.
+         */
 	virtual _Resolution prof(const Dim&) = 0;
-    virtual double ops(const Dim&) = 0;
+        
+        /**
+         * Calculate number of operations needed for the dimension @c dim.
+         * 
+         * @param dim Current dimension.
+         */
+    virtual double ops(const Dim& dim) = 0;
 
 
 	void run()
@@ -104,6 +117,8 @@ public:
 
         for(Dim i = _start; compare(i, _end); advance(i,_step))
         {
+          try
+          {
 //			TRUE_COMMENT("start : " << this->_start.toString() << ", _end : " << this->_end.toString() << ", _step = " << this->_step.toString() << ", i " << i.toString() << ", comp = "  << compare(i,_end));
 
 			Seconds time = this->prof(i);
@@ -114,6 +129,12 @@ public:
             this->_times.push_back(time) ;
             this->_ops.push_back(op) ; // 2 * n^2 + n
             this->_perf.push_back(perf);
+          }
+          catch ( std::exception& e )
+          {
+            // Absorb error to not exit profiling at all.
+            std::cerr << "Profile \"" << name() << "\" pass aborted due to " << e.what() << std::endl;
+          }
 		}
 
 	}

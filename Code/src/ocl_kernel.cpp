@@ -609,8 +609,11 @@ std::string ocl::Kernel::specialize(const std::string& kernel, const std::string
 
     //     DEBUG_COMMENT("fct = " << fct);
 
+    // cl_khr_fp64 is core in OpenCL 1.2
+#ifndef CL_VERSION_1_2
     if(type == "double")//utl::type::Double)
     fct.insert(0, "#pragma OPENCL EXTENSION cl_khr_fp64: enable\n");
+#endif
 
 
     size_t pos = 0;

@@ -544,8 +544,8 @@ void ocl::Image::write(const Queue& queue, const void *ptr_to_host_data, const s
 {
     TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
     TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    std::vector<size_t> origin = {0, 0, 0};
-    OPENCL_SAFE_CALL( clEnqueueWriteImage(queue.id(), this->id(), CL_TRUE, origin.data(), region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
+    size_t const origin[] = {0, 0, 0};
+    OPENCL_SAFE_CALL( clEnqueueWriteImage(queue.id(), this->id(), CL_TRUE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
     OPENCL_SAFE_CALL( clFinish(queue.id()) );
 }
 

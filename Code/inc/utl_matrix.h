@@ -200,6 +200,15 @@ struct column_major_tag { };
 ///  Marking row_major matrices.
 struct row_major_tag  { };
 
+template< typename >
+std::string getFormatName();
+
+template<>
+std::string getFormatName<column_major_tag>() { return "column_major"; }
+
+template<>
+std::string getFormatName<row_major_tag>() { return "row_major"; }
+
 }
 
 
@@ -213,6 +222,19 @@ class Matrix : private __MatrixBase<T>
 {
     Matrix() = delete;
 };
+
+/**
+ * Calculate element wise absolut value.
+ */
+template< typename T, typename F >
+Matrix< T, F > abs( Matrix< T, F > const& m )
+{
+  Matrix< T, F > tmp( m.rows(), m.cols() );
+  
+  std::transform( m.begin(), m.end(), tmp.begin(), []( T x ){ return std::abs( x ); } );
+  
+  return std::move( tmp );
+}
 
 
 namespace detail {
