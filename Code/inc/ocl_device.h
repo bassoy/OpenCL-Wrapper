@@ -80,12 +80,18 @@ public:
         
         size_t getL2CacheSize() const;
         
+        /** For AMD */
         size_t wavefrontSize() const;
+        /** For NVIDIA. */
         size_t warpSize() const { return wavefrontSize(); }
+        /** For Intel. */
+        size_t vectorSize() const { return wavefrontSize(); }
         
         size_t maxWorkItemRegs() const;
         
         size_t maxLocalMemAllocSize() const;
+        
+        size_t localMemSizeNotLimitedByWavefronts( size_t const workgroupSize ) const;
 
 	cl_platform_id platform() const;
 	std::string version()    const;
