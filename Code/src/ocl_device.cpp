@@ -494,7 +494,7 @@ size_t ocl::Device::maxLocalMemAllocSize() const
   // 48KB is the default value and the remaining KB are used for L1 caching.
   else if ( n == "Tesla C2050" )
   {
-    return 48u * 1024u;
+    return localMemSize(); //48u * 1024u;
   }
   else if ( n == "Intel(R) Many Integrated Core Acceleration Card" )
   {
