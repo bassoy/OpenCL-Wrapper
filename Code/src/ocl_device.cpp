@@ -506,3 +506,32 @@ size_t ocl::Device::maxLocalMemAllocSize() const
     throw std::runtime_error( "don't know maximum size to allocate for local memory for device " + n );
   }
 }
+
+
+/**
+ * Get maximum size of local memory that a work-group can allocate without affecting the number of active wavefronts per compute unit.
+ */
+size_t ocl::Device::localMemSizeNotLimitedByWavefronts( size_t const workGroupSize ) const
+{
+  if ( workGroupSize > maxWorkGroupSize() ) throw std::runtime_error("too large work-group size");
+  
+  std::string const n = name();
+  
+  if ( n == "Tahiti" )
+  {
+    return localMemSize() / ((workGroupSize + wavefrontSize() - 1u) / wavefrontSize());
+  }
+  else if ( n == "Tesla C2050" )
+  {
+    if ( workGroupSize <= 192 ) return 6144;
+    if ( workGroupSize <= 256 ) return 8192;
+    if ( workGroupSize <= 384 ) return 12288;
+    if ( workGroupSize <= 512 ) return 16384;
+    if ( workGroupSize <= 768 ) return 24576;
+    return 49152;
+  }
+  else
+  {
+    throw std::runtime_error( "don't know local memory limit on active wavefronts for device " + n );
+  }
+}
