@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include <functional>
 
 #include <utl_stream.h>
 #include <utl_dim.h>
@@ -58,7 +59,9 @@ public:
 	
 	ProfilePass() = delete;
 	ProfilePass(const ProfilePass&) = default;
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
 	ProfilePass(ProfilePass&&) = default;
+#endif
   virtual ~ProfilePass(){}
 
 	template<class F>
@@ -94,13 +97,23 @@ public:
     {
         //size_t j = 0;
 
-        auto compare = _countUp ?
-        [](const Dim& lhs, const Dim& rhs){ return (lhs < 1) == 0 && lhs <= rhs; } :
-        [](const Dim& lhs, const Dim& rhs){ return (lhs < 1) == 0 && lhs >= rhs; };
+#if 0
+        std::function< bool (const Dim&, const Dim&) > compare = _countUp ?
+        [](const Dim& lhs, const Dim& rhs)->bool{ return (lhs < 1) == 0 && lhs <= rhs; } :
+        [](const Dim& lhs, const Dim& rhs)->bool{ return (lhs < 1) == 0 && lhs >= rhs; };
 
-        auto advance = _countUp ?
+        std::function< void(Dim&, const Dim&) > advance = _countUp ?
                 [](Dim& lhs, const Dim& rhs){ lhs += rhs; } :
                 [](Dim& lhs, const Dim& rhs){ lhs -= rhs; } ;
+#else
+    std::function< bool(const Dim&, const Dim&) > compare = [](const Dim& lhs, const Dim& rhs)->bool{ return (lhs < 1) == 0 && lhs >= rhs; };
+
+    if (_countUp) compare = [](const Dim& lhs, const Dim& rhs)->bool{ return (lhs < 1) == 0 && lhs <= rhs; };
+
+    std::function< void(Dim&, const Dim&) > advance = [](Dim& lhs, const Dim& rhs){ lhs -= rhs; };
+
+    if (_countUp) advance = [](Dim& lhs, const Dim& rhs){ lhs += rhs; };
+#endif
 
         for(Dim i = _start; compare(i, _end); advance(i,_step))
         {

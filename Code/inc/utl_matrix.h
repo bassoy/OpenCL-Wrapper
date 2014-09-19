@@ -25,6 +25,7 @@
 #include <iostream>
 #include <ostream>
 #include <algorithm>
+#include <functional>
 
 #include <utl_assert.h>
 
@@ -149,10 +150,10 @@ public:
 
     const std::vector<T>& vector() const { return this->_vector; }
 
-    const_iterator begin() const { return const_iterator( this->data() ); }
-    const_iterator end() const   { return const_iterator( this->data()+this->size() ); }
-    iterator begin() { return iterator ( this->data()  ); }
-    iterator end()   { return iterator( this->data()+this->size() ); }
+    const_iterator begin() const { return _vector.begin(); }
+    const_iterator end() const   { return _vector.end(); }
+    iterator begin() { return _vector.begin(); }
+    iterator end()   { return _vector.end(); }
 
 
     reference operator[](size_t index) { return _vector[index]; }
@@ -241,18 +242,32 @@ namespace detail {
 template< typename T >
 struct isRowMajorImpl
 {
-  constexpr static bool const value = false;
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+  constexpr 
+#endif
+    static bool const value;
 };
 
-template< typename T > constexpr bool const isRowMajorImpl< T >::value;
+template< typename T > 
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+constexpr
+#endif
+bool const isRowMajorImpl< T >::value = false;
 
 template< typename T >
 struct isRowMajorImpl< Matrix< T, row_major_tag > >
 {
-  constexpr static bool const value = true;
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+  constexpr 
+#endif
+    static bool const value;
 };
 
-template< typename T > constexpr bool const isRowMajorImpl< Matrix< T, row_major_tag > >::value;
+template< typename T > 
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+constexpr 
+#endif
+bool const isRowMajorImpl< Matrix< T, row_major_tag > >::value = true;
   
 }
 
@@ -260,10 +275,17 @@ template< typename T > constexpr bool const isRowMajorImpl< Matrix< T, row_major
 template< typename Matrix >
 struct isRowMajor
 {
-  constexpr static bool const value = detail::isRowMajorImpl< Matrix >::value;
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+  constexpr 
+#endif
+    static bool const value = detail::isRowMajorImpl< Matrix >::value;
 };
 
-template< typename Matrix > constexpr bool const isRowMajor< Matrix >::value;
+template< typename Matrix > 
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+constexpr 
+#endif
+bool const isRowMajor< Matrix >::value;
 
 }
 
@@ -593,11 +615,11 @@ public :
 
         Engine engine(device());
 
-        constexpr bool is_integral = std::is_integral<T>::value;
-        constexpr bool is_floating_point = std::is_floating_point<T>::value;
+/*        constexpr bool is_integral = std::is_integral<T>::value;
+        constexpr bool is_floating_point = std::is_floating_point<T>::value; */
 
-        uniform_int_distribution<Engine, Vector, is_integral>::run(engine, this->_vector , min, max);
-        uniform_real_distribution<Engine, Vector, is_floating_point>::run(engine, this->_vector, min, max);
+        uniform_int_distribution<Engine, Vector, std::is_integral<T>::value>::run(engine, this->_vector, min, max);
+        uniform_real_distribution<Engine, Vector, std::is_floating_point<T>::value>::run(engine, this->_vector, min, max);
     }
 };
 

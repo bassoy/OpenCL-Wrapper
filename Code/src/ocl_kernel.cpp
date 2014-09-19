@@ -238,6 +238,7 @@ ocl::Event ocl::Kernel::callKernel()
     return ocl::Event(event_id, &this->context());
 }
 
+#if 0
 /*! \brief Executes this Kernel and returns an Event by which the execution can be tracked.
   *
   * Executes this Kernel on the active Queue
@@ -248,6 +249,7 @@ ocl::Event ocl::Kernel::operator ()()
 {
     return this->callKernel();
 }
+#endif
 
 /*! \brief Sets the working dimension of the index space.
   *
@@ -442,21 +444,29 @@ void ocl::Kernel::setArg(int pos, cl_sampler data)
 template<class T>
 void ocl::Kernel::setArg(int pos, const T& data)
 {
-    TRUE_ASSERT(this->numberOfArgs() > size_t(pos), "Position " << pos << " >= " << this->_memlocs.size());
+  TRUE_ASSERT(this->numberOfArgs() > size_t(pos), "Position " << pos << " >= " << this->_memlocs.size());
+
 	cl_int stat ;
-    if(this->memoryLocation(pos) == host){
+
+  if(this->memoryLocation(pos) == host)
+  {
 		stat = clSetKernelArg(_id, pos, sizeof(T), (void*)&data);
 	}
-    else if(this->memoryLocation(pos) == local)
+  else if(this->memoryLocation(pos) == local)
 	{
-        TRUE_ASSERT(typeid(data) == typeid(size_t), "data: "<< data << " at pos " << pos << " must be of type size_t");
-		stat = clSetKernelArg(_id, pos, data, NULL);
+    TRUE_ASSERT(typeid(data) == typeid(size_t), "data: "<< data << " at pos " << pos << " must be of type size_t");
+
+    // TODO This is a hack and should be better implemented using compile time type erasure.
+		stat = clSetKernelArg(_id, pos, static_cast<size_t>( data ), NULL);
 	}
-	else{
-        TRUE_ASSERT(0,"Location Unkown - Error setting kernel "<< name() << " at pos = " << pos << ", arg = " << data);
+	else
+  {
+    TRUE_ASSERT(0,"Location Unkown - Error setting kernel "<< name() << " at pos = " << pos << ", arg = " << data);
 	}
-    if(stat != CL_SUCCESS) cerr << "Error setting kernel "<< name() << " at pos = " << pos << ", arg = " << data << endl;
-	OPENCL_SAFE_CALL( stat );
+    
+  if(stat != CL_SUCCESS) cerr << "Error setting kernel "<< name() << " at pos = " << pos << ", arg = " << data << endl;
+	
+  OPENCL_SAFE_CALL( stat );
 }
 
 template void ocl::Kernel::setArg<int>   (int pos, const int& data);

@@ -84,54 +84,297 @@ public:
     void setProgram(const Program&);
     Context& context() const;
 
-    /*! \brief Executes this Kernel with arguments and returns an Event by which the execution can be tracked.
-      *
-      * The number of arguments must be equal to the number of arguments
-      * defined in the kernel function of this Kernel. Also the types
-      * must match.
-    */
-	template<typename ... Types>
-    ocl::Event operator()(const Queue &queue, const EventList& list, const Types& ... args)
-	{
-        //int pos = 0;
-        //if(sizeof...(args) > 0) setArg(pos, args ... );
-          pushArg( args... );
-        return callKernel(queue, list);
-	}
-
-    /*! \brief Executes this Kernel with arguments and returns an Event by which the execution can be tracked.
-      *
-      * The number of arguments must be equal to the number of arguments
-      * defined in the kernel function of this Kernel. Also the types
-      * must match.
-    */
-    template<typename ... Types>
-    ocl::Event operator()(const Queue &queue, const Types& ... args)
-    {
-        //int pos = 0;
-        //if(sizeof...(args) > 0) setArg(pos, args ... );
-        pushArg( args ... );
-        return callKernel(queue);
-    }
-
-    /*! \brief Executes this Kernel with arguments and returns an Event by which the execution can be tracked.
-      *
-      * The number of arguments must be equal to the number of arguments
-      * defined in the kernel function of this Kernel. Also the types
-      * must match.
-    */
-    template<typename ... Types>
-    ocl::Event operator()(const Types& ... args)
-    {
-        //int pos = 0;
-        //setArg(pos, args ... );
-        pushArg( args ... );
-        return callKernel();
-    }
-
-
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+#if 0
     ocl::Event operator()();
 
+
+    /*! \brief Executes this Kernel with arguments and returns an Event by which the execution can be tracked.
+    *
+    * The number of arguments must be equal to the number of arguments
+    * defined in the kernel function of this Kernel. Also the types
+    * must match.
+    */
+    template<typename T, typename ... Types>
+    ocl::Event operator()(const T& arg0, const Types& ... args)
+    {
+    //int pos = 0;
+    //setArg(pos, args ... );
+    //pushArg(arg0);
+    pushArg( arg0, args ... );
+    return callKernel();
+    }
+
+    template<typename T1, typename T2, typename ... Types>
+    ocl::Event operator()(const T1& arg0, const T2& arg1, const Types& ... args)
+    {
+      //int pos = 0;
+      //setArg(pos, args ... );
+      //pushArg(arg0);
+      //pushArg(arg1);
+      pushArg( arg0, arg1, args ...);
+      return callKernel();
+    }
+#else
+    template< typename ... Types >
+    ocl::Event operator ()(Types const&... args)
+    {
+      pushArg(args...);
+      return callKernel();
+    }
+#endif
+
+    /*! \brief Executes this Kernel with arguments and returns an Event by which the execution can be tracked.
+    *
+    * The number of arguments must be equal to the number of arguments
+    * defined in the kernel function of this Kernel. Also the types
+    * must match.
+    */
+    template<typename ... Types>
+    ocl::Event operator()(const ocl::Queue &queue, const ocl::EventList& list, const Types& ... args)
+    {
+      //int pos = 0;
+      //if(sizeof...(args) > 0) setArg(pos, args ... );
+      pushArg(args...);
+      return callKernel(queue, list);
+    }
+
+    /*! \brief Executes this Kernel with arguments and returns an Event by which the execution can be tracked.
+    *
+    * The number of arguments must be equal to the number of arguments
+    * defined in the kernel function of this Kernel. Also the types
+    * must match.
+    */
+    template<typename ... Types>
+    ocl::Event operator()(const ocl::Queue &queue, const Types& ... args)
+    {
+      //int pos = 0;
+      //if(sizeof...(args) > 0) setArg(pos, args ... );
+      pushArg(args ...);
+      return callKernel(queue);
+    }
+#else
+    ocl::Event operator()()
+    {
+      return callKernel();
+    }
+
+    template< typename T >
+    ocl::Event operator()( T const& arg0 )
+    {
+      pushArg(arg0);
+      return callKernel();
+    }
+
+    template< typename T1, typename T2 >
+    ocl::Event operator()(T1 const& arg0, T2 const& arg1)
+    {
+      pushArg(arg0,arg1);
+      return callKernel();
+    }
+
+    template< typename T1, typename T2, typename T3 >
+    ocl::Event operator()(T1 const& arg0, T2 const& arg1, T3 const& arg2)
+    {
+      pushArg(arg0, arg1,arg2);
+      return callKernel();
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4 >
+    ocl::Event operator()(T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3)
+    {
+      pushArg(arg0, arg1, arg2, arg3);
+      return callKernel();
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4, typename T5 >
+    ocl::Event operator()(T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3, T5 const& arg4)
+    {
+      pushArg(arg0, arg1, arg2, arg3, arg4);
+      return callKernel();
+    }
+
+
+    ocl::Event operator()( Queue const& queue )
+    {
+      return callKernel(queue);
+    }
+
+    template< typename T >
+    ocl::Event operator()(Queue const& queue , T const& arg0)
+    {
+      pushArg(arg0);
+      return callKernel(queue);
+    }
+
+    template< typename T1, typename T2 >
+    ocl::Event operator()(Queue const& queue, T1 const& arg0, T2 const& arg1)
+    {
+      pushArg(arg0, arg1);
+      return callKernel(queue);
+    }
+
+    template< typename T1, typename T2, typename T3 >
+    ocl::Event operator()(Queue const& queue, T1 const& arg0, T2 const& arg1, T3 const& arg2)
+    {
+      pushArg(arg0, arg1, arg2);
+      return callKernel(queue);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4 >
+    ocl::Event operator()(Queue const& queue, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3)
+    {
+      pushArg(arg0, arg1, arg2, arg3);
+      return callKernel(queue);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4, typename T5 >
+    ocl::Event operator()(Queue const& queue, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3, T5 const& arg4)
+    {
+      pushArg(arg0, arg1, arg2, arg3, arg4);
+      return callKernel(queue);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6 >
+    ocl::Event operator()(Queue const& queue, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3, T5 const& arg4, T6 const& arg5)
+    {
+      pushArg(arg0, arg1, arg2, arg3, arg4, arg5);
+      return callKernel(queue);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7 >
+    ocl::Event operator()(Queue const& queue, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3, T5 const& arg4, T6 const& arg5, T7 const& arg6)
+    {
+      pushArg(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
+      return callKernel(queue);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8 >
+    ocl::Event operator()(Queue const& queue, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3, T5 const& arg4, T6 const& arg5, T7 const& arg6, T8 const& arg7)
+    {
+      pushArg(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+      return callKernel(queue);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9 >
+    ocl::Event operator()(Queue const& queue, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3, T5 const& arg4, T6 const& arg5, T7 const& arg6, T8 const& arg7, T9 const& arg8)
+    {
+      pushArg(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+      return callKernel(queue);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename T10 >
+    ocl::Event operator()(Queue const& queue, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3, T5 const& arg4, T6 const& arg5, T7 const& arg6, T8 const& arg7, T9 const& arg8, T10 const& arg9)
+    {
+      pushArg(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+      return callKernel(queue);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename T10, typename T11 >
+    ocl::Event operator()(Queue const& queue, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3, T5 const& arg4, T6 const& arg5, T7 const& arg6, T8 const& arg7, T9 const& arg8, T10 const& arg9, T11 const& arg10)
+    {
+      pushArg(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+      return callKernel(queue);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename T10, typename T11, typename T12 >
+    ocl::Event operator()(Queue const& queue, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3, T5 const& arg4, T6 const& arg5, T7 const& arg6, T8 const& arg7, T9 const& arg8, T10 const& arg9, T11 const& arg10, T12 const& arg11)
+    {
+      pushArg(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+      return callKernel(queue);
+    }
+
+
+
+    ocl::Event operator()(Queue const& queue, EventList const& el)
+    {
+      return callKernel(queue, el);
+    }
+
+    template< typename T >
+    ocl::Event operator()(Queue const& queue, EventList const& el, T const& arg0)
+    {
+      pushArg(arg0);
+      return callKernel(queue, el);
+    }
+
+    template< typename T1, typename T2 >
+    ocl::Event operator()(Queue const& queue, EventList const& el, T1 const& arg0, T2 const& arg1)
+    {
+      pushArg(arg0, arg1);
+      return callKernel(queue, el);
+    }
+
+    template< typename T1, typename T2, typename T3 >
+    ocl::Event operator()(Queue const& queue, EventList const& el, T1 const& arg0, T2 const& arg1, T3 const& arg2)
+    {
+      pushArg(arg0, arg1, arg2);
+      return callKernel(queue, el);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4 >
+    ocl::Event operator()(Queue const& queue, EventList const& el, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3)
+    {
+      pushArg(arg0, arg1, arg2, arg3);
+      return callKernel(queue, el);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4, typename T5 >
+    ocl::Event operator()(Queue const& queue, EventList const& el, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3, T5 const& arg4)
+    {
+      pushArg(arg0, arg1, arg2, arg3, arg4);
+      return callKernel(queue, el);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6 >
+    ocl::Event operator()(Queue const& queue, EventList const& el, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3, T5 const& arg4, T6 const& arg5)
+    {
+      pushArg(arg0, arg1, arg2, arg3, arg4, arg5);
+      return callKernel(queue, el);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7 >
+    ocl::Event operator()(Queue const& queue, EventList const& el, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3, T5 const& arg4, T6 const& arg5, T7 const& arg6)
+    {
+      pushArg(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
+      return callKernel(queue, el);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8 >
+    ocl::Event operator()(Queue const& queue, EventList const& el, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3, T5 const& arg4, T6 const& arg5, T7 const& arg6, T8 const& arg7)
+    {
+      pushArg(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+      return callKernel(queue, el);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9 >
+    ocl::Event operator()(Queue const& queue, EventList const& el, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3, T5 const& arg4, T6 const& arg5, T7 const& arg6, T8 const& arg7, T9 const& arg8)
+    {
+      pushArg(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+      return callKernel(queue, el);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename T10 >
+    ocl::Event operator()(Queue const& queue, EventList const& el, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3, T5 const& arg4, T6 const& arg5, T7 const& arg6, T8 const& arg7, T9 const& arg8, T10 const& arg9)
+    {
+      pushArg(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+      return callKernel(queue, el);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename T10, typename T11 >
+    ocl::Event operator()(Queue const& queue, EventList const& el, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3, T5 const& arg4, T6 const& arg5, T7 const& arg6, T8 const& arg7, T9 const& arg8, T10 const& arg9, T11 const& arg10)
+    {
+      pushArg(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+      return callKernel(queue, el);
+    }
+
+    template< typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename T10, typename T11, typename T12 >
+    ocl::Event operator()(Queue const& queue, EventList const& el, T1 const& arg0, T2 const& arg1, T3 const& arg2, T4 const& arg3, T5 const& arg4, T6 const& arg5, T7 const& arg6, T8 const& arg7, T9 const& arg8, T10 const& arg9, T11 const& arg10, T12 const& arg11)
+    {
+      pushArg(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+      return callKernel(queue, el);
+    }
+#endif
 
 	void setWorkSize(size_t lSizeX, size_t gSizeX);
 	void setWorkSize(size_t lSizeX, size_t lSizeY, size_t gSizeX, size_t gSizeY);
@@ -182,7 +425,7 @@ private:
     template< size_t NumArgs, size_t ArgIndex, typename Type, typename... Types >
     struct ArgPusher
     {
-      ArgPusher( Kernel& kernel, Type arg, Types... args )
+      ArgPusher( Kernel& kernel, Type const& arg, Types const&... args )
       {
         kernel.setArg( ArgIndex, arg );
         
@@ -193,7 +436,7 @@ private:
     template< size_t ArgIndex, typename Type>
     struct ArgPusher< 1, ArgIndex, Type >
     {
-      ArgPusher( Kernel& kernel, Type arg )
+      ArgPusher( Kernel& kernel, Type const& arg )
       {
         kernel.setArg( ArgIndex, arg );
         
