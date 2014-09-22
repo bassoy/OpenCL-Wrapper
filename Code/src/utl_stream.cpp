@@ -75,7 +75,7 @@ void utl::read(const std::string &name, T *matrix, size_t size, std::ios::openmo
     is.seekg (0, std::ios::end);
 	auto length = is.tellg(); // number of characters, bytes
     is.seekg (0, std::ios::beg);
-	TRUE_ASSERT(size == length, size << " != " << length);
+	TRUE_ASSERT(static_cast<std::streampos>(size) == length, size << " != " << length);
 	is.read((char*)matrix, size);
 	TRUE_ASSERT(!is.bad(), "Error reading file: " << name);
 	is.close();

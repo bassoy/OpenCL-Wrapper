@@ -245,14 +245,18 @@ struct isRowMajorImpl
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
   constexpr 
 #endif
-    static bool const value;
+    static bool const value
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+    =  false
+#endif    
+    ;
 };
 
+
+#if defined(_MSC_VER) && _MSC_VER < 1900
 template< typename T > 
-#if !defined(_MSC_VER) || _MSC_VER >= 1900
-constexpr
-#endif
 bool const isRowMajorImpl< T >::value = false;
+#endif
 
 template< typename T >
 struct isRowMajorImpl< Matrix< T, row_major_tag > >
@@ -260,15 +264,18 @@ struct isRowMajorImpl< Matrix< T, row_major_tag > >
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
   constexpr 
 #endif
-    static bool const value;
+    static bool const value
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+     = true
+#endif
+  ;
 };
 
+#if defined(_MSC_VER) && _MSC_VER < 1900
 template< typename T > 
-#if !defined(_MSC_VER) || _MSC_VER >= 1900
-constexpr 
-#endif
 bool const isRowMajorImpl< Matrix< T, row_major_tag > >::value = true;
-  
+#endif
+
 }
 
 
