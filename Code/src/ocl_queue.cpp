@@ -101,7 +101,17 @@ void ocl::Queue::create(ocl::Context * ctxt)
 	}
 
 	cl_int status;
+	
+#if CL_VERSION_2_0
+	cl_queue_properties props[] = {
+	  CL_QUEUE_PROPERTIES, this->properties(),
+	  0
+	};
+	
+	_id = clCreateCommandQueueWithProperties( this->context().id(), this->device().id(), props, &status );
+#else
 	_id = clCreateCommandQueue(this->context().id(), this->device().id(), this->properties(), &status);
+#endif
 	OPENCL_SAFE_CALL(status);
 	TRUE_ASSERT(_id != NULL, "clCreateCommandQueue failed\n");
     _context->insert(this);
