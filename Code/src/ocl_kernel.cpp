@@ -137,7 +137,9 @@ void ocl::Kernel::create()
     TRUE_ASSERT(this->program().isBuilt(), "Program not yet built");
     const char * __t = this->name().c_str();
     
+#if 0
     std::cout << "Looking for kernel with name: " << __t << std::endl;
+#endif
     
     cl_int err;
     _id = clCreateKernel(this->_program->id(), __t, &err);

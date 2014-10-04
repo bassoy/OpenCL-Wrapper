@@ -471,8 +471,10 @@ ocl::Program& ocl::Program::operator << (const std::string &k)
     checkConstraints();
     
 //     TRUE_ASSERT( !_types.empty(), "Lost types in this function?" );
+#if 0
     for ( auto& kernel : _kernels )
       std::cout << "Has kernel: " << kernel->name() << std::endl;
+#endif
     
     return *this;
 }
@@ -757,7 +759,7 @@ void ocl::Program::eraseComments(std::string &kernels) const
 
 
 /*! \brief Checks whether the build process was successfull or not.*/
-void ocl::Program::checkBuild(cl_int /*buildErr*/) const
+void ocl::Program::checkBuild(cl_int buildErr) const
 {
 #if 0
 	if(buildErr == CL_SUCCESS) return;
@@ -780,8 +782,8 @@ void ocl::Program::checkBuild(cl_int /*buildErr*/) const
 	exit(-1);
 #else
   // Exiting the program is not acceptable.
-  //if ( buildErr == CL_SUCCESS )
-    //return;
+  if ( buildErr == CL_SUCCESS )
+    return;
   
   std::ostringstream oss;
   
