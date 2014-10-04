@@ -471,6 +471,8 @@ ocl::Program& ocl::Program::operator << (const std::string &k)
     checkConstraints();
     
 //     TRUE_ASSERT( !_types.empty(), "Lost types in this function?" );
+    for ( auto& kernel : _kernels )
+      std::cout << "Has kernel: " << kernel->name() << std::endl;
     
     return *this;
 }
