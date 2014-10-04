@@ -53,6 +53,20 @@ ocl::Device::Device() :
 
 }
 
+static bool supportsAtLeast1Point2( cl_platform_id id )
+{
+  char version[128];
+  size_t versionLen = 0;
+  
+  clGetPlatformInfo( id, CL_PLATFORM_VERSION, 128, version, &versionLen );
+  
+  int major = 0, minor = 0;
+  
+  std::sscanf( version, "OpenCL %i.%i", &major, &minor );
+  
+  return major > 1 || (major == 1 && minor > 1);
+}
+
 /*! \brief Destructs this Device.
   *
   */
@@ -61,7 +75,8 @@ ocl::Device::~Device()
   if ( _id )
   {
 #ifdef CL_VERSION_1_2
-    OPENCL_SAFE_CALL( clReleaseDevice( _id ) );
+    if ( supportsAtLeast1Point2( platform() ) )
+      OPENCL_SAFE_CALL( clReleaseDevice( _id ) );
 #endif
     _id = 0;
   }
@@ -78,7 +93,8 @@ ocl::Device::Device(const Device& dev) :
     _id(dev._id), _type(dev._type)
 {
 #ifdef CL_VERSION_1_2
-  OPENCL_SAFE_CALL( clRetainDevice( _id ) );
+  if ( supportsAtLeast1Point2( platform() ) )
+    OPENCL_SAFE_CALL( clRetainDevice( _id ) );
 #endif
 }
 
@@ -96,7 +112,8 @@ ocl::Device& ocl::Device::operator =(const ocl::Device &dev)
     _type = dev._type;
     
 #ifdef CL_VERSION_1_2
-    OPENCL_SAFE_CALL( clRetainDevice( _id ) );
+    if ( supportsAtLeast1Point2( platform() ) )
+      OPENCL_SAFE_CALL( clRetainDevice( _id ) );
 #endif
   }
   
