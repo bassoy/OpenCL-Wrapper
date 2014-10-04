@@ -755,7 +755,7 @@ void ocl::Program::eraseComments(std::string &kernels) const
 
 
 /*! \brief Checks whether the build process was successfull or not.*/
-void ocl::Program::checkBuild(cl_int buildErr) const
+void ocl::Program::checkBuild(cl_int /*buildErr*/) const
 {
 #if 0
 	if(buildErr == CL_SUCCESS) return;
@@ -778,12 +778,12 @@ void ocl::Program::checkBuild(cl_int buildErr) const
 	exit(-1);
 #else
   // Exiting the program is not acceptable.
-  if ( buildErr == CL_SUCCESS )
-    return;
+  //if ( buildErr == CL_SUCCESS )
+    //return;
   
   std::ostringstream oss;
   
-  oss << "Program failed to build.\n";
+  bool headerSet = false;
   
   for ( auto const& device : _context->devices() )
   {
@@ -793,6 +793,12 @@ void ocl::Program::checkBuild(cl_int buildErr) const
     
     if ( buildStatus != CL_SUCCESS ) 
     {
+      if ( !headerSet )
+      {
+	oss << "Program failed to build.\n";
+	headerSet = true;
+      }
+      
       size_t size = 0u;
       
       clGetProgramBuildInfo( _id, device.id(), CL_PROGRAM_BUILD_LOG, 0u, nullptr, &size );
@@ -805,7 +811,8 @@ void ocl::Program::checkBuild(cl_int buildErr) const
     }
   }
   
-  throw std::runtime_error( oss.str() );
+  if ( !oss.str().empty() )
+    throw std::runtime_error( oss.str() );
 #endif
 }
 
