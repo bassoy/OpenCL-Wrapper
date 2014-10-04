@@ -342,7 +342,6 @@ bool ocl::Device::imageSupport() const
 }
 
 
-
 static bool supportsExtension( std::string const& extensionsString, char const* extension )
 {
   auto const len = std::strlen( extension );
@@ -363,13 +362,19 @@ static bool supportsExtension( std::string const& extensionsString, char const* 
 
 
 
+bool ocl::Device::supportsExtension( std::string const& ext ) const
+{
+  return ::supportsExtension( extensions(), ext.c_str() );
+}
+
+
 /** 
  * @retval true If this device supports double data type (cl_khr_fp64).
  * @retval false Otherwise.
  */
 bool ocl::Device::doubleSupport() const
 {
-  return supportsExtension( extensions(), "cl_khr_fp64" );
+  return supportsExtension( "cl_khr_fp64" );
 }
 
 

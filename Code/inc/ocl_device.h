@@ -101,6 +101,8 @@ public:
 	
 	bool imageSupport() const;
   bool doubleSupport() const;
+  
+	bool supportsExtension( std::string const& extension ) const;
 
 private:
 	cl_device_id _id;
