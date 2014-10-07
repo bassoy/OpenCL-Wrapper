@@ -458,6 +458,10 @@ size_t ocl::Device::wavefrontSize() const
   {
     return 16u;
   }
+  else if ( n == "AMD FX(tm)-8150 Eight-Core Processor" )
+  {
+    return 1;
+  }
   else
   {
     throw std::runtime_error( "don't know wavefront size for device " + n );
@@ -491,6 +495,10 @@ size_t ocl::Device::maxWorkItemRegs() const
   else if ( n == "Intel(R) Many Integrated Core Acceleration Card" )
   {
     return 32u;
+  }
+  else if ( n == "AMD FX(tm)-8150 Eight-Core Processor" )
+  {
+    return 16; // just a guess
   }
   else
   {
@@ -557,6 +565,10 @@ size_t ocl::Device::localMemSizeNotLimitedByWavefronts( size_t const workGroupSi
   else if ( n == "Intel(R) Many Integrated Core Acceleration Card" )
   {
     // Intel Xeon Phi does not really have limitations on local memory :(
+    return localMemSize();
+  }
+  else if ( n == "AMD FX(tm)-8150 Eight-Core Processor" )
+  {
     return localMemSize();
   }
   else
