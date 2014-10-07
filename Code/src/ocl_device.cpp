@@ -552,6 +552,11 @@ size_t ocl::Device::localMemSizeNotLimitedByWavefronts( size_t const workGroupSi
     if ( workGroupSize <= 768 ) return 24576;
     return 49152;
   }
+  else if ( n == "Intel(R) Many Integrated Core Acceleration Card" )
+  {
+    // Intel Xeon Phi does not really have limitations on local memory :(
+    return localMemSize();
+  }
   else
   {
     throw std::runtime_error( "don't know local memory limit on active wavefronts for device " + n );

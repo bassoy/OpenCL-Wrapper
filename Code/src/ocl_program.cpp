@@ -389,7 +389,9 @@ ocl::Program& ocl::Program::operator << (const std::string &k)
 //   }
   
     std::string kernels = k;
+#if 0 // For now disable comment removal as we need it to play a trick on the AMD compiler.
     eraseComments(kernels);
+#endif
 
 //     filterCommonCode( k );
     //DEBUG_COMMENT(kernels);
