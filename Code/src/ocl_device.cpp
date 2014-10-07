@@ -53,6 +53,7 @@ ocl::Device::Device() :
 
 }
 
+#ifdef CL_VERSION_1_2
 static bool supportsAtLeast1Point2( cl_platform_id id )
 {
   char version[128];
@@ -66,6 +67,7 @@ static bool supportsAtLeast1Point2( cl_platform_id id )
   
   return major > 1 || (major == 1 && minor > 1);
 }
+#endif
 
 /*! \brief Destructs this Device.
   *
