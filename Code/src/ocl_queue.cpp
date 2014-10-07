@@ -84,6 +84,7 @@ void ocl::Queue::setContext(ocl::Context &ctxt)
     _context = &ctxt;
 }
 
+#if CL_VERSION_2_0
 static bool supportsAtLeast2Point0( cl_platform_id id )
 {
   char version[128];
@@ -97,6 +98,7 @@ static bool supportsAtLeast2Point0( cl_platform_id id )
   
   return major > 1;
 }
+#endif
 
 /*! \brief Creates cl_command_queue for this Queue.
   *
