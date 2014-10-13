@@ -103,6 +103,8 @@ public:
   bool doubleSupport() const;
   
 	bool supportsExtension( std::string const& extension ) const;
+        
+        bool supportsVersion( int major, int minor ) const;
 
 private:
 	cl_device_id _id;
