@@ -540,7 +540,7 @@ size_t ocl::Device::maxLocalMemAllocSize() const
   else if ( n == "Intel(R) Many Integrated Core Acceleration Card" )
   {
     // Intel Xeon Phi does not really have limitations on local memory :(
-    return localMemSize();
+    return 8192u * 1024u; // Tested with example Kernel. 
   }
   else
   {
@@ -574,11 +574,11 @@ size_t ocl::Device::localMemSizeNotLimitedByWavefronts( size_t const workGroupSi
   else if ( n == "Intel(R) Many Integrated Core Acceleration Card" )
   {
     // Intel Xeon Phi does not really have limitations on local memory :(
-    return localMemSize();
+    return maxLocalMemAllocSize();
   }
   else if ( n == "AMD FX(tm)-8150 Eight-Core Processor" )
   {
-    return localMemSize();
+    return maxLocalMemAllocSize();
   }
   else
   {
