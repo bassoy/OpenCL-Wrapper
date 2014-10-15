@@ -69,6 +69,15 @@ static bool supportsAtLeast1Point2( cl_platform_id id )
 }
 #endif
 
+bool ocl::Device::supportsVersion( int major, int minor ) const
+{
+  int mjr = 0, mnr = 0;
+  
+  std::sscanf( version().c_str(), "OpenCL %i.%i", &mjr, &mnr );
+  
+  return mjr > major || (mjr == major && mnr >= minor);
+}
+
 /*! \brief Destructs this Device.
   *
   */

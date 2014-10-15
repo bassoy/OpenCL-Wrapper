@@ -117,24 +117,30 @@ void ocl::Image::create(size_t width, size_t height, ChannelType type, ChannelOr
     format.image_channel_order = order;
     format.image_channel_data_type = type;
     cl_int status;
+    
+#ifdef CL_VERSION_1_2
+    if ( _context->devices()[0].supportsVersion( 1, 2 ) )
+    {
+      cl_image_desc desc;
+      desc.image_type = CL_MEM_OBJECT_IMAGE2D;
+      desc.image_height = height;
+      desc.image_width = width;
+      desc.image_depth = 1;
+      desc.image_array_size = 1;
+      desc.image_row_pitch = 0;
+      desc.image_slice_pitch = 0;
+      desc.num_mip_levels = 0;
+      desc.num_samples = 0;
+      desc.buffer = NULL;
 
-#ifndef CL_VERSION_1_2
-    this->_id = clCreateImage2D(this->_context->id(), flags, &format, width, height, 0, NULL, &status);
-#else
-    cl_image_desc desc;
-    desc.image_type = CL_MEM_OBJECT_IMAGE2D;
-    desc.image_height = height;
-    desc.image_width = width;
-    desc.image_depth = 1;
-    desc.image_array_size = 1;
-    desc.image_row_pitch = 0;
-    desc.image_slice_pitch = 0;
-    desc.num_mip_levels = 0;
-    desc.num_samples = 0;
-    desc.buffer = NULL;
-
-    this->_id = clCreateImage(this->_context->id(), flags, &format, &desc, NULL, &status);
+      this->_id = clCreateImage(this->_context->id(), flags, &format, &desc, NULL, &status);
+    }
+    else
 #endif
+    {
+      this->_id = clCreateImage2D(this->_context->id(), flags, &format, width, height, 0, NULL, &status);
+    }
+    
     OPENCL_SAFE_CALL(status);
     TRUE_ASSERT(this->_id != 0, "Could not create 2D image.");
 }
@@ -163,22 +169,30 @@ void ocl::Image::create(size_t width, size_t height, size_t depth, ChannelType t
 
     cl_int status;
 
-#ifndef CL_VERSION_1_2
-    this->_id = clCreateImage3D(this->_context->id(), flags, &format, width, height, depth, 0, 0, NULL, &status);
-#else
-    cl_image_desc desc;
-    desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-    desc.image_height = height;
-    desc.image_width = width;
-    desc.image_depth = depth;
-    desc.image_array_size = 1;
-    desc.image_row_pitch = 0;
-    desc.image_slice_pitch = 0;
-    desc.num_mip_levels = 0;
-    desc.num_samples = 0;
-    desc.buffer = NULL;
-    this->_id = clCreateImage(this->_context->id(), flags, &format, &desc, NULL, &status);
+
+#ifdef CL_VERSION_1_2
+    if ( _context->devices()[0].supportsVersion( 1, 2 ) )
+    {
+      cl_image_desc desc;
+      desc.image_type = CL_MEM_OBJECT_IMAGE3D;
+      desc.image_height = height;
+      desc.image_width = width;
+      desc.image_depth = depth;
+      desc.image_array_size = 1;
+      desc.image_row_pitch = 0;
+      desc.image_slice_pitch = 0;
+      desc.num_mip_levels = 0;
+      desc.num_samples = 0;
+      desc.buffer = NULL;
+      this->_id = clCreateImage(this->_context->id(), flags, &format, &desc, NULL, &status);
+    }
+    else
 #endif
+    {
+      this->_id = clCreateImage3D(this->_context->id(), flags, &format, width, height, depth, 0, 0, NULL, &status);
+    }
+    
+    
     OPENCL_SAFE_CALL(status);
     TRUE_ASSERT(this->_id != 0, "Could not create 3D image.");
 }
