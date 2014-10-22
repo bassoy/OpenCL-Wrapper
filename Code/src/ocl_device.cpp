@@ -418,6 +418,11 @@ size_t ocl::Device::getL2CacheSize() const
   {
     return 768u * 1024u;
   }
+  else if ( n == "Hawaii" )
+  {
+    // http://www.hardwareluxx.com/index.php/news/hardware/vgacards/28214-new-slide-reveals-hawaii-gpu-specs.html
+    return 1024u * 1024u;
+  }
   else if ( n == "Tesla C2050" )
   {
     return 786432u;
@@ -448,7 +453,7 @@ size_t ocl::Device::wavefrontSize() const
 {
   std::string const n = name();
   
-  if ( n == "Tahiti" )
+  if ( n == "Tahiti" || n == "Hawaii" )
   {
     return 64u;
   }
@@ -523,7 +528,7 @@ size_t ocl::Device::maxLocalMemAllocSize() const
 {
   std::string const n = name();
   
-  if ( n == "Tahiti" )
+  if ( n == "Tahiti" || n == "Hawaii" )
   {
     return 32u * 1024u;
   }
