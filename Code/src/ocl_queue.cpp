@@ -121,12 +121,12 @@ void ocl::Queue::create(ocl::Context * ctxt)
 #if CL_VERSION_2_0
   if ( supportsAtLeast2Point0( device().platform() ) )
   {
-    cl_queue_properties props[] = {
+    cl_queue_properties propties[] = {
       CL_QUEUE_PROPERTIES, this->properties(),
       0
     };
     
-    _id = clCreateCommandQueueWithProperties( this->context().id(), this->device().id(), props, &status );
+    _id = clCreateCommandQueueWithProperties( this->context().id(), this->device().id(), propties, &status );
   }
   else
 #endif
