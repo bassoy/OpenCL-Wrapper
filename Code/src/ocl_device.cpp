@@ -490,7 +490,8 @@ size_t ocl::Device::maxWorkItemRegs() const
 {
   std::string const n = name();
   
-  if ( n == "Tahiti" )
+  // The guess is that Hawaii is not lesser equipped than Tahiti.
+  if ( n == "Tahiti" || n == "Hawaii" )
   {
     return 25u;
   }
@@ -563,7 +564,8 @@ size_t ocl::Device::localMemSizeNotLimitedByWavefronts( size_t const workGroupSi
   
   std::string const n = name();
   
-  if ( n == "Tahiti" )
+  // Nobody nows about Hawaii, but Tahiti should be a good approximartion here.
+  if ( n == "Tahiti" || n == "Hawaii" )
   {
     return localMemSize() / ((workGroupSize + wavefrontSize() - 1u) / wavefrontSize());
   }
