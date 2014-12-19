@@ -3,11 +3,6 @@
 
 #include <ocl_wrapper.h>
 #include <utl_utils.h>
-#ifdef __APPLE__
-#include <OpenCL/opencl.h>
-#else
-#include <CL/opencl.h>
-#endif
 
 typedef float Type;
 
@@ -42,10 +37,8 @@ int main(int /*argc*/, char** /*argv*/)
 
 	{
 
-// 		typedef utl::Matrix <Type,utl::column_major_tag> Matrix;
-// 		typedef utl::Ones   <Type,utl::column_major_tag> Ones;
 		typedef utl::Zeros  <Type,utl::column_major_tag> Zeros;
-// 		typedef utl::Rand   <Type,utl::column_major_tag, utl::uniform_dist_tag> Rand;
+		typedef utl::Matrix  <Type,utl::column_major_tag> Matrix;
 
 		const size_t elements  = 1 << 4;
 		const size_t local_size = 256;
@@ -57,8 +50,8 @@ int main(int /*argc*/, char** /*argv*/)
 
 
 		// create host matrices
-		auto h_matrix_in  = Zeros(elements,1);
-		auto h_matrix_out = Zeros(elements,1);
+		Matrix h_matrix_in  = Zeros(elements,1);
+		Matrix h_matrix_out = Zeros(elements,1);
 
 		float i = 0;
 		for(auto &v : h_matrix_in)
@@ -88,10 +81,8 @@ int main(int /*argc*/, char** /*argv*/)
 
 	{
 
-		typedef utl::Matrix <Type,utl::column_major_tag> Matrix;
-// 		typedef utl::Ones   <Type,utl::column_major_tag> Ones;
 		typedef utl::Zeros  <Type,utl::column_major_tag> Zeros;
-// 		typedef utl::Rand   <Type,utl::column_major_tag, utl::uniform_dist_tag> Rand;
+		typedef utl::Matrix  <Type,utl::column_major_tag> Matrix;
 
 		const size_t rows  = 1 << 6;
 		const size_t cols  = 1 << 7;
@@ -179,11 +170,8 @@ int main(int /*argc*/, char** /*argv*/)
 
 
 	{
-
-		typedef utl::Matrix <Type,utl::row_major_tag> Matrix;
-// 		typedef utl::Ones   <Type,utl::row_major_tag> Ones;
 		typedef utl::Zeros  <Type,utl::row_major_tag> Zeros;
-// 		typedef utl::Rand   <Type,utl::row_major_tag, utl::uniform_dist_tag> Rand;
+		typedef utl::Matrix  <Type,utl::row_major_tag> Matrix;
 
 		const size_t rows  = 1 << 6;
 		const size_t cols  = 1 << 7;

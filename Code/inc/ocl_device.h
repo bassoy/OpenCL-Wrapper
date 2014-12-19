@@ -30,8 +30,6 @@
 
 namespace ocl{
 
-
-
 /*! \class Device ocl_device.h "inc/ocl_device.h"
   * \brief Wrapper for cl_device_id.
   *
@@ -44,7 +42,8 @@ namespace ocl{
   */
 class  Device
 {
-public:
+public:	
+	
 	Device(const Device&);
 	explicit Device(cl_device_id);
 	Device();
@@ -101,13 +100,14 @@ public:
 	
 	bool imageSupport() const;
   bool doubleSupport() const;
-  
 	bool supportsExtension( std::string const& extension ) const;
   bool supportsVersion( int major, int minor ) const;
 
 private:
 	cl_device_id _id;
 	DeviceType _type;
+
+
 };
 
 }

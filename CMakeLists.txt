@@ -16,6 +16,7 @@ find_path(OPENCL_INCLUDE_DIR CL/cl.h HINTS
 include_directories(SYSTEM ${OPENCL_INCLUDE_DIR})
 include_directories(Code/inc)
 
+
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   add_definitions(-Wall -Wextra -Werror -pedantic -pedantic-errors -O2
     -Wno-deprecated-declarations
@@ -95,6 +96,7 @@ set(OclWrapper_SRCS
 )
 
 add_library(OclWrapper STATIC ${OclWrapper_HDRS} ${OclWrapper_SRCS})
+set_target_properties(OclWrapper PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Code/lib)
 
 add_executable(platform Tutorial/1.platform/platform.cpp)
 target_link_libraries(platform OclWrapper ${OPENCL_LIBRARIES})

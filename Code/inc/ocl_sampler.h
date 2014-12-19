@@ -65,7 +65,8 @@ public:
   ~Sampler();
   Sampler(Context&, AdressingMode amode = None, FilterMode fmode = Nearest, bool normalized = false);  
   void create(AdressingMode amode = None, FilterMode fmode = Nearest, bool normalized = false);
-  
+	 Sampler& operator =( Sampler const& ) = delete;
+	 Sampler( Sampler const& ) = delete;  
 
 	cl_sampler id() const;
 	void release();
@@ -73,9 +74,6 @@ public:
   bool isNormalized() const;
   AdressingMode addressingMode() const;
   FilterMode filterMode() const;
-  
-  Sampler& operator =( Sampler const& ) = delete;
-  Sampler( Sampler const& ) = delete;
   
 private:
   Context *_context;

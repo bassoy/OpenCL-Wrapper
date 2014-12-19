@@ -28,7 +28,6 @@
 #include <utl_assert.h>
 
 
-
 /*! \brief Instantiates this Device.
   *
   * Usually the devices are created using the Platform class.
@@ -62,7 +61,7 @@ bool ocl::Device::supportsVersion( int major, int minor ) const
   return mjr > major || (mjr == major && mnr >= minor);
 }
 
-#ifdef CL_VERSION_1_2
+#ifdef OPENCL_V1_2
 static bool supportsAtLeast1Point2( cl_platform_id id )
 {
   char version[128];
@@ -85,7 +84,7 @@ ocl::Device::~Device()
 {
   if ( _id )
   {
-#ifdef CL_VERSION_1_2
+#ifdef OPENCL_V1_2
     if ( supportsAtLeast1Point2( platform() ) )
       OPENCL_SAFE_CALL( clReleaseDevice( _id ) );
 #endif
@@ -103,7 +102,7 @@ ocl::Device::~Device()
 ocl::Device::Device(const Device& dev) :
     _id(dev._id), _type(dev._type)
 {
-#ifdef CL_VERSION_1_2
+#ifdef OPENCL_V1_2
   if ( supportsAtLeast1Point2( platform() ) )
     OPENCL_SAFE_CALL( clRetainDevice( _id ) );
 #endif
@@ -122,7 +121,7 @@ ocl::Device& ocl::Device::operator =(const ocl::Device &dev)
     _id = dev._id;
     _type = dev._type;
     
-#ifdef CL_VERSION_1_2
+#ifdef OPENCL_V1_2
     if ( supportsAtLeast1Point2( platform() ) )
       OPENCL_SAFE_CALL( clRetainDevice( _id ) );
 #endif
@@ -303,61 +302,63 @@ cl_platform_id ocl::Device::platform() const
 	return _pl;
 }
 
+static std::string 
+getDeviceInfo(cl_device_id id, cl_device_info info)
+{
+	size_t size = 0u;
+	OPENCL_SAFE_CALL( clGetDeviceInfo(id, info, 0u, nullptr, &size ) );
+	std::unique_ptr< char[] > buffer( new char[size] );
+ 
+	OPENCL_SAFE_CALL( clGetDeviceInfo(id, info,  size, buffer.get(), NULL));
+	return buffer.get();
+}
+
 /*! \brief Returns the version of this Device .*/
 std::string ocl::Device::version() const
 {
-// 	std::string buffer(100,0);
-  char buffer[100];
-  
-	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VERSION,  sizeof buffer, buffer, NULL));
-	return buffer;
+	return getDeviceInfo(this->id(),CL_DEVICE_VERSION);
 }
 
 /*! \brief Returns the name of this Device .*/
 std::string ocl::Device::name() const
 {
-//     std::string buffer(100,0);
-  char buffer[100];
-  
-	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_NAME,  sizeof buffer, buffer, NULL));
-	return buffer;
+	return getDeviceInfo(this->id(),CL_DEVICE_NAME);
 }
 
 /*! \brief Returns the name of the vendor of this Device .*/
 std::string ocl::Device::vendor() const
 {
-//     std::string buffer(100,0);
-  char buffer[100];
-  
-	OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VENDOR,  sizeof buffer, buffer, NULL));
-	return buffer;
+	return getDeviceInfo(this->id(),CL_DEVICE_VENDOR);
 }
 
 /*! \brief Returns all extensions of this Device (support of double precision?) .*/
 std::string ocl::Device::extensions() const
 {
-  std::size_t size = 0u;
-  OPENCL_SAFE_CALL( clGetDeviceInfo( this->id(), CL_DEVICE_EXTENSIONS, 0u, nullptr, &size ) );
-  
-  std::unique_ptr< char[] > buffer( new char[size] );
-  
-  OPENCL_SAFE_CALL( clGetDeviceInfo( this->id(), CL_DEVICE_EXTENSIONS, size, buffer.get(), nullptr ) );
-  
-  return buffer.get();
+	return getDeviceInfo(this->id(),CL_DEVICE_EXTENSIONS);
 }
 
 /*! \brief Prints this Device.*/
 void ocl::Device::print() const
 {
-//     std::string buffer(100,0);
-    char buffer[100];
     std::cout << "\tDevice " << std::endl;
-    OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_VENDOR, sizeof buffer, buffer, NULL) );
-    std::cout << "\t\tDevice: " << buffer << std::endl;
-//     buffer.assign(100,0);
-    OPENCL_SAFE_CALL( clGetDeviceInfo(this->id(), CL_DEVICE_NAME, sizeof buffer, buffer, NULL) );
-    std::cout << "\t\tName: " <<  buffer << std::endl;
+    std::cout << "\t\tVendor: " << this->vendor() << std::endl;
+    std::cout << "\t\tName: " <<  this->name() << std::endl;
+}
 
+static bool supportsExtension( std::string const& extensionsString, char const* extension )
+{
+ auto const len = std::strlen( extension );
+ auto p = extensionsString.c_str();
+
+ while ( *p != '\0' )
+ {
+		auto n = std::strcspn( p, " " );
+
+		if ( len == n && 0 == strncmp( p, extension, n ) ) return true;
+		p += ++n;
+	}
+
+ return false;
 }
 
 
@@ -368,27 +369,6 @@ bool ocl::Device::imageSupport() const
 	OPENCL_SAFE_CALL( clGetDeviceInfo( this->id(), CL_DEVICE_IMAGE_SUPPORT, sizeof support, &support, NULL ) );
 	return support == CL_TRUE;
 }
-
-
-static bool supportsExtension( std::string const& extensionsString, char const* extension )
-{
-  auto const len = std::strlen( extension );
-  auto       p   = extensionsString.c_str();
-  
-  while ( *p != '\0' )
-  {
-    auto n = std::strcspn( p, " " );
-    
-    if ( len == n && 0 == strncmp( p, extension, n ) )
-      return true;
-    
-    p += ++n;
-  }
-  
-  return false;
-}
-
-
 
 bool ocl::Device::supportsExtension( std::string const& ext ) const
 {

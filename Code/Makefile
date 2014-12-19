@@ -19,7 +19,7 @@ else
 	OCL_VERSION=-DOPENCL_V1_2
 endif
 
-GCC_FLAGS=-std=c++11 -Wall $(OCL_VERSION) #-D__OPENGL__ #
+GCC_FLAGS=-std=c++11 -Wall $(OCL_VERSION) -O3 #-D__OPENGL__ #
 
 
 archive: $(OBJS)

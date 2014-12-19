@@ -565,7 +565,7 @@ std::string ocl::Kernel::extractParameter(const std::string& kernel)
     const string &substr = kernel.substr(start, end - start + 1);
 
     start = substr.find_first_not_of(" ");
-    end = substr.find_last_not_of(" ");
+    end = substr.find_last_not_of(" ");	
 
     //if(start == end) return "";
     return substr.substr(start, end - start + 1);
@@ -608,16 +608,11 @@ std::string ocl::Kernel::specialize(const std::string& kernel, const std::string
     start = fct.find("template", start);
     end   = fct.find(">",end,1);
     TRUE_ASSERT(start < end, "Template not correctly defined.");
-    //TRUE_ASSERT(start >= 0, "Template not correctly defined.");
 
     fct.erase(start, end - start + 2);
 
-    //     DEBUG_COMMENT("fct = " << fct);
-
-    // cl_khr_fp64 is core in OpenCL 1.2
-#ifndef CL_VERSION_1_2
-    if(type == "double")//utl::type::Double)
-    fct.insert(0, "#pragma OPENCL EXTENSION cl_khr_fp64: enable\n");
+#if defined OPENCL_V1_1 || defined OPENCL_V1_0
+	if(type == "double") fct.insert(0, "#pragma OPENCL EXTENSION cl_khr_fp64: enable\n");
 #endif
 
 

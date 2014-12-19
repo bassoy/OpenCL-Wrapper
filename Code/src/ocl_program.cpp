@@ -24,6 +24,7 @@
 #include <vector>
 #include <fstream>
 #include <stdexcept>
+#include <memory>
 
 #include <ocl_query.h>
 #include <ocl_program.h>
@@ -184,14 +185,15 @@ ocl::Program::~Program()
 */
 void ocl::Program::release()
 {
-   if(this->isBuilt())
-   {
-     for ( auto& k : _kernels )
-       k->release();
-     
+   if(this->isBuilt()){
         OPENCL_SAFE_CALL( clReleaseProgram (_id));
+
+		for(auto &map : _kernels){
+			auto *kernel = map.get();
+			TRUE_ASSERT(kernel != nullptr, "Kernel should not be null");
+			kernel->release();
+		}
    }
-   
     _id = 0;
 
 //	if(_context)
@@ -234,7 +236,6 @@ void ocl::Program::setTypes(const utl::Types& types)
     TRUE_ASSERT(!types.empty(), "Types should not be empty");
     TRUE_ASSERT(!this->isBuilt(), "Program already built.");
     _types = types;
-
 }
 
 /*! \brief Sets the Types for the Kernel objects.
@@ -414,10 +415,7 @@ ocl::Program& ocl::Program::operator << (const std::string &k)
         if(_types.empty() || !ocl::Kernel::templated(next)){
             std::unique_ptr< ocl::Kernel > kernel( new ocl::Kernel(*this, next) );
             if(this->isBuilt()) kernel->create();
-            //DEBUG_COMMENT("Creating kernel " << kernel->name() << std::endl << kernel->toString() );
-#if 0
-            _kernels[kernel->name()] = kernel;
-#else
+
             auto t = std::find_if( _kernels.begin(), _kernels.end(), [&kernel]( std::unique_ptr< Kernel > const& k ){
               return kernel->name() == k->name();
             } );
@@ -426,19 +424,16 @@ ocl::Program& ocl::Program::operator << (const std::string &k)
               t->swap( kernel );
             else
               _kernels.push_back( std::move( kernel ) );
-#endif
+
             continue;
         }
+
 
         for(utl::Types::const_iterator it = _types.begin(); it != _types.end(); ++it)
         {
             const utl::Type& type = **it;
             std::unique_ptr< ocl::Kernel > kernel( new ocl::Kernel(*this, next, type) );
             if(this->isBuilt()) kernel->create();
-            //DEBUG_COMMENT("Creating kernel " << kernel->name() << std::endl << kernel->toString() );
-#if 0
-            _kernels[kernel->name()] = kernel;
-#else
             auto t = std::find_if( _kernels.begin(), _kernels.end(), [&kernel]( std::unique_ptr< Kernel > const& k ){
               return kernel->name() == k->name();
             } );
@@ -447,7 +442,6 @@ ocl::Program& ocl::Program::operator << (const std::string &k)
               t->swap( kernel );
             else
               _kernels.push_back( std::move( kernel ) );
-#endif
         }
     }
     
@@ -665,8 +659,6 @@ std::string ocl::Program::nextKernel(const std::string &kernels, size_t pos)
 #if 0
     if(pos == kernels.npos) return "";
 
-
-
     size_t start_template = kernels.find("template", pos);
     size_t start_non_template = kernels.find("__kernel",pos);
     size_t start;
@@ -714,47 +706,25 @@ std::string ocl::Program::nextKernel(const std::string &kernels, size_t pos)
 void ocl::Program::eraseComments(std::string &kernels) const
 {
 	size_t end_pos = 0, pos = 0;
-    while(pos < kernels.length()){
-            pos = kernels.find("/*", pos,2);
-            end_pos = kernels.find("*/", pos,2);
-            if(pos >= kernels.length()) break;
-            if(end_pos >= kernels.length()) break;
-            TRUE_ASSERT(pos < end_pos, pos << " >= " << end_pos);
-//		cout << "Erasing substring : " << kernels.substr(start_pos, end_pos-start_pos+2) <<  "-ENDEND" << endl;
-            
-            size_t numLineBreaks = std::count(
-              kernels.begin() + pos,
-              kernels.begin() + end_pos + 2,
-              '\n'
-            );
-            
-            kernels.replace( 
-              kernels.begin() + pos,
-              kernels.begin() + end_pos + 2,
-              numLineBreaks, '\n' 
-            );
-            
-            pos += numLineBreaks;
-            
-//             kernels.erase(pos, end_pos-pos+2);
-//             pos += 2;
+	while(pos < kernels.length()){
+		pos = kernels.find("/*", pos,2);
+		end_pos = kernels.find("*/", pos,2);
+		if(pos >= kernels.length()) break;
+		if(end_pos >= kernels.length()) break;
+		TRUE_ASSERT(pos < end_pos, pos << " >= " << end_pos);
+		kernels.erase(pos, end_pos-pos+2);
+		pos += 2;
 	}
-        pos = 0;
-        while(pos < kernels.length()){
-            pos = kernels.find("//", pos,2);
-            end_pos = kernels.find("\n", pos); //std::string s("\n");
-            if(pos >= kernels.length()) break;
-            if(end_pos >= kernels.length()) break;
-            TRUE_ASSERT(pos < end_pos, pos << " >= " << end_pos);
-            //		cout << "Erasing substring : " << kernels.substr(start_pos, end_pos-start_pos) <<  "-ENDEND" << endl;
-            kernels.erase(pos, end_pos-pos);
-//             kernels.replace(
-//               kernels.begin() + pos,
-//               kernels.begin() + end_pos + 1u,
-//               1u, '\n'
-//             );
-            pos++;
-         }
+	pos = 0;
+	while(pos < kernels.length()){
+		pos = kernels.find("//", pos,2);
+		end_pos = kernels.find("\n", pos); std::string s("\n");
+		if(pos >= kernels.length()) break;
+		if(end_pos >= kernels.length()) break;
+		TRUE_ASSERT(pos < end_pos, pos << " >= " << end_pos);
+		kernels.erase(pos, end_pos-pos);
+		pos++;
+	}
 }
 
 
@@ -763,26 +733,6 @@ void ocl::Program::eraseComments(std::string &kernels) const
 /*! \brief Checks whether the build process was successfull or not.*/
 void ocl::Program::checkBuild(cl_int buildErr) const
 {
-#if 0
-	if(buildErr == CL_SUCCESS) return;
-    std::cerr << "Program failed to build." << std::endl;
-	cl_build_status buildStatus;
-//     std::string buildLog;
-	size_t size = 0;
-    for(auto device : _context->devices()){
-        clGetProgramBuildInfo(_id, device.id(), CL_PROGRAM_BUILD_STATUS, sizeof(cl_build_status), &buildStatus, NULL);
-		if(buildStatus == CL_SUCCESS) continue;
-
-		clGetProgramBuildInfo(_id, device.id(), CL_PROGRAM_BUILD_LOG,  0, NULL, &size);
-// 		buildLog.assign((unsigned int)size, 0);
-                
-                std::unique_ptr< cl_char[] > buildLog( new cl_char[size] );
-
-		clGetProgramBuildInfo(_id, device.id(), CL_PROGRAM_BUILD_LOG,  size, buildLog.get(), NULL);
-        std::cerr << "Device " << device.name() << " Build Log:\n" << buildLog.get() << std::endl;
-	}
-	exit(-1);
-#else
   // Exiting the program is not acceptable.
   if ( buildErr == CL_SUCCESS )
     return;
@@ -819,7 +769,6 @@ void ocl::Program::checkBuild(cl_int buildErr) const
   
   if ( !oss.str().empty() )
     throw std::runtime_error( oss.str() );
-#endif
 }
 
 void ocl::Program::checkConstraints() const

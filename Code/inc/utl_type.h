@@ -39,8 +39,7 @@ class Type;
   *
   * Define your type in order to query types at runtime.
   */
-
-class Types //: public std::set<const Type*>
+class Types
 {
   std::set< Type const* > types_;
 public:
@@ -49,34 +48,36 @@ public:
 	typedef /*typename*/ std::set<const Type*>::const_pointer const_pointer;
 	typedef /*typename*/ std::set<const Type*>::const_reference const_reference;
 
-    Types();
-    Types(const Type &);
-    Types(const Types&);
-    Types(Types&&);
+	 //std::set< Type const* > types_;
+   
+	Types();
+	Types(const Type &);
+	Types(const Types&);
+	Types(Types&&);
 
-    template<typename T, typename ... Ts>
-    Types(T arg0, Ts ... args) //: std::set<const Type*>()
-    {
-        std::vector<const Type*> __v = {arg0, args...};
-        for(auto e : __v)
-            types_.insert(e);
-    }
+	template<typename ... Ts>
+	Types(Ts ... args)
+	{
+		std::vector<const Type*> __v = {args...};
+		for(auto e : __v)
+			types_.insert(e);
+	}
+	
 
-    bool empty() const { return types_.empty(); }
-    
-    const_iterator begin() const { return types_.begin(); }
-    
-    const_iterator end() const { return types_.end(); }
+	bool empty() const { return types_.empty(); }
+	const_iterator begin() const { return types_.begin(); }
+	const_iterator end() const { return types_.end(); }
 
-    bool contains(const Type &) const;
-    bool contains(const Types &) const;
 
-    std::set<std::string> names() const;
+	bool contains(const Type &) const;
+	bool contains(const Types &) const;
 
-    std::string toString() const;
+	std::set<std::string> names() const;
 
-    Types& operator=(const Types&);
-    Types& operator=(Types&&);
+	std::string toString() const;
+
+	Types& operator=(const Types&);
+	Types& operator=(Types&&);
 
 	bool operator==(const Types &) const;
 	bool operator!=(const Types &) const;
@@ -85,7 +86,7 @@ public:
 	Types& operator|(const Types &);
 
 	Types& operator<<(const Type &);
-    Types& operator<<(const Types &);
+	Types& operator<<(const Types &);
 };
 
 
@@ -100,6 +101,12 @@ class Type
 public:
 	Type(const std::string &name, const std::type_info &info);
 
+	Type( Type const& ) = delete;
+	Type( Type&& ) = delete;
+
+	Type& operator =( Type const& ) = delete;
+	Type& operator =( Type&& ) = delete;
+
 	bool operator==(const Type &) const;
 	bool operator!=(const Type &) const;
 	bool operator==(const std::type_info&) const;
@@ -111,24 +118,17 @@ public:
 	Types operator|(const Type  &__rhs);
 	Types operator|(const Types &__rhs);
 
-    const Type* operator()() const;
+	const Type* operator()() const;
 
-    template <class T>
-    static const Type& type(){
-        for(auto __t : _allTypes) { if(*__t == typeid(T)) return *__t; }
-        TRUE_ASSERT(0, "Type with id " << typeid(T).name() << " not found");
-    }
-    
-    Type( Type const& ) = delete;
-    Type( Type&& ) = delete;
-    
-    Type& operator =( Type const& ) = delete;
-    Type& operator =( Type&& ) = delete;
-    
+	template <class T>
+	static const Type& type(){
+		for(auto __t : _allTypes) { if(*__t == typeid(T)) return *__t; }
+		TRUE_ASSERT(0, "Type with id " << typeid(T).name() << " not found");
+	}
 private:
 	std::string _name;
 	const std::type_info* _info;
-    static std::set<const Type*> _allTypes;
+	static std::set<const Type*> _allTypes;
 
 };
 
@@ -137,19 +137,12 @@ namespace type{
 	extern Type Single;
 	extern Type Int;
 	extern Type UInt;
-	extern Type SChar; // char can be either signed or unsigned depending on the implementation.
+	extern Type SChar;
 	extern Type UChar;
+	extern Type Undefined;
 	//extern Type Bool;
 }
 
-template< typename T > Type& getType(); // No matching type defined.
-template<> inline Type& getType< float >() { return type::Single; }
-template<> inline Type& getType< double >() { return type::Double; }
-template<> inline Type& getType< int >() { return type::Int; }
-template<> inline Type& getType< unsigned int >() { return type::UInt; }
-template<> inline Type& getType< signed char >() { return type::SChar; }
-template<> inline Type& getType< unsigned char >() { return type::UChar; }
-// template<> inline Type getType< bool >() { return type::Bool; }
 }
 
 

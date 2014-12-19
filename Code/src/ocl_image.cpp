@@ -118,7 +118,7 @@ void ocl::Image::create(size_t width, size_t height, ChannelType type, ChannelOr
     format.image_channel_data_type = type;
     cl_int status;
     
-#ifdef CL_VERSION_1_2
+#ifdef OPENCL_V1_2
     if ( _context->devices()[0].supportsVersion( 1, 2 ) )
     {
       cl_image_desc desc;
@@ -168,9 +168,9 @@ void ocl::Image::create(size_t width, size_t height, size_t depth, ChannelType t
     format.image_channel_data_type = type;
 
     cl_int status;
+    
 
-
-#ifdef CL_VERSION_1_2
+#ifdef OPENCL_V1_2
     if ( _context->devices()[0].supportsVersion( 1, 2 ) )
     {
       cl_image_desc desc;
@@ -192,7 +192,6 @@ void ocl::Image::create(size_t width, size_t height, size_t depth, ChannelType t
       this->_id = clCreateImage3D(this->_context->id(), flags, &format, width, height, depth, 0, 0, NULL, &status);
     }
     
-    
     OPENCL_SAFE_CALL(status);
     TRUE_ASSERT(this->_id != 0, "Could not create 3D image.");
 }
@@ -213,7 +212,7 @@ void ocl::Image::create(unsigned int texture, unsigned long texture_target, long
     }
 
     cl_int status;
-#ifndef CL_VERSION_1_2
+#if defined(OPENCL_V1_0) || defined(OPENCL_V1_1)
     this->_id = clCreateFromGLTexture2D(this->_context->id(), flags, texture_target, miplevel, texture, &status);
 #else
     this->_id = clCreateFromGLTexture(this->_context->id(), flags, texture_target, miplevel, texture, &status);

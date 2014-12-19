@@ -82,9 +82,10 @@ public:
 	Context(const Device&, const Device&, bool shared = false);
 	Context();
         
-        Context( Context const& ) = delete;
-
 	~Context();
+
+	Context( Context const& ) = delete;
+	Context& operator =( Context const& ) = delete;
 
 	void setDevices(const Platform&);
 	void setDevices(const std::vector<Device>&);
@@ -142,9 +143,6 @@ public:
 
 	std::vector<cl_device_id> cl_devices() const;
         
-        Context& operator =( Context const& ) = delete;
-
-
 protected:
 
 	cl_context _id;                  /**< OpenCL context. */

@@ -75,7 +75,8 @@ public:
     Kernel(const std::string &kernel, const utl::Type &);
     Kernel(const Program&, const std::string &kernel, const utl::Type &);
     Kernel(const Kernel&) = delete;
-	~Kernel();
+		Kernel& operator =( Kernel const& ) = delete;
+		~Kernel();
     void create();
     bool created() const;
     void release();
@@ -411,8 +412,6 @@ public:
     void setArg(int pos, const T& data);
     void setArg(int pos, cl_mem);    
     void setArg(int pos, cl_sampler);
-    
-    Kernel& operator =( Kernel const& ) = delete;
 
 private:
     template< typename... Types > void pushArg( Types const& ... args )
@@ -460,19 +459,17 @@ private:
 
 };
 
-
-
 /**
- * Round @c x to the next multiple of @c y.
- * 
- * This is usefull if one wants to fully populate all wavefronts/warps.
- */
+* Round @c x to the next multiple of @c y.
+*
+* This is usefull if one wants to fully populate all wavefronts/warps.
+*/
 template< typename T >
 T roundNextMultiple( T x, T y )
 {
-  auto const tmp = x % y;
-  
-  return tmp ? x + y - tmp : x;
+ auto const tmp = x % y;
+
+ return tmp ? x + y - tmp : x;
 }
 
 }

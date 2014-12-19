@@ -35,6 +35,7 @@
 
 namespace utl{
 
+
 /*! \class ProfilePass utl_profile_pass.h "inc/utl_profile_pass.h"
   * \brief Utility class to profile functions.
   *
@@ -44,149 +45,49 @@ namespace utl{
   * Inhertied objects need to implement the prof and ops functions.
   */
 
-template <class T>
 class ProfilePass
 {
 public:
 	using _Timer = Timer<Seconds>;
-	using _Resolution = _Timer::Resolution;
 
-	ProfilePass(const std::string& str, const Dim& start, const Dim& step, const Dim& end, size_t __iter = 10) :
-        _name(str), _start(start), _step(step), _end(end), _iter(__iter), _print_n(true), _print_t(true), _print_o(true), _print_p(true) , _countUp(true)
-	{}
-	
-	using ValueType = T;
-	
+	ProfilePass(const std::string& str, const Dim& start, const Dim& step, const Dim& end, size_t __iter = 10);
 	ProfilePass() = delete;
-	ProfilePass(const ProfilePass&) = default;
-#if !defined(_MSC_VER) || _MSC_VER >= 1900
-	ProfilePass(ProfilePass&&) = default;
-#endif
-  virtual ~ProfilePass(){}
+	ProfilePass(const ProfilePass&);
+	virtual ~ProfilePass() = default;
 
 	template<class F>
-	_Resolution call(F&& __func)
+	Seconds call(F&& func)
 	{
 		_Timer::tic();
 		for (size_t j = 0; j < _iter; j++){
-			__func();
+			func();
 		}
 		_Timer::toc();
 		return _Timer::elapsed() / _iter;
 	}
 
 
-	/**
-         * Profile.
-         * 
-         * @param dim Current dimension.
-         * 
-         * @return Execution time.
-         */
-	virtual _Resolution prof(const Dim&) = 0;
-        
-        /**
-         * Calculate number of operations needed for the dimension @c dim.
-         * 
-         * @param dim Current dimension.
-         */
-    virtual double ops(const Dim& dim) = 0;
+	virtual Seconds prof(const Dim&) = 0;
+    virtual double ops(const Dim&) = 0;
 
+	void run();
 
-	void run()
-    {
-        //size_t j = 0;
+	const std::vector<double> & dims() const;
+	const std::vector<Seconds>& times() const;
+	const std::vector<double> & ops() const;
+	const std::vector<double> & perf() const;
+	const std::string &name() const;
 
-#if 0
-        std::function< bool (const Dim&, const Dim&) > compare = _countUp ?
-        [](const Dim& lhs, const Dim& rhs)->bool{ return (lhs < 1) == 0 && lhs <= rhs; } :
-        [](const Dim& lhs, const Dim& rhs)->bool{ return (lhs < 1) == 0 && lhs >= rhs; };
+	void setCountUp();
+	void setCountDown();
 
-        std::function< void(Dim&, const Dim&) > advance = _countUp ?
-                [](Dim& lhs, const Dim& rhs){ lhs += rhs; } :
-                [](Dim& lhs, const Dim& rhs){ lhs -= rhs; } ;
-#else
-    std::function< bool(const Dim&, const Dim&) > compare = [](const Dim& lhs, const Dim& rhs)->bool{ return (lhs < 1) == 0 && lhs >= rhs; };
+	bool printNumber() const;
+	bool printTime() const;
+	bool printOperation() const;
+	bool printPerformance() const;
 
-    if (_countUp) compare = [](const Dim& lhs, const Dim& rhs)->bool{ return (lhs < 1) == 0 && lhs <= rhs; };
-
-    std::function< void(Dim&, const Dim&) > advance = [](Dim& lhs, const Dim& rhs){ lhs -= rhs; };
-
-    if (_countUp) advance = [](Dim& lhs, const Dim& rhs){ lhs += rhs; };
-#endif
-
-        for(Dim i = _start; compare(i, _end); advance(i,_step))
-        {
-          try
-          {
-//			TRUE_COMMENT("start : " << this->_start.toString() << ", _end : " << this->_end.toString() << ", _step = " << this->_step.toString() << ", i " << i.toString() << ", comp = "  << compare(i,_end));
-
-			Seconds time = this->prof(i);
-            double op = this->ops(i);
-			double perf = double(op)  / double(time.count());
-
-            this->_elems.push_back(i.prod());
-            this->_times.push_back(time) ;
-            this->_ops.push_back(op) ; // 2 * n^2 + n
-            this->_perf.push_back(perf);
-          }
-          catch ( std::exception& e )
-          {
-            // Absorb error to not exit profiling at all.
-            std::cerr << "Profile \"" << name() << "\" pass aborted due to " << e.what() << std::endl;
-          }
-		}
-
-	}
-
-
-    const std::vector<double> & dims()    const { return _elems; }
-	const std::vector<_Resolution> & times()   const { return _times; }
-	const std::vector<double> & ops()     const { return _ops; }
-	const std::vector<double> & perf()    const { return _perf; }
-	const std::string &name()             const { return _name; }
-
-    void setCountUp()   { this->_countUp = true; }
-    void setCountDown() { this->_countUp = false; }
-
-    void setPrint(bool print_n, bool print_t, bool print_o, bool print_p)
-    {
-        _print_n = print_n;
-        _print_t = print_t;
-        _print_o = print_o;
-        _print_p = print_p;
-    }
-
-    void setName(const std::string& n)  { _name = n; }
-    void setIter(size_t iter) { this->_iter = iter; }
-
-	template<class E>
-	std::string toString(const std::vector<E> &v) const
-	{
-		if(v.empty()) return "[];";
-
-		std::ostringstream oss;
-                oss.precision( std::numeric_limits< E >::digits10 );
-		oss << std::scientific << '[';
-		for ( size_t i = 0, size = v.size()-1u; i < size; ++i )
-		{
-			indirection( oss, v.at(i) ) << ',';
-		}
-		indirection( oss,  v.back() ) << "];";
-		return oss.str();
-	}
-
-	friend std::ostream& operator <<(std::ostream &out, const ProfilePass<T> *_p)
-	{
-		//out.precision(std::numeric_limits< double >::digits10);
-		out.precision(5);
-		out << std::scientific;
-		if(_p->_print_n) out << _p->name() << "_n = " << _p->toString<double>(_p->dims())  << std::endl;
-        if(_p->_print_o) out << _p->name() << "_o = " << _p->toString<double>(_p->ops())   << std::endl;
-		if(_p->_print_t) out << _p->name() << "_t = " << _p->toString<_Resolution>(_p->times()) << std::endl;
-        if(_p->_print_p) out << _p->name() << "_p = " << _p->toString<double>(_p->perf())  << std::endl;
-		return out;
-	}
+	std::string toString(const std::vector<double>& v) const;
+	std::string toString(const std::vector<Seconds>& v) const;
 
 protected:
 	std::string _name;
@@ -196,7 +97,7 @@ protected:
 
     std::vector<double> _elems;
 	std::vector<double> _ops;   /*!< Number of operations at each dimension [ ops ]*/
-	std::vector<_Resolution> _times; /*!< Time needed for the operation [ s ] */
+	std::vector<Seconds> _times; /*!< Time needed for the operation [ s ] */
 	std::vector<double> _perf;  /*!< Number of operations per Time [ Ops / s ]*/
 
     bool _countUp;
@@ -212,5 +113,9 @@ private :
 };
 
 }
+
+std::ostream& operator <<(std::ostream &out, const utl::ProfilePass& pass);
+
+
 
 #endif
