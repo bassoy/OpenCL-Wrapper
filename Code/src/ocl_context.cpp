@@ -281,8 +281,6 @@ void ocl::Context::release()
     
     OPENCL_SAFE_CALL( clReleaseContext( _id ) );
 
-		OPENCL_SAFE_CALL( clReleaseContext( _id ) );
-
     this->_activeProgram = 0;
     this->_activeQueue = 0;
     this->_id = 0;

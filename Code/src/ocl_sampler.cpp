@@ -78,7 +78,8 @@ void ocl::Sampler::create(AdressingMode amode, FilterMode fmode, bool normalized
     cl_filter_mode cl_fmode = fmode;
     cl_int status;
     
-#ifdef CL_VERSION_2_0
+// #ifdef CL_VERSION_2_0
+#ifdef OPENCL_V2_0
     cl_sampler_properties props[] = {
       CL_SAMPLER_NORMALIZED_COORDS, coords,
       CL_SAMPLER_ADDRESSING_MODE, cl_amode,
