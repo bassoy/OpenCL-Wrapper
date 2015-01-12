@@ -278,8 +278,8 @@ void ocl::Context::release()
         ocl::Sampler *m = *it; ++it;
         this->release(m);
     }
-
-		OPENCL_SAFE_CALL( clReleaseContext( _id ) );
+    
+    OPENCL_SAFE_CALL( clReleaseContext( _id ) );
 
     this->_activeProgram = 0;
     this->_activeQueue = 0;

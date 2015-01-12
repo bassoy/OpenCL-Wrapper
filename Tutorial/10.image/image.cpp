@@ -7,7 +7,7 @@
 typedef float Type;
 
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char** /*argv*/)
 {
 
 	// provides a convient access to the command line arguments
@@ -170,7 +170,6 @@ int main(int argc, char* argv[])
 
 
 	{
-
 		typedef utl::Zeros  <Type,utl::row_major_tag> Zeros;
 		typedef utl::Matrix  <Type,utl::row_major_tag> Matrix;
 

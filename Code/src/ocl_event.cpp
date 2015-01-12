@@ -90,6 +90,7 @@ ocl::Event::Event( const Event & other ) : _id(other._id), _ctxt(other._ctxt)
     TRUE_ASSERT(_id != 0, "Event not valid (id == 0)");
     TRUE_ASSERT(_ctxt != 0, "Event not valid (ctxt == 0)");
 
+
 	OPENCL_SAFE_CALL( clRetainEvent( _id ) );
 }
 

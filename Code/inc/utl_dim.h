@@ -43,17 +43,17 @@ namespace utl{
 class Dim
 {
 public:
-    typedef typename std::vector<int>::iterator             iterator;
-    typedef typename std::vector<int>::const_iterator const_iterator;
+    typedef /*typename*/ std::vector<int>::iterator             iterator;
+    typedef /*typename*/ std::vector<int>::const_iterator const_iterator;
 
-    typedef typename std::vector<int>::reverse_iterator             reverse_iterator;
-    typedef typename std::vector<int>::const_reverse_iterator const_reverse_iterator;
+    typedef /*typename*/ std::vector<int>::reverse_iterator             reverse_iterator;
+    typedef /*typename*/ std::vector<int>::const_reverse_iterator const_reverse_iterator;
 
-    typedef typename std::vector<int>::value_type        value_type;
-    typedef typename std::vector<int>::pointer           pointer;
-    typedef typename std::vector<int>::const_pointer     const_pointer;
-    typedef typename std::vector<int>::reference         reference;
-    typedef typename std::vector<int>::const_reference   const_reference;
+    typedef /*typename*/ std::vector<int>::value_type        value_type;
+    typedef /*typename*/ std::vector<int>::pointer           pointer;
+    typedef /*typename*/ std::vector<int>::const_pointer     const_pointer;
+    typedef /*typename*/ std::vector<int>::reference         reference;
+    typedef /*typename*/ std::vector<int>::const_reference   const_reference;
 
 	explicit Dim();
 

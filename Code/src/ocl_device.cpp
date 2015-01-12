@@ -15,8 +15,10 @@
 //You should have received a copy of the GNU General Public License
 //along with OpenCL Utility Toolkit.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <memory>
+#include <algorithm>
 #include <cstring>
+#include <memory>
+#include <stdexcept>
 
 #include <ocl_device.h>
 #include <ocl_query.h>
@@ -24,8 +26,6 @@
 #include <ocl_platform.h>
 
 #include <utl_assert.h>
-
-//#include <algorithm>
 
 
 /*! \brief Instantiates this Device.
@@ -52,18 +52,44 @@ ocl::Device::Device() :
 
 }
 
+bool ocl::Device::supportsVersion( int major, int minor ) const
+{
+  int mjr = 0, mnr = 0;
+  
+  std::sscanf( version().c_str(), "OpenCL %i.%i", &mjr, &mnr );
+  
+  return mjr > major || (mjr == major && mnr >= minor);
+}
+
+#ifdef OPENCL_V1_2
+static bool supportsAtLeast1Point2( cl_platform_id id )
+{
+  char version[128];
+  size_t versionLen = 0;
+  
+  clGetPlatformInfo( id, CL_PLATFORM_VERSION, 128, version, &versionLen );
+  
+  int major = 0, minor = 0;
+  
+  std::sscanf( version, "OpenCL %i.%i", &major, &minor );
+  
+  return major > 1 || (major == 1 && minor > 1);
+}
+#endif
+
 /*! \brief Destructs this Device.
   *
   */
 ocl::Device::~Device()
 {
-	if ( _id )
-	{
-		#ifdef OPENCL_V1_2
-		OPENCL_SAFE_CALL( clReleaseDevice( _id ) );
-		#endif
-		_id = 0;
-	}
+  if ( _id )
+  {
+#ifdef OPENCL_V1_2
+    if ( supportsAtLeast1Point2( platform() ) )
+      OPENCL_SAFE_CALL( clReleaseDevice( _id ) );
+#endif
+    _id = 0;
+  }
 }
 
 
@@ -76,9 +102,10 @@ ocl::Device::~Device()
 ocl::Device::Device(const Device& dev) :
     _id(dev._id), _type(dev._type)
 {
-	#ifdef OPENCL_V1_2
-	OPENCL_SAFE_CALL( clRetainDevice( _id ) );
-	#endif
+#ifdef OPENCL_V1_2
+  if ( supportsAtLeast1Point2( platform() ) )
+    OPENCL_SAFE_CALL( clRetainDevice( _id ) );
+#endif
 }
 
 /*! \brief Copies from other device to this device
@@ -89,16 +116,18 @@ ocl::Device::Device(const Device& dev) :
   */
 ocl::Device& ocl::Device::operator =(const ocl::Device &dev)
 {
- if ( this == &dev ) return *this;
-
+  if ( this != &dev )
+  {
     _id = dev._id;
     _type = dev._type;
-
+    
 #ifdef OPENCL_V1_2
-	OPENCL_SAFE_CALL( clRetainDevice( _id ) );
+    if ( supportsAtLeast1Point2( platform() ) )
+      OPENCL_SAFE_CALL( clRetainDevice( _id ) );
 #endif
-
-    return *this;
+  }
+  
+  return *this;
 }
 
 
@@ -332,24 +361,26 @@ static bool supportsExtension( std::string const& extensionsString, char const* 
  return false;
 }
 
-bool ocl::Device::doubleSupport() const
-{
- return supportsExtension( extensions(), "cl_khr_fp64" );
-}
 
-bool ocl::Device::supportsVersion(float other_version) const
-{
-	std::string this_version = this->version();
-	auto pos = this_version.find(' ');
-	TRUE_ASSERT(pos != std::string::npos, "could not find the version");
-	return other_version == std::stof(this_version.substr(pos+1,3u));
-}
-
-
-/*! \brief Return true if this Device support images.*/
+/*! \brief Return true if this Device supports images.*/
 bool ocl::Device::imageSupport() const
 {
 	cl_bool support = CL_FALSE;
 	OPENCL_SAFE_CALL( clGetDeviceInfo( this->id(), CL_DEVICE_IMAGE_SUPPORT, sizeof support, &support, NULL ) );
 	return support == CL_TRUE;
+}
+
+bool ocl::Device::supportsExtension( std::string const& ext ) const
+{
+  return ::supportsExtension( extensions(), ext.c_str() );
+}
+
+
+/** 
+ * @retval true If this device supports double data type (cl_khr_fp64).
+ * @retval false Otherwise.
+ */
+bool ocl::Device::doubleSupport() const
+{
+  return supportsExtension( "cl_khr_fp64" );
 }

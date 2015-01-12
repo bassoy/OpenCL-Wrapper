@@ -117,24 +117,30 @@ void ocl::Image::create(size_t width, size_t height, ChannelType type, ChannelOr
     format.image_channel_order = order;
     format.image_channel_data_type = type;
     cl_int status;
+    
+#ifdef OPENCL_V1_2
+    if ( _context->devices()[0].supportsVersion( 1, 2 ) )
+    {
+      cl_image_desc desc;
+      desc.image_type = CL_MEM_OBJECT_IMAGE2D;
+      desc.image_height = height;
+      desc.image_width = width;
+      desc.image_depth = 1;
+      desc.image_array_size = 1;
+      desc.image_row_pitch = 0;
+      desc.image_slice_pitch = 0;
+      desc.num_mip_levels = 0;
+      desc.num_samples = 0;
+      desc.buffer = NULL;
 
-#if defined(OPENCL_V1_0) || defined(OPENCL_V1_1)
-    this->_id = clCreateImage2D(this->_context->id(), flags, &format, width, height, 0, NULL, &status);
-#else
-    _cl_image_desc desc;
-    desc.image_type = CL_MEM_OBJECT_IMAGE2D;
-    desc.image_height = height;
-    desc.image_width = width;
-    desc.image_depth = 1;
-    desc.image_array_size = 1;
-    desc.image_row_pitch = 0;
-    desc.image_slice_pitch = 0;
-    desc.num_mip_levels = 0;
-    desc.num_samples = 0;
-    desc.buffer = NULL;
-
-    this->_id = clCreateImage(this->_context->id(), flags, &format, &desc, NULL, &status);
+      this->_id = clCreateImage(this->_context->id(), flags, &format, &desc, NULL, &status);
+    }
+    else
 #endif
+    {
+      this->_id = clCreateImage2D(this->_context->id(), flags, &format, width, height, 0, NULL, &status);
+    }
+    
     OPENCL_SAFE_CALL(status);
     TRUE_ASSERT(this->_id != 0, "Could not create 2D image.");
 }
@@ -162,23 +168,30 @@ void ocl::Image::create(size_t width, size_t height, size_t depth, ChannelType t
     format.image_channel_data_type = type;
 
     cl_int status;
+    
 
-#if defined(OPENCL_V1_0) || defined(OPENCL_V1_1)
-    this->_id = clCreateImage3D(this->_context->id(), flags, &format, width, height, depth, 0, 0, NULL, &status);
-#else
-    _cl_image_desc desc;
-    desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-    desc.image_height = height;
-    desc.image_width = width;
-    desc.image_depth = depth;
-    desc.image_array_size = 1;
-    desc.image_row_pitch = 0;
-    desc.image_slice_pitch = 0;
-    desc.num_mip_levels = 0;
-    desc.num_samples = 0;
-    desc.buffer = NULL;
-    this->_id = clCreateImage(this->_context->id(), flags, &format, &desc, NULL, &status);
+#ifdef OPENCL_V1_2
+    if ( _context->devices()[0].supportsVersion( 1, 2 ) )
+    {
+      cl_image_desc desc;
+      desc.image_type = CL_MEM_OBJECT_IMAGE3D;
+      desc.image_height = height;
+      desc.image_width = width;
+      desc.image_depth = depth;
+      desc.image_array_size = 1;
+      desc.image_row_pitch = 0;
+      desc.image_slice_pitch = 0;
+      desc.num_mip_levels = 0;
+      desc.num_samples = 0;
+      desc.buffer = NULL;
+      this->_id = clCreateImage(this->_context->id(), flags, &format, &desc, NULL, &status);
+    }
+    else
 #endif
+    {
+      this->_id = clCreateImage3D(this->_context->id(), flags, &format, width, height, depth, 0, 0, NULL, &status);
+    }
+    
     OPENCL_SAFE_CALL(status);
     TRUE_ASSERT(this->_id != 0, "Could not create 3D image.");
 }
@@ -544,8 +557,8 @@ void ocl::Image::write(const Queue& queue, const void *ptr_to_host_data, const s
 {
     TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
     TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    std::vector<size_t> origin = {0, 0, 0};
-    OPENCL_SAFE_CALL( clEnqueueWriteImage(queue.id(), this->id(), CL_TRUE, origin.data(), region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
+    size_t const origin[] = {0, 0, 0};
+    OPENCL_SAFE_CALL( clEnqueueWriteImage(queue.id(), this->id(), CL_TRUE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
     OPENCL_SAFE_CALL( clFinish(queue.id()) );
 }
 

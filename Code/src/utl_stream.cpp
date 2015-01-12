@@ -73,9 +73,9 @@ void utl::read(const std::string &name, T *matrix, size_t size, std::ios::openmo
 	is.open (name.c_str(), mode);
 	TRUE_ASSERT(!is.fail(), "Error opening file: " << name);
     is.seekg (0, std::ios::end);
-	size_t length = is.tellg(); // number of characters, bytes
+	auto length = is.tellg(); // number of characters, bytes
     is.seekg (0, std::ios::beg);
-	TRUE_ASSERT(size == length, size << " != " << length);
+	TRUE_ASSERT(static_cast<std::streampos>(size) == length, size << " != " << length);
 	is.read((char*)matrix, size);
 	TRUE_ASSERT(!is.bad(), "Error reading file: " << name);
 	is.close();
@@ -97,7 +97,7 @@ template<class T>
 void utl::randn(T *data, size_t num, T maxData)
 {
 	using namespace std::chrono;
-	srand(duration_cast<microseconds>(system_clock::now().time_since_epoch()).count());
+	srand(static_cast< unsigned> (duration_cast<microseconds>(system_clock::now().time_since_epoch()).count()));
 
 
 	if(maxData == (T)RAND_MAX){

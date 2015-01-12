@@ -39,17 +39,17 @@ class Type;
   *
   * Define your type in order to query types at runtime.
   */
-
 class Types
 {
+  std::set< Type const* > types_;
 public:
-	typedef typename std::set<const Type*>::iterator iterator;
-	typedef typename std::set<const Type*>::const_iterator const_iterator;
-	typedef typename std::set<const Type*>::const_pointer const_pointer;
-	typedef typename std::set<const Type*>::const_reference const_reference;
+	typedef /*typename*/ std::set<const Type*>::iterator iterator;
+	typedef /*typename*/ std::set<const Type*>::const_iterator const_iterator;
+	typedef /*typename*/ std::set<const Type*>::const_pointer const_pointer;
+	typedef /*typename*/ std::set<const Type*>::const_reference const_reference;
 
-	 std::set< Type const* > types_;
-
+	 //std::set< Type const* > types_;
+   
 	Types();
 	Types(const Type &);
 	Types(const Types&);
@@ -62,6 +62,7 @@ public:
 		for(auto e : __v)
 			types_.insert(e);
 	}
+	
 
 	bool empty() const { return types_.empty(); }
 	const_iterator begin() const { return types_.begin(); }
@@ -141,6 +142,7 @@ namespace type{
 	extern Type Undefined;
 	//extern Type Bool;
 }
+
 }
 
 

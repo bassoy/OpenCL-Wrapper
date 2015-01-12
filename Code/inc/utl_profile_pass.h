@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include <functional>
 
 #include <utl_stream.h>
 #include <utl_dim.h>
@@ -71,7 +72,6 @@ public:
 
 	void run();
 
-
 	const std::vector<double> & dims() const;
 	const std::vector<Seconds>& times() const;
 	const std::vector<double> & ops() const;
@@ -89,7 +89,6 @@ public:
 	std::string toString(const std::vector<double>& v) const;
 	std::string toString(const std::vector<Seconds>& v) const;
 
-
 protected:
 	std::string _name;
     utl::Dim _start, _step, _end;
@@ -103,6 +102,14 @@ protected:
 
     bool _countUp;
 
+private :
+  template< typename S >
+  static std::ostream& indirection( std::ostream& os, S const& t )
+  { return os << t; }
+  
+  template< typename S, typename U >
+  static std::ostream& indirection( std::ostream& os, std::chrono::duration<S,U> const& t )
+  { return os << std::chrono::duration_cast< std::chrono::duration< S > >( t ).count(); }
 };
 
 }

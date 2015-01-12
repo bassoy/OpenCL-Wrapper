@@ -84,6 +84,22 @@ void ocl::Queue::setContext(ocl::Context &ctxt)
     _context = &ctxt;
 }
 
+#if CL_VERSION_2_0
+static bool supportsAtLeast2Point0( cl_platform_id id )
+{
+  char version[128];
+  size_t versionLen = 0;
+  
+  clGetPlatformInfo( id, CL_PLATFORM_VERSION, 128, version, &versionLen );
+  
+  int major = 0, minor = 0;
+  
+  std::sscanf( version, "OpenCL %i.%i", &major, &minor );
+  
+  return major > 1;
+}
+#endif
+
 /*! \brief Creates cl_command_queue for this Queue.
   *
   * This is only needed when the Queue is not instantiated with a Device and a Queue.
@@ -101,7 +117,23 @@ void ocl::Queue::create(ocl::Context * ctxt)
 	}
 
 	cl_int status;
-	_id = clCreateCommandQueue(this->context().id(), this->device().id(), this->properties(), &status);
+	
+#if CL_VERSION_2_0
+  if ( supportsAtLeast2Point0( device().platform() ) )
+  {
+    cl_queue_properties propties[] = {
+      CL_QUEUE_PROPERTIES, this->properties(),
+      0
+    };
+    
+    _id = clCreateCommandQueueWithProperties( this->context().id(), this->device().id(), propties, &status );
+  }
+  else
+#endif
+  {
+    _id = clCreateCommandQueue(this->context().id(), this->device().id(), this->properties(), &status);
+  }
+  
 	OPENCL_SAFE_CALL(status);
 	TRUE_ASSERT(_id != NULL, "clCreateCommandQueue failed\n");
     _context->insert(this);

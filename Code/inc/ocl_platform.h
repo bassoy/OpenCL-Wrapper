@@ -126,9 +126,8 @@ public:
     static bool hasActivePlatform();
     static void setActivePlatform(Platform &);
     static Platform* activePlatform();
-
-
-private:
+    
+private: 
 
     static Platform *_activePlatform;
 

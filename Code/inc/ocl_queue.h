@@ -82,6 +82,9 @@ public:
     props properties() const;
     void barrier(const EventList&) const;
 
+    Queue& operator =( Queue const& ) = delete;
+    
+    Queue( Queue const& ) = delete;
 
 private:
 	const Device *_device;
