@@ -216,7 +216,8 @@ inline std::string getFormatName<row_major_tag>() { return "row_major"; }
 
 
 
-namespace utl{
+namespace utl
+{
 
 template <class T, class F>
 class Matrix : private __MatrixBase<T>
@@ -243,39 +244,15 @@ namespace detail {
 template< typename T >
 struct isRowMajorImpl
 {
-#if !defined(_MSC_VER) || _MSC_VER >= 1900
-  constexpr 
-#endif
-    static bool const value
-#if !defined(_MSC_VER) || _MSC_VER >= 1900
-    =  false
-#endif    
-    ;
+  constexpr static bool const value =  false ;
 };
 
-
-#if defined(_MSC_VER) && _MSC_VER < 1900
-template< typename T > 
-bool const isRowMajorImpl< T >::value = false;
-#endif
 
 template< typename T >
 struct isRowMajorImpl< Matrix< T, row_major_tag > >
 {
-#if !defined(_MSC_VER) || _MSC_VER >= 1900
-  constexpr 
-#endif
-    static bool const value
-#if !defined(_MSC_VER) || _MSC_VER >= 1900
-     = true
-#endif
-  ;
+  constexpr static bool const value = true ;
 };
-
-#if defined(_MSC_VER) && _MSC_VER < 1900
-template< typename T > 
-bool const isRowMajorImpl< Matrix< T, row_major_tag > >::value = true;
-#endif
 
 }
 
@@ -283,19 +260,14 @@ bool const isRowMajorImpl< Matrix< T, row_major_tag > >::value = true;
 template< typename Matrix >
 struct isRowMajor
 {
-#if !defined(_MSC_VER) || _MSC_VER >= 1900
-  constexpr 
-#endif
-    static bool const value = detail::isRowMajorImpl< Matrix >::value;
+  constexpr static bool const value = detail::isRowMajorImpl< Matrix >::value;
 };
 
 template< typename Matrix > 
-#if !defined(_MSC_VER) || _MSC_VER >= 1900
-constexpr 
-#endif
-bool const isRowMajor< Matrix >::value;
+constexpr  bool const isRowMajor< Matrix >::value;
 
 }
+
 
 namespace utl{
 

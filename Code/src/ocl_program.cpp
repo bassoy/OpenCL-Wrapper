@@ -390,14 +390,6 @@ ocl::Program& ocl::Program::operator << (const std::string &k)
 //   }
   
     std::string kernels = k;
-#if 0 // For now disable comment removal as we need it to play a trick on the AMD compiler.
-    eraseComments(kernels);
-#endif
-
-//     filterCommonCode( k );
-    //DEBUG_COMMENT(kernels);
-    
-//     commonCodeBlocks_.clear();
 
     size_t pos = 0;
     while(pos < kernels.npos){
@@ -449,33 +441,12 @@ ocl::Program& ocl::Program::operator << (const std::string &k)
             }
         }
     }
-    
-    /*if ( _kernels.empty() )
-    {
-      commonCodeBlocks_.resize( 1 );
-    }*/
-    
-    /*for ( auto c : commonCodeBlocks_ )
-    {
-      std::cout << "BEGIN BLOCK" << c << "END BLOCK\n";
-    }*/
-    
-    /*for ( auto& c : _kernels )
-    {
-      std::cout << "BEGIN KERNEL" << c->toString() << "END KERNEL\n";
-    }*/
+  
     
     commonCodeBlocks_.push_back( "" );
-    
-//     std::cout << "kernels: " << _kernels.size() << " blocks: " << commonCodeBlocks_.size() << std::endl;
+ 
     
     checkConstraints();
-    
-//     TRUE_ASSERT( !_types.empty(), "Lost types in this function?" );
-#if 0
-    for ( auto& kernel : _kernels )
-      std::cout << "Has kernel: " << kernel->name() << std::endl;
-#endif
     
     return *this;
 }
@@ -588,18 +559,9 @@ std::string ocl::Program::nextKernel(const std::string &kernels, size_t pos)
   if ( pos >= kernels.size() )
     return "";
 
-#if !defined(_MSC_VER) || _MSC_VER >= 1900
-  constexpr 
-#endif
-    char const kernelKeyword1[]  = "__kernel";
-#if !defined(_MSC_VER) || _MSC_VER >= 1900
-  constexpr
-#endif 
-    char const kernelKeyword2[]  = "kernel";
-#if !defined(_MSC_VER) || _MSC_VER >= 1900
-    constexpr
-#endif 
-      char const templateKeyword[] = "template";
+  constexpr char const kernelKeyword1[]  = "__kernel";
+  constexpr char const kernelKeyword2[]  = "kernel";
+  constexpr char const templateKeyword[] = "template";
   
   auto const startTemplate    = kernels.find( templateKeyword, pos );
   auto const startNonTemplate = std::min( kernels.find( kernelKeyword1, pos ), kernels.find( kernelKeyword2, pos ) );
@@ -661,45 +623,6 @@ std::string ocl::Program::nextKernel(const std::string &kernels, size_t pos)
     
   return kernels.substr( start, end - start +1 );
   
-#if 0
-    if(pos == kernels.npos) return "";
-
-    size_t start_template = kernels.find("template", pos);
-    size_t start_non_template = kernels.find("__kernel",pos);
-    size_t start;
-
-    bool template_found = false, non_template_found = false;
-    if(start_template < start_non_template){
-        template_found = true;
-        start = start_template;
-    }
-    else{
-        non_template_found = true;
-        start = start_non_template;
-    }
-
-    if(start == kernels.npos) return "";
-
-//    DEBUG_COMMENT("start_template = " << start << " pos = " << pos);
-
-    if(template_found){
-        size_t step = kernels.find("__kernel",start);
-        size_t end1 = kernels.find("template",step+1);
-        size_t end2 = kernels.find("__kernel",step+1);
-        size_t end = std::min(end1, end2);
-        return kernels.substr(start, end - start);
-    }
-
-
-//    DEBUG_COMMENT("start_kernel = " << start << " pos = " << pos << ", npos " << kernels.npos);
-    if(non_template_found){
-        size_t end1 = kernels.find("template",start + 8);
-        size_t end2 = kernels.find("__kernel",start + 8);
-        size_t end = std::min(end1, end2);
-        return kernels.substr(start, end - start);
-    }
-    return "";
-#endif
 }
 
 

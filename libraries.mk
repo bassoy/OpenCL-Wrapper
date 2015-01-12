@@ -1,7 +1,7 @@
 OCL_LIB=
 OCL_INC=
 
-INTEL:=1
+NVIDIA:=1
 
 ifdef INTEL
 	OCL_LIB += -L/usr/lib64 -lOpenCL
