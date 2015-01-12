@@ -26,7 +26,7 @@ void utl::ProfilePass::run()
 
 	for(Dim i = _start; compare(i, _end); advance(i,_step))
 	{
-		//			TRUE_COMMENT("start : " << this->_start.toString() << ", _end : " << this->_end.toString() << ", _step = " << this->_step.toString() << ", i " << i.toString() << ", comp = "  << compare(i,_end));
+		//			__comment("start : " << this->_start.toString() << ", _end : " << this->_end.toString() << ", _step = " << this->_step.toString() << ", i " << i.toString() << ", comp = "  << compare(i,_end));
 
 		Seconds time = this->prof(i);
 		double op = this->ops(i);

@@ -840,7 +840,7 @@ utl::Dim utl::Dim::squeeze(const Dim& dim)
  */
 size_t utl::Dim::prod(size_t __end) const
 {
-//    TRUE_COMMENT("this.size() " << this->size() << ", __end " << __end);
+//    __comment("this.size() " << this->size() << ", __end " << __end);
 	return this->prod(0,__end);
 }
 
@@ -866,7 +866,7 @@ size_t utl::Dim::prod(size_t __start, size_t __end) const
 
 size_t utl::Dim::prod() const
 {
-//    TRUE_COMMENT("this.size() " << this->size() << ", " << this->size() - 1);
+//    __comment("this.size() " << this->size() << ", " << this->size() - 1);
 	return this->prod(0,this->size()-1);
 }
 
