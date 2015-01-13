@@ -2,16 +2,17 @@
 #include <utl_assert.h>
 #include <utl_profile_pass.h>
 
+namespace utl {
 
-utl::ProfilePassManager&
-utl::ProfilePassManager::operator<<(ProfilePass* p)
+ProfilePassManager&
+ProfilePassManager::operator<<( std::unique_ptr< ProfilePass >&& p )
 {
 	TRUE_ASSERT(p != nullptr, "ProfilePass is not valid: nullptr");
-	_passes.emplace_back(std::unique_ptr<ProfilePass>(p));
+	_passes.emplace_back(std::move(p));
 	return *this;
 }
 
-void utl::ProfilePassManager::run()
+void ProfilePassManager::run()
 {
 	for (const auto &it : _passes){
 		std::cout << "Profiling " << it->name() << std::endl;
@@ -19,11 +20,14 @@ void utl::ProfilePassManager::run()
 	}
 }
 
-void utl::ProfilePassManager::write(std::ostream& out) const
+void ProfilePassManager::write(std::ostream& out) const
 {
 	for (const uPPassPtr &it : _passes){
 		out << *it;
 		out << std::endl;
 	}
 	out << std::endl;
+}
+
+
 }

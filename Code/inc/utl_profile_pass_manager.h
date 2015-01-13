@@ -44,9 +44,14 @@ public:
     ~ProfilePassManager() = default;
 	ProfilePassManager(const ProfilePassManager&) = delete;
 	
-	ProfilePassManager& operator<<(ProfilePass* p);
+	// ProfilePassManager& operator<<(ProfilePass* p);
+  ProfilePassManager& operator <<( std::unique_ptr< ProfilePass >&& p );
 	void run();
 	void write(std::ostream& out) const;
+  
+  uPPassPtr& getPass( size_t index ) {
+    return _passes.at( index );
+  }
 
 private:
 
