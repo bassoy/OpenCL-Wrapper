@@ -72,6 +72,8 @@ set(OclWrapper_SRCS
   Code/src/ocl_sampler.cpp
   Code/src/utl_args.cpp
   Code/src/utl_dim.cpp
+  Code/src/utl_profile_pass.cpp
+  Code/src/utl_profile_pass_manager.cpp
   Code/src/utl_storage.cpp
   Code/src/utl_stream.cpp
   Code/src/utl_timer.cpp
