@@ -202,7 +202,7 @@ void ocl::Context::create(bool shared)
 		return;
 	}
 
-	__comment("Creating a shared context");
+//	__comment("Creating a shared context");
 
 	// TODO: check if shared context possible.
 
