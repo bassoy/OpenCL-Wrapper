@@ -53,6 +53,8 @@ public :
 
 	/*! This function needs to be defined so that it can be called from the pass manager. */
 	double ops( Dim const& ) override;
+  
+  StudXPass1& operator =( StudXPass1 const& ) = delete;
 
 private :
 

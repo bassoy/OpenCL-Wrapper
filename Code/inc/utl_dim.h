@@ -59,7 +59,7 @@ public:
 
 
     template<typename HeadType, typename ... TailTypes>
-    Dim(HeadType head, TailTypes ... tail)
+    Dim(HeadType head, TailTypes ... tail): _vector()
     {
         if(sizeof...(tail) == 0)
             _vector.resize(2,head);

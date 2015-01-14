@@ -3,6 +3,12 @@
 #include <utl_profile_pass.h>
 
 namespace utl {
+  
+ProfilePassManager&
+ProfilePassManager::operator<<( ProfilePass* p )
+{
+  return *this << std::unique_ptr<ProfilePass>( p );
+}
 
 ProfilePassManager&
 ProfilePassManager::operator<<( std::unique_ptr< ProfilePass >&& p )

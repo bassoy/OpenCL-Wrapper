@@ -611,9 +611,9 @@ std::string ocl::Kernel::specialize(const std::string& kernel, const std::string
 
     fct.erase(start, end - start + 2);
 
-#if defined OPENCL_V1_1 || defined OPENCL_V1_0
-	if(type == "double") fct.insert(0, "#pragma OPENCL EXTENSION cl_khr_fp64: enable\n");
-#endif
+// #if defined OPENCL_V1_1 || defined OPENCL_V1_0
+	if(type == "double") fct.insert(0, "#if !defined(__OPENCL_VERSION__) || __OPENCL_VERSION__ < 120\n#pragma OPENCL EXTENSION cl_khr_fp64: enable\n#endif\n");
+// #endif
 
 
     size_t pos = 0;
