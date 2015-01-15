@@ -40,11 +40,14 @@ class ProfilePassManager
 	using uPPassPtr = std::unique_ptr<ProfilePass> ;
 public:
 
-    ProfilePassManager() = default;
+    ProfilePassManager(): _passes() {}
     ~ProfilePassManager() = default;
 	ProfilePassManager(const ProfilePassManager&) = delete;
 	
-	// ProfilePassManager& operator<<(ProfilePass* p);
+  // This is the legay interface.
+	ProfilePassManager& operator<<(ProfilePass* p);
+  
+  // New interface.
   ProfilePassManager& operator <<( std::unique_ptr< ProfilePass >&& p );
 	void run();
 	void write(std::ostream& out) const;

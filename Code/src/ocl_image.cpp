@@ -212,10 +212,10 @@ void ocl::Image::create(unsigned int texture, unsigned long texture_target, long
     }
 
     cl_int status;
-#if defined(OPENCL_V1_0) || defined(OPENCL_V1_1)
-    this->_id = clCreateFromGLTexture2D(this->_context->id(), flags, texture_target, miplevel, texture, &status);
-#else
+#ifdef OPENCL_V1_2
     this->_id = clCreateFromGLTexture(this->_context->id(), flags, texture_target, miplevel, texture, &status);
+#else
+    this->_id = clCreateFromGLTexture2D(this->_context->id(), flags, texture_target, miplevel, texture, &status);
 #endif
     OPENCL_SAFE_CALL(status);
     TRUE_ASSERT(this->_id != 0, "Could not create shared image.");

@@ -24,9 +24,16 @@ __kernel void reverse(int num, __global float *dst, __global float *src)
 
 int main()
 {
+  // It is hard to test on Xeon Phi, if the device_type is GPU.
+  ocl::DeviceType deviceType = 
+#if 0
+  ocl::device_type::GPU;
+#else
+  ocl::device_type::CPU;
+#endif
 
-    ocl::Platform platform(ocl::device_type::GPU);
-    ocl::Device device = platform.device(ocl::device_type::GPU);
+    ocl::Platform platform(deviceType);
+    ocl::Device device = platform.device(deviceType);
 
     // creates a context for a decice or platform
     ocl::Context context1(device);
