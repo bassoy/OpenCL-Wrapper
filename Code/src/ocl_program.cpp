@@ -389,7 +389,21 @@ ocl::Program& ocl::Program::operator << (const std::string &k)
 //     commonCodeBlocks_.resize( 0 );
 //   }
   
-    std::string kernels = k;
+	std::string kernels;
+	{
+		auto const doubleTypeIter = std::find_if( _types.begin(), _types.end(), []( utl::Type const* t ){ return *t == utl::type::Double; } );
+		if ( doubleTypeIter != _types.end() ) 
+		{
+			kernels = "#if !defined(__OPENCL_VERSION__) || __OPENCL_VERSION__ < 120\n#pragma OPENCL EXTENSION cl_khr_fp64: enable\n#endif\n" + k;
+		} 
+		else 
+		{
+			kernels = k;
+		}
+	}
+	#if 0 // For now disable comment removal as we need it to play a trick on the AMD compiler.
+	eraseComments(kernels);
+	#endif
 
     size_t pos = 0;
     while(pos < kernels.npos){
