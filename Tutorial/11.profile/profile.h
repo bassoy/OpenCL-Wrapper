@@ -7,7 +7,8 @@
 #include <istream>
 
 #include <ocl_wrapper.h>
-#include <utl_utils.h>
+#include <utl_profile_pass.h>
+#include <utl_matrix.h>
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -49,7 +50,7 @@ public :
 			   size_t iter = 10);             /*! Number of kernel iterations */
 
 	/*! This function needs to be defined so that it can be called from the pass manager. */
-	utl::Seconds prof( Dim const& ) override;
+	void prof( Dim const& ) override;
 
 	/*! This function needs to be defined so that it can be called from the pass manager. */
 	double ops( Dim const& ) override;
@@ -116,7 +117,7 @@ StudXPass1<Type_,Format_,W1,W2>::StudXPass1(
  * \param dim Dimension which is between the first and the last.
 */
 template <class Type_,class Format_ , size_t W1, size_t W2>
-utl::Seconds StudXPass1<Type_,Format_, W1,W2>::prof( utl::Dim const& dim )
+void StudXPass1<Type_,Format_, W1,W2>::prof( utl::Dim const& dim )
 {
 
 	  const size_t M = dim[0];
@@ -166,7 +167,7 @@ utl::Seconds StudXPass1<Type_,Format_, W1,W2>::prof( utl::Dim const& dim )
 		  queue.finish();
 	  };
 
-	  auto t = this->call(std::bind(lambda, std::ref(*kernel_), std::ref(queue_), std::ref(bufRes), std::cref(bufLhs), std::cref(bufRhs)));
+	  this->call(std::bind(lambda, std::ref(*kernel_), std::ref(queue_), std::ref(bufRes), std::cref(bufLhs), std::cref(bufRhs)));
 
 
 
@@ -191,9 +192,6 @@ utl::Seconds StudXPass1<Type_,Format_, W1,W2>::prof( utl::Dim const& dim )
 
 
 	  program_.release();
-
-
-	  return t;
 }
 
 

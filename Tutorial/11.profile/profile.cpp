@@ -5,11 +5,11 @@
 #include <istream>
 
 #include <ocl_wrapper.h>
-#include <utl_utils.h>
+
+#include <utl_args.h>
+#include <utl_profile_pass_manager.h>
 
 #include "profile.h"
-
-
 
 int main( int argc, char** argv )
 {
@@ -21,9 +21,9 @@ int main( int argc, char** argv )
 
 	utl::ProfilePassManager mgr;
 
-	size_t const f  = args.toSizet( 1 );
-	size_t const l  = args.toSizet( 2 );
-	size_t const s  = args.toSizet( 3 );
+	size_t const f  = args.toSize_t( 1 );
+	size_t const l  = args.toSize_t( 2 );
+	size_t const s  = args.toSize_t( 3 );
 	bool testing = numArgs == 5 ? args.toBool(4) : false;
 
 	const utl::Dim first = utl::Dim(f,f,f);

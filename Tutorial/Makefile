@@ -1,12 +1,20 @@
-OCL_WRAPPER_DIR := ../../Code
+OCL_WRAPPER_DIR:=../../Code
+#PROFILER_DIR:=../../../Profiler/Code
 
 include ../libraries.mk 
-INCS:="$(OCL_WRAPPER_INC) $(OCL_INC)"
-LIBS:="$(OCL_WRAPPER_LIB) $(OCL_LIB) $(OGL_LIB)"
+INCS:="$(OCL_WRAPPER_INC) $(OCL_INC)"#$(PROFILER_INC)
+LIBS:="$(OCL_WRAPPER_LIB) $(OCL_LIB) $(OGL_LIB)"#$(PROFILER_LIB)
 
-GCC_FLAGS:="-std=c++11 -Wall -O3"
+#ifdef NVIDIA
+#	OCL_VERSION=-DOPENCL_V1_1
+#else
+	OCL_VERSION=-DOPENCL_V1_2
+#endif
 
-all: platform context queue program buffer kernel events matrix minimum image profile
+GCC_FLAGS:="-std=c++11 -Wall -g $(OCL_VERSION)"
+
+all: platform context queue program buffer kernel events matrix minimum image
+# profile
 
 platform: 1.platform/platform.cpp
 	$(MAKE) -C 1.platform LIBS=$(LIBS) INCS=$(INCS) GCC_FLAGS=$(GCC_FLAGS)
@@ -38,8 +46,8 @@ minimum: 9.minimum/minimum.cpp
 image: 10.image/image.cpp
 	$(MAKE) -C 10.image   LIBS=$(LIBS) INCS=$(INCS) GCC_FLAGS=$(GCC_FLAGS)
 
-profile: 11.profile/profile.cpp 11.profile/profile.h
-	$(MAKE) -C 11.profile   LIBS=$(LIBS) INCS=$(INCS) GCC_FLAGS=$(GCC_FLAGS)
+#profile: 11.profile/profile.cpp 11.profile/profile.h
+#	$(MAKE) -C 11.profile   LIBS=$(LIBS) INCS=$(INCS) GCC_FLAGS=$(GCC_FLAGS)
 
 .PHONY : clean
 
@@ -54,5 +62,5 @@ clean :
 	$(MAKE) clean -C 8.matrix
 	$(MAKE) clean -C 9.minimum
 	$(MAKE) clean -C 10.image
-	$(MAKE) clean -C 11.profile
+#	$(MAKE) clean -C 11.profile
 

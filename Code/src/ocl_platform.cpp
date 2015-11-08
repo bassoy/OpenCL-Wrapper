@@ -20,8 +20,6 @@
 #include <ocl_device.h>
 #include <ocl_context.h>
 #include <ocl_device_type.h>
-#include <utl_stream.h>
-#include <utl_assert.h>
 
 #include <algorithm>
 #include <sstream>
@@ -53,7 +51,7 @@ ocl::Platform::Platform() :
 ocl::Platform::Platform(cl_platform_id id) :
     _devices(), _id(0), _activeContext(), _contexts()
 {
-    TRUE_ASSERT(ocl::exists(id), "Platform does not exist");
+	if(!ocl::exists(id)) throw std::runtime_error("Platform does not exist");
     this->create(id);
     const std::vector<cl_device_id>& devs = ocl::devices(id);
     for(auto it = devs.begin(); it != devs.end(); ++it){
@@ -72,7 +70,7 @@ ocl::Platform::Platform(const ocl::DeviceType &type) :
     _devices(), _id(0), _activeContext(), _contexts()
 {
     cl_platform_id id = ocl::Platform::id(type);
-    TRUE_ASSERT(id != 0, "Could not find any platform for type " << type.name());
+	if(id == nullptr) throw std::runtime_error("Could not find any platform for type " + type.name());
     this->create(id);
 
 //	this->create(type);
@@ -90,7 +88,7 @@ ocl::Platform::Platform(const ocl::DeviceTypes &types) :
     _devices(), _id(0), _activeContext(), _contexts()
 {
     cl_platform_id id = ocl::Platform::id(types);
-    TRUE_ASSERT(id != 0, "Could not find any platform for type");
+	if(id == 0) throw std::runtime_error("could not find any platform");
     this->create(id);
 }
 
@@ -111,11 +109,12 @@ ocl::Platform::~Platform()
 */
 void ocl::Platform::create(cl_platform_id id)
 {
-    TRUE_ASSERT(_id == 0, "Platform is already constructed.");
-    TRUE_ASSERT(id != 0, "Platform is not valid");
-    TRUE_ASSERT(ocl::exists(id), "Platform does not exist");
-    TRUE_ASSERT(this->_contexts.empty(), "Cannot create an already created platform. Context not empty.");
-    TRUE_ASSERT(this->_devices.empty(), "Cannot create an already created platform.");
+	if(this->_id != 0) throw std::runtime_error("Platform is already constructed.");
+	if(id == 0) throw std::runtime_error("Platform is not valid.");
+	if(!ocl::exists(id)) throw std::runtime_error("Platform does not exist.");
+
+	if(!this->_contexts.empty()) throw std::runtime_error("Cannot create an already created platform. Context not empty.");
+	if(!this->_devices.empty()) throw std::runtime_error("Cannot create an already created platform.");
 
     this->_id = id;
 
@@ -132,7 +131,7 @@ void ocl::Platform::create(cl_platform_id id)
 void ocl::Platform::create(const ocl::DeviceType& type)
 {
     cl_platform_id id = ocl::Platform::id(type);
-    TRUE_ASSERT(id != 0, "Could not find any platform for type");
+	if(id == 0) throw std::runtime_error("Could not find platform for that type.");
     this->create(id);
 }
 
@@ -144,7 +143,7 @@ void ocl::Platform::create(const ocl::DeviceType& type)
 void ocl::Platform::create(const ocl::DeviceTypes& types)
 {
     cl_platform_id id = ocl::Platform::id(types);
-    TRUE_ASSERT(id != 0, "Could not find any platform for type");
+	if(id == 0) throw std::runtime_error("Could not find platform for that types.");
     this->create(id);
 }
 
@@ -244,7 +243,7 @@ cl_platform_id ocl::Platform::id() const
 ocl::Device ocl::Platform::device(cl_device_id id) const
 {
     auto it = std::find(_devices.begin(), _devices.end(), id);
-    TRUE_ASSERT(it != this->devices().end(), "Could not find device");
+	if(it == this->devices().end()) throw std::runtime_error("Could not find device");
     return *it;
 }
 
@@ -252,7 +251,7 @@ ocl::Device ocl::Platform::device(cl_device_id id) const
 ocl::Device ocl::Platform::device(const ocl::DeviceType &type) const
 {
     auto it = std::find(_devices.begin(), _devices.end(), type);
-    TRUE_ASSERT(it != this->devices().end(), "Could not find device");
+	if(it == this->devices().end()) throw std::runtime_error("Could not find device");
     return *it;
 }
 
@@ -337,14 +336,14 @@ bool ocl::Platform::has(ocl::Context & ctxt) const
 */
 void ocl::Platform::setActiveContext(ocl::Context &ctxt)
 {
-    TRUE_ASSERT(this->has(ctxt), "Context not in Platform.");
+	if(!this->has(ctxt)) throw std::runtime_error("Context not in Platform.");
     this->_activeContext = &ctxt;
 }
 
 /*! \brief Returns the active Context of this Platform. */
 ocl::Context* ocl::Platform::activeContext() const
 {
-    TRUE_ASSERT(_activeContext != NULL, "There is no active Context");
+	if(_activeContext == nullptr) throw std::runtime_error("There is no active Context");
     return this->_activeContext;
 }
 
@@ -373,7 +372,7 @@ void ocl::Platform::insert(ocl::Context &ctxt)
     for(auto it = devs.begin(); it != devs.end(); ++it)
     {
         const auto &dev = *it;
-        TRUE_ASSERT(this->has(dev), "Platform does not have this Device");
+		if(!this->has(dev)) throw std::runtime_error("Platform does not have this Device");
     }
     this->_contexts.insert(&ctxt);
 }

@@ -3,7 +3,6 @@
 #include <functional>
 
 #include <ocl_wrapper.h>
-#include <utl_utils.h>
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
 #else

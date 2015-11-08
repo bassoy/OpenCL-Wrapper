@@ -25,8 +25,8 @@
 #include <limits>
 #include <utility>
 #include <vector>
+#include <stdexcept>
 
-#include <utl_assert.h>
 
 
 
@@ -123,7 +123,7 @@ public:
 	template <class T>
 	static const Type& type(){
 		for(auto __t : _allTypes) { if(*__t == typeid(T)) return *__t; }
-		TRUE_ASSERT(0, "Type with id " << typeid(T).name() << " not found");
+		throw std::runtime_error(std::string("Type with id ") + typeid(T).name() + " not found");
 	}
 private:
 	std::string _name;

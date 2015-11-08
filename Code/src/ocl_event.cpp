@@ -18,8 +18,6 @@
 #include <ocl_event.h>
 #include <ocl_query.h>
 
-#include <utl_assert.h>
-
 #include <ocl_platform.h>
 #include <ocl_context.h>
 
@@ -32,12 +30,12 @@
   */
 ocl::Event::Event(cl_event id, ocl::Context* ctxt) : _id(id), _ctxt(ctxt)
 {
-    TRUE_ASSERT(id != 0, "Event not valid.");
-    TRUE_ASSERT(ctxt != 0, "Context not valid");
+	if(this->_id   == nullptr) throw std::runtime_error("Event not valid");
+	if(this->_ctxt == nullptr) throw std::runtime_error("Context not valid");
 
     cl_context cl_ctxt = 0;
     OPENCL_SAFE_CALL( clGetEventInfo (this->id(), CL_EVENT_CONTEXT , sizeof(cl_ctxt), &cl_ctxt, NULL));
-    TRUE_ASSERT(_ctxt->id() == cl_ctxt, "Context must be the same");
+	if(_ctxt->id() != cl_ctxt) throw std::runtime_error("Contexts must be the same");
 }
 
 
@@ -51,14 +49,16 @@ ocl::Event::Event(cl_event id, ocl::Context* ctxt) : _id(id), _ctxt(ctxt)
   */
 ocl::Event::Event() : _id(0), _ctxt(0)
 {
-    if(ocl::Platform::hasActivePlatform() && ocl::Platform::activePlatform()->hasActiveContext()){
-        _ctxt = ocl::Platform::activePlatform()->activeContext();
-        TRUE_ASSERT(_ctxt != 0, "No active context");
-        cl_int err;
-        _id =  clCreateUserEvent (_ctxt->id(), &err);
-        OPENCL_SAFE_CALL(err);
-        TRUE_ASSERT(_id != 0, "Could not create user event");
-    }
+	if(!ocl::Platform::hasActivePlatform() || !ocl::Platform::activePlatform()->hasActiveContext()) return;
+
+	_ctxt = ocl::Platform::activePlatform()->activeContext();
+
+	if(this->_ctxt == nullptr) throw std::runtime_error("no active context");
+	cl_int err;
+	_id =  clCreateUserEvent (_ctxt->id(), &err);
+	OPENCL_SAFE_CALL(err);
+	if(this->_id == nullptr) throw std::runtime_error("could not create user event");
+
 }
 
 /*! \brief Instantiates a user Event.
@@ -69,12 +69,12 @@ ocl::Event::Event() : _id(0), _ctxt(0)
   */
 ocl::Event::Event(ocl::Context& ctxt) : _id(0), _ctxt(&ctxt)
 {
-    TRUE_ASSERT(this->_ctxt != 0, "Context not valid");
+	if(this->_ctxt == nullptr) throw std::runtime_error("no active context");
 
     cl_int err;
     _id =  clCreateUserEvent (_ctxt->id(), &err);
     OPENCL_SAFE_CALL(err);
-    TRUE_ASSERT(_id != 0, "Could not create user event");
+	if(this->_id == nullptr) throw std::runtime_error("could not create user event");
 }
 
 
@@ -87,9 +87,8 @@ ocl::Event::Event(ocl::Context& ctxt) : _id(0), _ctxt(&ctxt)
   */
 ocl::Event::Event( const Event & other ) : _id(other._id), _ctxt(other._ctxt)
 {
-    TRUE_ASSERT(_id != 0, "Event not valid (id == 0)");
-    TRUE_ASSERT(_ctxt != 0, "Event not valid (ctxt == 0)");
-
+	if(this->_ctxt == nullptr) throw std::runtime_error("context not valid");
+	if(this->_id == nullptr) throw std::runtime_error("id not valid");
 
 	OPENCL_SAFE_CALL( clRetainEvent( _id ) );
 }
@@ -100,8 +99,8 @@ ocl::Event& ocl::Event::operator =( ocl::Event const& other )
 
 	if ( this == &other ) return *this;
 
-	TRUE_ASSERT(other._id != 0, "Event not valid (id == 0)");
-	TRUE_ASSERT(other._ctxt != 0, "Event not valid (ctxt == 0)");
+	if(this->_ctxt == nullptr) throw std::runtime_error("context not valid");
+	if(this->_id == nullptr) throw std::runtime_error("id not valid");
 
 	release();
 
@@ -238,14 +237,14 @@ bool ocl::Event::isSubmitted () const
 /*! \brief Returns the context with which this Event was created.*/
 ocl::Context& ocl::Event::context() const
 {
-    TRUE_ASSERT(this->_ctxt != 0, "No Context for Event");
+	if(this->_ctxt == nullptr) throw std::runtime_error("context not valid");
     return *this->_ctxt;
 }
 
 /*! \brief Returns the reference count of this Event object.*/
 size_t ocl::Event::reference_count() const
 {
-    TRUE_ASSERT(_id != 0, "Cannot get reference count for this. Not yet created.");
+	if(this->_id == nullptr) throw std::runtime_error("id not valid");
     cl_uint info;
     OPENCL_SAFE_CALL( clGetEventInfo (_id, CL_EVENT_REFERENCE_COUNT, sizeof(info), &info, NULL)) ;
     return size_t(info);

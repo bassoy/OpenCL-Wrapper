@@ -13,14 +13,14 @@ OBJS   := $(addprefix build/,$(OBJS2))
 	
 TARGET := lib/libOclWrapper.a
 
-ifdef NVIDIA
-	OCL_VERSION=-DOPENCL_V1_1
-else
+#ifdef NVIDIA
+#	OCL_VERSION=-DOPENCL_V1_1
+#else
 	OCL_VERSION=-DOPENCL_V1_2
-endif
+#endif
 
-GCC_FLAGS=-std=c++11 -Wall -DDEBUG $(OCL_VERSION) -O3 #-D__OPENGL__ #
-
+GCC_FLAGS:=-std=c++11 -Wall -DDEBUG $(OCL_VERSION)
+#$(GCC_FLAGS)	
 
 archive: $(OBJS)
 	ar cr $(TARGET) build/*.o

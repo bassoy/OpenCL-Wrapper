@@ -22,8 +22,6 @@
 #include <ocl_context.h>
 #include <ocl_event_list.h>
 
-#include <utl_assert.h>
-
 #include <algorithm>
 #include <sstream>
 
@@ -68,9 +66,9 @@ ocl::Queue::Queue(ocl::Context& ctxt, const ocl::Device& dev, Queue::props props
   */
 void ocl::Queue::setDevice(const ocl::Device &dev)
 {
-    TRUE_ASSERT(_device == 0, "Device already set for this queue.");
-    TRUE_ASSERT(_context != 0, "Set the context for the queue.");
-    TRUE_ASSERT(_context->has(dev), "Context does not contain this device.");
+	if(_device != nullptr) throw std::runtime_error("device already set for this queue");
+	if(_context == nullptr) throw std::runtime_error("context for this queue not yet set");
+	if(!_context->has(dev)) throw std::runtime_error("context does not include the dev");
     _device = &dev;
 }
 
@@ -80,7 +78,7 @@ void ocl::Queue::setDevice(const ocl::Device &dev)
   */
 void ocl::Queue::setContext(ocl::Context &ctxt)
 {
-    TRUE_ASSERT(_context == 0, "Context already set for this queue.");
+	if(_context != nullptr) throw std::runtime_error("context already set for this queue");
     _context = &ctxt;
 }
 
@@ -109,10 +107,10 @@ static bool supportsAtLeast2Point0( cl_platform_id id )
 void ocl::Queue::create(ocl::Context * ctxt)
 {
 	if(ctxt == 0){
-		TRUE_ASSERT(_context != 0, "Must have a context.");
+		if(_context == nullptr) throw std::runtime_error("this queue must have a valid context");
 	}
 	else {
-		TRUE_ASSERT(ctxt == _context || _context == NULL, "Cannot have different contexts for the same program.");
+		if(_context != ctxt && _context != nullptr) throw std::runtime_error("cannot have different contexts for the same program");
 		_context = ctxt;
 	}
 
@@ -135,7 +133,7 @@ void ocl::Queue::create(ocl::Context * ctxt)
   }
   
 	OPENCL_SAFE_CALL(status);
-	TRUE_ASSERT(_id != NULL, "clCreateCommandQueue failed\n");
+	if(_id == nullptr) throw std::runtime_error("could not create command queue");
     _context->insert(this);
 }
 
@@ -165,7 +163,8 @@ bool ocl::Queue::created() const
   */
 size_t ocl::Queue::reference_count() const
 {
-    TRUE_ASSERT(_id != 0, "Cannot get reference count for this. Not yet created.");
+	if(_id == nullptr) throw std::runtime_error("could not performance a reference count");
+
     cl_uint info;
 	OPENCL_SAFE_CALL( clGetCommandQueueInfo (_id,CL_QUEUE_REFERENCE_COUNT, sizeof(info), &info, NULL)) ;
 	return size_t(info);
@@ -261,7 +260,7 @@ list
   */
 const ocl::Context& ocl::Queue::context() const
 {
-    TRUE_ASSERT(this->_context != 0, "No Context for this Queue");
+	if(_context == nullptr) throw std::runtime_error("there is no context for this queue");
 	return *this->_context;
 }
 
@@ -270,7 +269,7 @@ const ocl::Context& ocl::Queue::context() const
   */
 const ocl::Device& ocl::Queue::device() const
 {
-    TRUE_ASSERT(this->_device!= 0, "No Device for this Queue");
+	if(_device == nullptr) throw std::runtime_error("there is no device for this queue");
 	return *this->_device;
 }
 

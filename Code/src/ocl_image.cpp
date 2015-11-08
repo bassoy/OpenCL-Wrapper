@@ -24,15 +24,13 @@
 #include <ocl_queue.h>
 #include <ocl_image.h>
 
-#include <utl_assert.h>
-
 /**
  * \brief ocl::Image::Image Instantiates this Image without a Context
  *
  * No Image is created. Use Image::create for the creation of such an object.
  */
 ocl::Image::Image()
-    :Memory()
+	:Memory()
 {
 
 }
@@ -51,9 +49,9 @@ ocl::Image::Image()
  * \param order Channelorder of the image.
  */
 ocl::Image::Image(Context& ctxt, size_t width, size_t height, ChannelType type, ChannelOrder order, Access access)
-    :Memory(ctxt)
+	:Memory(ctxt)
 {
-    this->create(width, height, type, order, access);
+	this->create(width, height, type, order, access);
 }
 
 /**
@@ -71,9 +69,9 @@ ocl::Image::Image(Context& ctxt, size_t width, size_t height, ChannelType type, 
  * \param order Channelorder of the image.
  */
 ocl::Image::Image(Context& ctxt, size_t width, size_t height, size_t depth, ChannelType type, ChannelOrder order, Access access)
-    :Memory(ctxt)
+	:Memory(ctxt)
 {
-    this->create(width, height, depth, type, order, access);
+	this->create(width, height, depth, type, order, access);
 }
 
 /**
@@ -84,9 +82,9 @@ ocl::Image::Image(Context& ctxt, size_t width, size_t height, size_t depth, Chan
  * \param miplevel MipMapping level.
  */
 ocl::Image::Image(Context &ctxt, unsigned int texture, unsigned long texture_target, long miplevel)
-    :Memory(ctxt)
+	:Memory(ctxt)
 {
-    this->create(texture, texture_target, miplevel);
+	this->create(texture, texture_target, miplevel);
 }
 
 
@@ -111,38 +109,39 @@ ocl::Image::~Image()
  */
 void ocl::Image::create(size_t width, size_t height, ChannelType type, ChannelOrder order, Access access)
 {
-    TRUE_ASSERT(this->_context != 0, "Context not valid - cannot create Image");
-    cl_mem_flags flags = access;
-    cl_image_format format;
-    format.image_channel_order = order;
-    format.image_channel_data_type = type;
-    cl_int status;
-    
-#ifdef OPENCL_V1_2
-    if ( _context->devices()[0].supportsVersion( 1, 2 ) )
-    {
-      cl_image_desc desc;
-      desc.image_type = CL_MEM_OBJECT_IMAGE2D;
-      desc.image_height = height;
-      desc.image_width = width;
-      desc.image_depth = 1;
-      desc.image_array_size = 1;
-      desc.image_row_pitch = 0;
-      desc.image_slice_pitch = 0;
-      desc.num_mip_levels = 0;
-      desc.num_samples = 0;
-      desc.buffer = NULL;
+	if(this->_ctxt == nullptr)
+		throw std::runtime_error("Context not valid - cannot create Image");
+	cl_mem_flags flags = access;
+	cl_image_format format;
+	format.image_channel_order = order;
+	format.image_channel_data_type = type;
+	cl_int status;
 
-      this->_id = clCreateImage(this->_context->id(), flags, &format, &desc, NULL, &status);
-    }
-    else
+#ifdef OPENCL_V1_2
+	{
+		cl_image_desc desc;
+		desc.image_type = CL_MEM_OBJECT_IMAGE2D;
+		desc.image_height = height;
+		desc.image_width = width;
+		desc.image_depth = 1;
+		desc.image_array_size = 1;
+		desc.image_row_pitch = 0;
+		desc.image_slice_pitch = 0;
+		desc.num_mip_levels = 0;
+		desc.num_samples = 0;
+		desc.buffer = NULL;
+
+		this->_id = clCreateImage(this->_ctxt->id(), flags, &format, &desc, NULL, &status);
+	}
+#elif OPENCL_V1_1
+	{
+		this->_id = clCreateImage2D(this->_ctxt->id(), flags, &format, width, height, 0, NULL, &status);
+	}
 #endif
-    {
-      this->_id = clCreateImage2D(this->_context->id(), flags, &format, width, height, 0, NULL, &status);
-    }
-    
-    OPENCL_SAFE_CALL(status);
-    TRUE_ASSERT(this->_id != 0, "Could not create 2D image.");
+	OPENCL_SAFE_CALL(status);
+
+	if(this->_id == nullptr)
+		throw std::runtime_error("Context not create 2D image");
 }
 
 
@@ -160,40 +159,45 @@ void ocl::Image::create(size_t width, size_t height, ChannelType type, ChannelOr
  */
 void ocl::Image::create(size_t width, size_t height, size_t depth, ChannelType type, ChannelOrder order, Access access)
 {
-    TRUE_ASSERT(this->_context != 0, "Context not valid - cannot create Image");
-    cl_mem_flags flags = access;
+	if(this->_ctxt == nullptr)
+		throw std::runtime_error("Context not valid");
 
-    cl_image_format format;
-    format.image_channel_order = order;
-    format.image_channel_data_type = type;
 
-    cl_int status;
-    
+	cl_image_format format;
+	format.image_channel_order = order;
+	format.image_channel_data_type = type;
+
+	cl_int status;
+
 
 #ifdef OPENCL_V1_2
-    if ( _context->devices()[0].supportsVersion( 1, 2 ) )
-    {
-      cl_image_desc desc;
-      desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-      desc.image_height = height;
-      desc.image_width = width;
-      desc.image_depth = depth;
-      desc.image_array_size = 1;
-      desc.image_row_pitch = 0;
-      desc.image_slice_pitch = 0;
-      desc.num_mip_levels = 0;
-      desc.num_samples = 0;
-      desc.buffer = NULL;
-      this->_id = clCreateImage(this->_context->id(), flags, &format, &desc, NULL, &status);
-    }
-    else
+	{
+		cl_mem_flags flags = access;
+		cl_image_desc desc;
+		desc.image_type = CL_MEM_OBJECT_IMAGE3D;
+		desc.image_height = height;
+		desc.image_width = width;
+		desc.image_depth = depth;
+		desc.image_array_size = 1;
+		desc.image_row_pitch = 0;
+		desc.image_slice_pitch = 0;
+		desc.num_mip_levels = 0;
+		desc.num_samples = 0;
+		desc.buffer = NULL;
+		this->_id = clCreateImage(this->_ctxt->id(), flags, &format, &desc, NULL, &status);
+	}
+#elif OPENCL_V1_1
+	{
+		cl_mem_flags flags = access;
+		this->_id = clCreateImage3D(this->_ctxt->id(), flags, &format, width, height, depth, 0, 0, NULL, &status);
+	}
 #endif
-    {
-      this->_id = clCreateImage3D(this->_context->id(), flags, &format, width, height, depth, 0, 0, NULL, &status);
-    }
-    
-    OPENCL_SAFE_CALL(status);
-    TRUE_ASSERT(this->_id != 0, "Could not create 3D image.");
+
+	OPENCL_SAFE_CALL(status);
+
+	if(this->_id == nullptr)
+		throw std::runtime_error("Context not create 3D image");
+
 }
 
 
@@ -205,20 +209,20 @@ void ocl::Image::create(size_t width, size_t height, size_t depth, ChannelType t
  */
 void ocl::Image::create(unsigned int texture, unsigned long texture_target, long miplevel)
 {
-    cl_mem_flags flags = ocl::Image::ReadWrite;
-    if (this->_context->devices().size() == 1 &&
-						this->_context->devices().front().type() == ocl::device_type::CPU){
-        flags |= ocl::Image::AllocHost;
-    }
+	cl_mem_flags flags = ocl::Image::ReadWrite;
+	if (this->_ctxt->devices().size() == 1 &&
+			this->_ctxt->devices().front().type() == ocl::device_type::CPU){
+		flags |= ocl::Image::AllocHost;
+	}
 
-    cl_int status;
+	cl_int status;
 #ifdef OPENCL_V1_2
-    this->_id = clCreateFromGLTexture(this->_context->id(), flags, texture_target, miplevel, texture, &status);
-#else
-    this->_id = clCreateFromGLTexture2D(this->_context->id(), flags, texture_target, miplevel, texture, &status);
+	this->_id = clCreateFromGLTexture(this->_ctxt->id(), flags, texture_target, miplevel, texture, &status);
+#elif OPENCL_V1_1
+	this->_id = clCreateFromGLTexture2D(this->_ctxt->id(), flags, texture_target, miplevel, texture, &status);
 #endif
-    OPENCL_SAFE_CALL(status);
-    TRUE_ASSERT(this->_id != 0, "Could not create shared image.");
+	OPENCL_SAFE_CALL(status);
+	if(this->_id == nullptr) throw std::runtime_error("Context not create 2D image");
 }
 
 /**
@@ -233,8 +237,8 @@ void ocl::Image::create(unsigned int texture, unsigned long texture_target, long
  */
 void ocl::Image::recreate(size_t width, size_t height, ChannelType type, ChannelOrder order)
 {
-    this->release();
-    this->create(width, height, type, order);
+	this->release();
+	this->create(width, height, type, order);
 }
 
 
@@ -251,10 +255,11 @@ void ocl::Image::recreate(size_t width, size_t height, ChannelType type, Channel
  */
 void ocl::Image::copyTo(size_t *src_origin, const size_t *region, const Image & dest, size_t *dest_origin, const EventList & list ) const
 {
-    TRUE_ASSERT(this->context() == dest.context(), "Context of this and dest must be equal");
-    TRUE_ASSERT(this->id() != dest.id(), "Images must not be equal this->id() " << this->id() << "; other.id " << dest.id());
-    OPENCL_SAFE_CALL( clEnqueueCopyImage(this->activeQueue().id(), this->id(), dest.id(), src_origin, dest_origin, region, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
+	if(this->id() == dest.id()) throw std::runtime_error("images ids must be equal");
+	if(this->context() != dest.context()) throw std::runtime_error("images contexts must be equal");
+
+	OPENCL_SAFE_CALL( clEnqueueCopyImage(this->activeQueue().id(), this->id(), dest.id(), src_origin, dest_origin, region, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
 }
 
 /**
@@ -269,13 +274,13 @@ void ocl::Image::copyTo(size_t *src_origin, const size_t *region, const Image & 
  */
 ocl::Event ocl::Image::copyToAsync(size_t *src_origin, const size_t *region, const Image &dest, size_t *dest_origin, const EventList &list)
 {
-    TRUE_ASSERT(this->context() == dest.context(), "Context of this and dest must be equal");
-    TRUE_ASSERT(this->id() != dest.id(), "Images must not be equal this->id() " << this->id() << "; other.id " << dest.id());
-    cl_event event_id;
-    OPENCL_SAFE_CALL( clEnqueueCopyImage(this->activeQueue().id(), this->id(), dest.id(),
-                                         src_origin, dest_origin, region, list.size(),
-                                         list.events().data(), &event_id) );
-    return ocl::Event(event_id, this->context());
+	if(this->id() == dest.id()) throw std::runtime_error("images ids must be equal");
+	if(this->context() != dest.context()) throw std::runtime_error("images contexts must be equal");
+	cl_event event_id;
+	OPENCL_SAFE_CALL( clEnqueueCopyImage(this->activeQueue().id(), this->id(), dest.id(),
+										 src_origin, dest_origin, region, list.size(),
+										 list.events().data(), &event_id) );
+	return ocl::Event(event_id, this->context());
 }
 
 
@@ -293,11 +298,12 @@ ocl::Event ocl::Image::copyToAsync(size_t *src_origin, const size_t *region, con
  */
 void ocl::Image::copyTo(const Queue &queue, size_t *src_origin, const size_t *region, const Image &dest, size_t *dest_origin, const EventList &list) const
 {
-    TRUE_ASSERT(this->context() == dest.context(), "Context of this and dest must be equal");
-    TRUE_ASSERT(this->id() != dest.id(), "Image must not be equal this->id() " << this->id() << "; other.id " << dest.id());
-    TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    OPENCL_SAFE_CALL( clEnqueueCopyImage(queue.id(), this->id(), dest.id(), src_origin, dest_origin, region, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
+	if(this->id() == dest.id()) throw std::runtime_error("images ids must be equal");
+	if(this->context() != dest.context()) throw std::runtime_error("images contexts must be equal");
+	if(queue.context() != *this->context()) throw std::runtime_error("context of queue and this must be equal");
+
+	OPENCL_SAFE_CALL( clEnqueueCopyImage(queue.id(), this->id(), dest.id(), src_origin, dest_origin, region, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
 }
 
 /**
@@ -313,13 +319,13 @@ void ocl::Image::copyTo(const Queue &queue, size_t *src_origin, const size_t *re
  */
 ocl::Event ocl::Image::copyToAsync(const Queue &queue, size_t *src_origin, const size_t *region, const Image &dest, size_t *dest_origin, const EventList &list)
 {
-    TRUE_ASSERT(this->context() == dest.context(), "Context of this and dest must be equal");
-    TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    cl_event event_id;
-    OPENCL_SAFE_CALL( clEnqueueCopyImage(queue.id(), this->id(), dest.id(),
-                                         src_origin, dest_origin, region, list.size(),
-                                         list.events().data(), &event_id) );
-    return ocl::Event(event_id, this->context());
+	if(this->context() != dest.context()) throw std::runtime_error("images contexts must be equal");
+	if(queue.context() != *this->context()) throw std::runtime_error("context of queue and this must be equal");
+	cl_event event_id;
+	OPENCL_SAFE_CALL( clEnqueueCopyImage(queue.id(), this->id(), dest.id(),
+										 src_origin, dest_origin, region, list.size(),
+										 list.events().data(), &event_id) );
+	return ocl::Event(event_id, this->context());
 }
 
 /**
@@ -334,15 +340,15 @@ ocl::Event ocl::Image::copyToAsync(const Queue &queue, size_t *src_origin, const
  */
 void * ocl::Image::map(size_t *origin, const size_t *region, Memory::Access access) const
 {
-    TRUE_ASSERT(this->activeQueue().device().isCpu(), "Device " << this->activeQueue().device().name() << " is not a cpu!");
-    cl_int status;
-    cl_map_flags flags = access;
-    void *pointer = clEnqueueMapImage(this->activeQueue().id(), this->id(), CL_TRUE, flags,
-                                      origin, region, 0, 0, 0, NULL, NULL, &status);
-    OPENCL_SAFE_CALL (status ) ;
-    TRUE_ASSERT(pointer != NULL, "Could not map image!");
-    OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
-    return pointer;
+	if(!this->activeQueue().device().isCpu()) throw std::runtime_error("Device " + this->activeQueue().device().name() + " is not a cpu!");
+	cl_int status;
+	cl_map_flags flags = access;
+	void *pointer = clEnqueueMapImage(this->activeQueue().id(), this->id(), CL_TRUE, flags,
+									  origin, region, 0, 0, 0, NULL, NULL, &status);
+	OPENCL_SAFE_CALL (status ) ;
+	if(pointer == nullptr) throw std::runtime_error("Could not map image!");
+	OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
+	return pointer;
 }
 
 /**
@@ -359,15 +365,15 @@ void * ocl::Image::map(size_t *origin, const size_t *region, Memory::Access acce
  */
 ocl::Event ocl::Image::mapAsync(void **ptr, size_t *origin, const size_t *region, Memory::Access access, const EventList &list) const
 {
-    TRUE_ASSERT(this->activeQueue().device().isCpu(), "Device " << this->activeQueue().device().name() << " is not a cpu!");
-    cl_int status;
-    cl_event event_id;
-    cl_map_flags flags = access;
-    *ptr = clEnqueueMapImage(this->activeQueue().id(), this->id(), CL_TRUE, flags,
-                                      origin, region, 0, 0, list.size(), list.events().data(), &event_id, &status);
-    OPENCL_SAFE_CALL (status ) ;
-    TRUE_ASSERT(ptr != NULL, "Could not map image!");
-    return ocl::Event(event_id, this->context());
+	if(!this->activeQueue().device().isCpu()) throw std::runtime_error("Device " + this->activeQueue().device().name() + " is not a cpu!");
+	cl_int status;
+	cl_event event_id;
+	cl_map_flags flags = access;
+	*ptr = clEnqueueMapImage(this->activeQueue().id(), this->id(), CL_TRUE, flags,
+							 origin, region, 0, 0, list.size(), list.events().data(), &event_id, &status);
+	OPENCL_SAFE_CALL (status ) ;
+	if(ptr == nullptr) throw std::runtime_error("could not map image");
+	return ocl::Event(event_id, this->context());
 }
 
 
@@ -381,9 +387,9 @@ ocl::Event ocl::Image::mapAsync(void **ptr, size_t *origin, const size_t *region
  */
 void ocl::Image::read(size_t *origin,  void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
-    TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
-    OPENCL_SAFE_CALL( clEnqueueReadImage(this->activeQueue().id(), this->id(), CL_TRUE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
+	if(ptr_to_host_data == nullptr) throw std::runtime_error("data = nullptr");
+	OPENCL_SAFE_CALL( clEnqueueReadImage(this->activeQueue().id(), this->id(), CL_TRUE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
 }
 
 /**
@@ -395,10 +401,10 @@ void ocl::Image::read(size_t *origin,  void *ptr_to_host_data, const size_t *reg
  */
 void ocl::Image::read(void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
-    TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
-    std::vector<size_t> origin = {0, 0, 0};
-    OPENCL_SAFE_CALL( clEnqueueReadImage(this->activeQueue().id(), this->id(), CL_TRUE, origin.data(), region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
+	if(ptr_to_host_data == nullptr) throw std::runtime_error("data = nullptr");
+	std::vector<size_t> origin = {0, 0, 0};
+	OPENCL_SAFE_CALL( clEnqueueReadImage(this->activeQueue().id(), this->id(), CL_TRUE, origin.data(), region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
 }
 
 /**
@@ -413,10 +419,10 @@ void ocl::Image::read(void *ptr_to_host_data, const size_t *region, const EventL
  */
 ocl::Event ocl::Image::readAsync(size_t *origin, void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
-    TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
-    cl_event event_id;
-    OPENCL_SAFE_CALL( clEnqueueReadImage(this->activeQueue().id(), this->id(), CL_FALSE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), &event_id) );
-    return ocl::Event(event_id, this->context());
+	if(ptr_to_host_data == nullptr) throw std::runtime_error("data = nullptr");
+	cl_event event_id;
+	OPENCL_SAFE_CALL( clEnqueueReadImage(this->activeQueue().id(), this->id(), CL_FALSE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), &event_id) );
+	return ocl::Event(event_id, this->context());
 }
 
 
@@ -432,10 +438,11 @@ ocl::Event ocl::Image::readAsync(size_t *origin, void *ptr_to_host_data, const s
  */
 void ocl::Image::read(const Queue& queue, const size_t *origin, void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
-    TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
-    TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    OPENCL_SAFE_CALL( clEnqueueReadImage(queue.id(), this->id(), CL_TRUE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(queue.id()) );
+	if(ptr_to_host_data == nullptr) throw std::runtime_error("data = nullptr");
+	if(queue.context() != *this->context()) throw std::runtime_error("Context of queue and this must be equal");
+
+	OPENCL_SAFE_CALL( clEnqueueReadImage(queue.id(), this->id(), CL_TRUE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(queue.id()) );
 }
 
 /**
@@ -449,11 +456,11 @@ void ocl::Image::read(const Queue& queue, const size_t *origin, void *ptr_to_hos
  */
 void ocl::Image::read(const Queue& queue, void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
-    TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
-    TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    const size_t origin[3] = {0, 0, 0};
-    OPENCL_SAFE_CALL( clEnqueueReadImage(queue.id(), this->id(), CL_TRUE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(queue.id()) );
+	if(ptr_to_host_data == nullptr) throw std::runtime_error("data = nullptr");
+	if(queue.context() != *this->context()) throw std::runtime_error("Context of queue and this must be equal");
+	const size_t origin[3] = {0, 0, 0};
+	OPENCL_SAFE_CALL( clEnqueueReadImage(queue.id(), this->id(), CL_TRUE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(queue.id()) );
 }
 
 /**
@@ -470,11 +477,11 @@ void ocl::Image::read(const Queue& queue, void *ptr_to_host_data, const size_t *
  */
 ocl::Event ocl::Image::readAsync(const Queue &queue, size_t *origin, void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
-    TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
-    TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    cl_event event_id;
-    OPENCL_SAFE_CALL( clEnqueueReadImage(queue.id(), this->id(), CL_FALSE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), &event_id) );
-    return ocl::Event(event_id, this->context());
+	if(ptr_to_host_data == nullptr) throw std::runtime_error("data = nullptr");
+	if(queue.context() != *this->context()) throw std::runtime_error("Context of queue and this must be equal");
+	cl_event event_id;
+	OPENCL_SAFE_CALL( clEnqueueReadImage(queue.id(), this->id(), CL_FALSE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), &event_id) );
+	return ocl::Event(event_id, this->context());
 }
 
 /**
@@ -487,9 +494,9 @@ ocl::Event ocl::Image::readAsync(const Queue &queue, size_t *origin, void *ptr_t
  */
 void ocl::Image::write(size_t *origin, const void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
-    TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
-    OPENCL_SAFE_CALL( clEnqueueWriteImage(this->activeQueue().id(), this->id(), CL_TRUE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
+	if(ptr_to_host_data == nullptr) throw std::runtime_error("data = nullptr");
+	OPENCL_SAFE_CALL( clEnqueueWriteImage(this->activeQueue().id(), this->id(), CL_TRUE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
 }
 
 /**
@@ -501,10 +508,10 @@ void ocl::Image::write(size_t *origin, const void *ptr_to_host_data, const size_
  */
 void ocl::Image::write(const void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
-    TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
-    std::vector<size_t> origin = {0, 0, 0};
-    OPENCL_SAFE_CALL( clEnqueueWriteImage(this->activeQueue().id(), this->id(), CL_TRUE, origin.data(), region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
+	if(ptr_to_host_data == nullptr) throw std::runtime_error("data = nullptr");
+	std::vector<size_t> origin = {0, 0, 0};
+	OPENCL_SAFE_CALL( clEnqueueWriteImage(this->activeQueue().id(), this->id(), CL_TRUE, origin.data(), region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
 }
 
 /**
@@ -519,10 +526,10 @@ void ocl::Image::write(const void *ptr_to_host_data, const size_t *region, const
  */
 ocl::Event ocl::Image::writeAsync(size_t *origin, const void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
-    TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
-    cl_event event_id;
-    OPENCL_SAFE_CALL( clEnqueueWriteImage(this->activeQueue().id(), this->id(), CL_FALSE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), &event_id) );
-    return ocl::Event(event_id, this->context());
+	if(ptr_to_host_data == nullptr) throw std::runtime_error("data = nullptr");
+	cl_event event_id;
+	OPENCL_SAFE_CALL( clEnqueueWriteImage(this->activeQueue().id(), this->id(), CL_FALSE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), &event_id) );
+	return ocl::Event(event_id, this->context());
 }
 
 
@@ -538,10 +545,10 @@ ocl::Event ocl::Image::writeAsync(size_t *origin, const void *ptr_to_host_data, 
  */
 void ocl::Image::write(const Queue& queue, size_t *origin, const void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
-    TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
-    TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    OPENCL_SAFE_CALL( clEnqueueWriteImage(queue.id(), this->id(), CL_TRUE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(queue.id()) );
+	if(ptr_to_host_data == nullptr) throw std::runtime_error("data = nullptr");
+	if(queue.context() != *this->context()) throw std::runtime_error("Context of queue and this must be equal");
+	OPENCL_SAFE_CALL( clEnqueueWriteImage(queue.id(), this->id(), CL_TRUE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(queue.id()) );
 }
 
 /**
@@ -555,11 +562,11 @@ void ocl::Image::write(const Queue& queue, size_t *origin, const void *ptr_to_ho
  */
 void ocl::Image::write(const Queue& queue, const void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
-    TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
-    TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    size_t const origin[] = {0, 0, 0};
-    OPENCL_SAFE_CALL( clEnqueueWriteImage(queue.id(), this->id(), CL_TRUE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(queue.id()) );
+	if(ptr_to_host_data == nullptr) throw std::runtime_error("data = nullptr");
+	if(queue.context() != *this->context()) throw std::runtime_error("Context of queue and this must be equal");
+	size_t const origin[] = {0, 0, 0};
+	OPENCL_SAFE_CALL( clEnqueueWriteImage(queue.id(), this->id(), CL_TRUE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(queue.id()) );
 }
 
 /**
@@ -576,11 +583,11 @@ void ocl::Image::write(const Queue& queue, const void *ptr_to_host_data, const s
  */
 ocl::Event ocl::Image::writeAsync(const Queue &queue, size_t *origin, const void *ptr_to_host_data, const size_t *region, const EventList &list) const
 {
-    TRUE_ASSERT(ptr_to_host_data != NULL, "data == 0");
-    TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    cl_event event_id;
-    OPENCL_SAFE_CALL( clEnqueueWriteImage(queue.id(), this->id(), CL_FALSE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), &event_id) );
-    return ocl::Event(event_id, this->context());
+	if(ptr_to_host_data == nullptr) throw std::runtime_error("data = nullptr");
+	if(queue.context() != *this->context()) throw std::runtime_error("Context of queue and this must be equal");
+	cl_event event_id;
+	OPENCL_SAFE_CALL( clEnqueueWriteImage(queue.id(), this->id(), CL_FALSE, origin, region, 0, 0, ptr_to_host_data, list.size(), list.events().data(), &event_id) );
+	return ocl::Event(event_id, this->context());
 }
 
 /*! \brief Acquires access to this Image.
@@ -591,8 +598,8 @@ ocl::Event ocl::Image::writeAsync(const Queue &queue, size_t *origin, const void
   */
 #ifdef __OPENGL__
 void ocl::Image::acquireAccess(Queue &q) {
-    glFinish();
-    OPENCL_SAFE_CALL( clEnqueueAcquireGLObjects(q.id(), 1, &this->_id, NULL, NULL, NULL) );
+	glFinish();
+	OPENCL_SAFE_CALL( clEnqueueAcquireGLObjects(q.id(), 1, &this->_id, NULL, NULL, NULL) );
 }
 #endif
 
@@ -604,6 +611,6 @@ void ocl::Image::acquireAccess(Queue &q) {
   * \returns whether releasing was successful or not.
   */
 void ocl::Image::releaseAccess(Queue &q, const EventList& list) {
-    cl_event event_id;
-    OPENCL_SAFE_CALL( clEnqueueReleaseGLObjects(q.id(), 1, &this->_id, list.size(), list.events().data(), &event_id) );
+	cl_event event_id;
+	OPENCL_SAFE_CALL( clEnqueueReleaseGLObjects(q.id(), 1, &this->_id, list.size(), list.events().data(), &event_id) );
 }

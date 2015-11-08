@@ -3,7 +3,8 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
-INCLUDEPATH += ../Code/inc
+INCLUDEPATH +=../Code/inc
+INCLUDEPATH +=../../Profiler/Code/inc
 
 include(1.platform/platform.pri)
 include(2.context/context.pri)

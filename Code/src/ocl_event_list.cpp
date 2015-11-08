@@ -20,9 +20,6 @@
 #include <ocl_query.h>
 #include <ocl_context.h>
 
-
-#include <utl_assert.h>
-
 #include <algorithm>
 
 
@@ -39,7 +36,7 @@ ocl::EventList::EventList () :
 ocl::EventList::EventList ( const ocl::Event & event ) :
     _events(1,&event), _ctxt(&event.context())
 {
-    TRUE_ASSERT(_ctxt != 0, "Context not valid.");
+	if(this->_ctxt == nullptr) throw std::runtime_error("context not valid");
 }
 
 /*! \brief Instantiates an EventList.
@@ -51,7 +48,7 @@ ocl::EventList::EventList ( const EventList & other ) :
 {
     const ocl::Event *efirst = _events.front();
     _ctxt = &efirst->context();
-    TRUE_ASSERT(_ctxt != 0, "Context not valid.");
+	if(this->_ctxt == nullptr) throw std::runtime_error("context not valid");
 }
 
 /*! \brief Appends an Event to this EventList.
@@ -66,7 +63,7 @@ void ocl::EventList::append ( const ocl::Event & event )
 {
     if(this->_events.empty()) {
         _ctxt = &event.context();
-        TRUE_ASSERT(_ctxt != 0, "Context not valid");
+		if(this->_ctxt == nullptr) throw std::runtime_error("context not valid");
     }
     this->_events.push_back(&event);
 
@@ -83,7 +80,7 @@ void ocl::EventList::append ( const ocl::EventList & other )
     for(auto it = other._events.begin(); it != other._events.end(); ++it)
     {
         const ocl::Event *e = *it;
-        TRUE_ASSERT(*_ctxt == e->context(), "Context not valid.");
+		if(*this->_ctxt != e->context()) throw std::runtime_error("context not valid");
     }
     this->_events.insert(this->_events.end(), other._events.begin(), other._events.end());
 }

@@ -27,8 +27,6 @@
 #include <algorithm>
 #include <functional>
 
-#include <utl_assert.h>
-
 
 namespace utl{
 
@@ -110,7 +108,7 @@ public:
     __MatrixBase operator+(const __MatrixBase& rhs) const
     {
         const __MatrixBase& lhs = *this;
-        TRUE_ASSERT(lhs.dim() == rhs.dim(), "Dimensions must be equal");
+		if(lhs.dim() != rhs.dim()) throw std::runtime_error("Dimensions must be equal");
         __MatrixBase res(lhs.rows(), lhs.cols());
         std::transform(lhs.begin(), lhs.end(), rhs.begin(), res.begin(), std::plus<T>());
         return res;

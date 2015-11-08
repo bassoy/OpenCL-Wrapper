@@ -1,7 +1,8 @@
 #include <iostream>
+#include <fstream>
+#include <iterator>
 
 #include <ocl_wrapper.h>
-#include <utl_utils.h>
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
 #else
@@ -94,8 +95,13 @@ int main()
     for (auto &v : h_buffer2_in)
     	v = ++i;
 
-    std::cout << "Vector1 before transmission : " << utl::toString(h_buffer1_out) << std::endl;
-    std::cout << "Vector2 before transmission : " << utl::toString(h_buffer2_out) << std::endl;
+	std::cout << "Vector1 before transmission : ";
+	std::copy(h_buffer1_out.begin(), h_buffer1_out.end(), std::ostream_iterator<float>(std::cout, ", "));
+	std::cout << std::endl;
+
+	std::cout << "Vector1 before transmission : ";
+	std::copy(h_buffer2_out.begin(), h_buffer2_out.end(), std::ostream_iterator<float>(std::cout, ", "));
+	std::cout << std::endl;
 
     // create device buffers on the specified context
     ocl::Buffer d_buffer1_in (context1, size_bytes);
@@ -123,13 +129,15 @@ int main()
     // copy data from device buffers to host buffers
     d_buffer1_out.read(queue1,h_buffer1_out.data(), size_bytes);
     d_buffer2_out.read(queue2,h_buffer2_out.data(), size_bytes);
-    
-    
-    
-    
+        
 
-    std::cout << "Vector1 after transmission : " << utl::toString(h_buffer1_out) << std::endl;
-    std::cout << "Vector2 after transmission : " << utl::toString(h_buffer2_out) << std::endl;
+	std::cout << "Vector1 after transmission : ";
+	std::copy(h_buffer1_out.begin(), h_buffer1_out.end(), std::ostream_iterator<float>(std::cout, ", "));
+	std::cout << std::endl;
+
+	std::cout << "Vector1 after transmission : ";
+	std::copy(h_buffer2_out.begin(), h_buffer2_out.end(), std::ostream_iterator<float>(std::cout, ", "));
+	std::cout << std::endl;
 
 	return 0;
 }

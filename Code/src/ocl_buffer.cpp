@@ -24,8 +24,6 @@
 #include <ocl_device.h>
 #include <ocl_queue.h>
 
-#include <utl_assert.h>
-
 
 /*! \brief Instantiates this Buffer within a context with size_bytes.
   *
@@ -36,9 +34,9 @@
   * \param size_bytes is the size in bytes which are needed for the Memory.
   */
 ocl::Buffer::Buffer (Context& ctxt, size_t size_bytes, Access access ) :
-    Memory(ctxt)
+	Memory(ctxt)
 {
-    create(size_bytes,access);
+	create(size_bytes,access);
 }
 
 /*! \brief Instantiates this Buffer within a context with size_bytes.
@@ -69,9 +67,9 @@ ocl::Buffer::Buffer (size_t size_bytes, Access access ) :
   */
 #ifdef __OPENGL__
 ocl::Buffer::Buffer(Context &ctxt, GLuint vbo_desc) :
-    Memory(ctxt)
+	Memory(ctxt)
 {
-    this->create(vbo_desc);
+	this->create(vbo_desc);
 }
 #endif
 
@@ -98,9 +96,9 @@ ocl::Buffer::~Buffer()
 ocl::Buffer::Buffer ( const Buffer & other ) :
 	Memory(other)
 {
-    TRUE_ASSERT(this->context() == other.context(), "context are not equal.");
-    this->create(other.size_bytes());
-    other.copyTo(0, other.size_bytes(), *this, 0);
+	if(this->context() != other.context() ) throw std::runtime_error("context must be equal");
+	this->create(other.size_bytes());
+	other.copyTo(0, other.size_bytes(), *this, 0);
 }
 
 /*! \brief Instantiates this Buffer from another Buffer within one context.
@@ -111,7 +109,7 @@ ocl::Buffer::Buffer ( const Buffer & other ) :
   * \param other Buffer to move from.
   */
 ocl::Buffer::Buffer (Buffer && other ) :
-    Memory(std::move(other))
+	Memory(std::move(other))
 {
 }
 
@@ -125,21 +123,20 @@ ocl::Buffer::Buffer (Buffer && other ) :
   */
 void ocl::Buffer::create(size_t size_bytes, Access access )
 {
-    TRUE_ASSERT(this->_context != 0, "Context not valid - cannot create buffer");
+	if(this->_ctxt == nullptr) throw std::runtime_error("context not valid");
+	if(this->_id != nullptr) throw std::runtime_error("cannot create buffer twice");
 
-	TRUE_ASSERT(this->id() == nullptr, "Cannot create buffer twice. Please release buffer.");
+	cl_mem_flags flags = access;
 
-    cl_mem_flags flags = access;
+	if(this->context()->devices().size() == 1 && this->context()->devices().at(0).type() == ocl::device_type::CPU){
+		flags |= ocl::Buffer::AllocHost;
+	}
 
-    if(this->context()->devices().size() == 1 &&
-       this->context()->devices().at(0).type() == ocl::device_type::CPU){
-       flags |= ocl::Buffer::AllocHost;
-    }	
-
-    cl_int status;
-	_id = clCreateBuffer(this->_context->id(), flags,  size_bytes, NULL, &status);
+	cl_int status;
+	_id = clCreateBuffer(this->_ctxt->id(), flags,  size_bytes, NULL, &status);
 	OPENCL_SAFE_CALL( status );
-    TRUE_ASSERT(_id != 0, "could not create buffer");
+
+	if(this->_id == nullptr) throw std::runtime_error("could not create buffer");
 }
 
 /*! \brief Creates cl_mem for this Buffer.
@@ -154,20 +151,19 @@ void ocl::Buffer::create(size_t size_bytes, Access access )
 #ifdef __OPENGL__
 void ocl::Buffer::create(GLuint vbo_desc)
 {
-    cl_mem_flags flags = ocl::Buffer::ReadWrite;
+	cl_mem_flags flags = ocl::Buffer::ReadWrite;
 
-    if (this->_context->devices().size() == 1 &&
-            this->_context->devices().at(0).type() == ocl::device_type::CPU){
-        flags |= ocl::Buffer::AllocHost;
-    }
+	if (this->_ctxt->devices().size() == 1 && this->_ctxt->devices().at(0).type() == ocl::device_type::CPU){
+		flags |= ocl::Buffer::AllocHost;
+	}
 
-    cl_int status;
+	cl_int status;
 
-    //Create Buffer from GL Buffer
-    this->_id = clCreateFromGLBuffer(this->_context->id(),
-                                     flags, vbo_desc, &status);
-    OPENCL_SAFE_CALL(status);
-    TRUE_ASSERT(this->_id != 0, "Could not create shared buffer.");
+	//Create Buffer from GL Buffer
+	this->_id = clCreateFromGLBuffer(this->_ctxt->id(), flags, vbo_desc, &status);
+	OPENCL_SAFE_CALL(status);
+	if(this->_id == nullptr) throw std::runtime_error("could not create shared buffer");
+
 }
 #endif
 
@@ -180,7 +176,7 @@ void ocl::Buffer::create(GLuint vbo_desc)
   */
 void ocl::Buffer::recreate(size_t size_bytes)
 {
-    if(this->size_bytes() == size_bytes) return;    
+	if(this->size_bytes() == size_bytes) return;
 	this->release();
 	this->create(size_bytes);
 }
@@ -197,10 +193,10 @@ void ocl::Buffer::recreate(size_t size_bytes)
   */
 void ocl::Buffer::copyTo ( size_t thisOffset, size_t size_bytes, const Buffer & dest, size_t destOffset, const ocl::EventList &list) const
 {
-    TRUE_ASSERT(this->context() == dest.context(), "Context of this and dest must be equal");
-    TRUE_ASSERT(this->id() != dest.id(), "Buffer must not be equal this->id() " << this->id() << "; other.id " << dest.id());
-    OPENCL_SAFE_CALL( clEnqueueCopyBuffer (this->activeQueue().id(), this->id(), dest.id(), thisOffset, destOffset, size_bytes, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
+	if(this->context() != dest.context()) throw std::runtime_error("context of this and dest must be equal");
+	if(this->id() != dest.id()) throw std::runtime_error("This and Other Buffer ids must be equal");
+	OPENCL_SAFE_CALL( clEnqueueCopyBuffer (this->activeQueue().id(), this->id(), dest.id(), thisOffset, destOffset, size_bytes, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
 }
 
 /*! \brief Copies asynchronously from this Buffer to the destination Buffer.
@@ -214,11 +210,11 @@ void ocl::Buffer::copyTo ( size_t thisOffset, size_t size_bytes, const Buffer & 
   */
 ocl::Event ocl::Buffer::copyToAsync( size_t thisOffset, size_t size_bytes, const Buffer & dest, size_t destOffset, const ocl::EventList &list)
 {
-    TRUE_ASSERT(this->context() == dest.context(), "Context of this and dest must be equal");
+	if(this->context() != dest.context()) throw std::runtime_error("context of this and dest must be equal");
 	cl_event event_id;
-    OPENCL_SAFE_CALL ( clEnqueueCopyBuffer (this->activeQueue().id(), this->id(), dest.id(), thisOffset, destOffset, size_bytes,
-																				 list.size(), list.events().data(), &event_id) );
-    return ocl::Event(event_id, this->context());
+	OPENCL_SAFE_CALL ( clEnqueueCopyBuffer (this->activeQueue().id(), this->id(), dest.id(), thisOffset, destOffset, size_bytes,
+											list.size(), list.events().data(), &event_id) );
+	return ocl::Event(event_id, this->context());
 }
 
 
@@ -235,11 +231,12 @@ ocl::Event ocl::Buffer::copyToAsync( size_t thisOffset, size_t size_bytes, const
   */
 void ocl::Buffer::copyTo (const ocl::Queue& queue, size_t thisOffset, size_t size_bytes, const Buffer & dest, size_t destOffset, const ocl::EventList &list) const
 {
-    TRUE_ASSERT(this->context() == dest.context(), "Context of this and dest must be equal");
-    TRUE_ASSERT(this->id() != dest.id(), "Buffer must not be equal this->id() " << this->id() << "; other.id " << dest.id());
-    TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    OPENCL_SAFE_CALL( clEnqueueCopyBuffer (queue.id(), this->id(), dest.id(), thisOffset, destOffset, size_bytes, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(queue.id()) );
+	if(this->context() != dest.context()) throw std::runtime_error("context of this and dest must be equal");
+	if(*this->context() != queue.context()) throw std::runtime_error("context of this and dest must be equal");
+	if(this->id() != dest.id()) throw std::runtime_error("This and Other Buffer ids must be equal");
+
+	OPENCL_SAFE_CALL( clEnqueueCopyBuffer (queue.id(), this->id(), dest.id(), thisOffset, destOffset, size_bytes, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(queue.id()) );
 }
 
 /*! \brief Copies asynchronously from this Buffer to the destination Buffer.
@@ -254,12 +251,13 @@ void ocl::Buffer::copyTo (const ocl::Queue& queue, size_t thisOffset, size_t siz
   */
 ocl::Event ocl::Buffer::copyToAsync(const ocl::Queue& queue, size_t thisOffset, size_t size_bytes, const Buffer & dest, size_t destOffset, const ocl::EventList &list)
 {
-    TRUE_ASSERT(this->context() == dest.context(), "Context of this and dest must be equal");
-    TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    cl_event event_id;
-    OPENCL_SAFE_CALL ( clEnqueueCopyBuffer (queue.id(), this->id(), dest.id(), thisOffset, destOffset, size_bytes,
-                                                                                 list.size(), list.events().data(), &event_id) );
-    return ocl::Event(event_id, this->context());
+	if(this->context() !=dest.context()) throw std::runtime_error("context of this and dest must be equal");
+	if(*this->context() != queue.context()) throw std::runtime_error("context of this and dest must be equal");
+
+	cl_event event_id;
+	OPENCL_SAFE_CALL ( clEnqueueCopyBuffer (queue.id(), this->id(), dest.id(), thisOffset, destOffset, size_bytes,
+											list.size(), list.events().data(), &event_id) );
+	return ocl::Event(event_id, this->context());
 }
 
 
@@ -274,13 +272,13 @@ ocl::Event ocl::Buffer::copyToAsync(const ocl::Queue& queue, size_t thisOffset, 
   */
 void * ocl::Buffer::map ( size_t offset, size_t size_bytes, Memory::Access access ) const
 {
-    TRUE_ASSERT(this->activeQueue().device().isCpu(), "Device " << this->activeQueue().device().name() << " is not a cpu!");
+	if(!this->activeQueue().device().isCpu()) throw std::runtime_error("Device " + this->activeQueue().device().name() + " is not a cpu!");
 	cl_int status;
 	cl_map_flags flags = access;
-    void *pointer = clEnqueueMapBuffer(this->activeQueue().id(), this->id(), CL_TRUE, flags, offset, size_bytes,  0, NULL, NULL, &status);
+	void *pointer = clEnqueueMapBuffer(this->activeQueue().id(), this->id(), CL_TRUE, flags, offset, size_bytes,  0, NULL, NULL, &status);
 	OPENCL_SAFE_CALL (status ) ;
-	TRUE_ASSERT(pointer != NULL, "Could not map buffer");
-    OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
+	if(pointer == nullptr) throw std::runtime_error("could not map buffer");
+	OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
 	return pointer;
 }
 
@@ -295,13 +293,13 @@ void * ocl::Buffer::map ( size_t offset, size_t size_bytes, Memory::Access acces
   */
 void * ocl::Buffer::map ( Memory::Access access ) const
 {
-    TRUE_ASSERT(this->activeQueue().device().isCpu(), "Device " << this->activeQueue().device().name() << " is not a cpu!");
+	if(!this->activeQueue().device().isCpu()) throw std::runtime_error("Device " + this->activeQueue().device().name() + " is not a cpu!");
 	cl_int status;
 	cl_map_flags flags = access;
-    void *pointer = clEnqueueMapBuffer(this->activeQueue().id(), this->id(), CL_TRUE, flags, 0, this->size_bytes(),  0, NULL, NULL, &status);
+	void *pointer = clEnqueueMapBuffer(this->activeQueue().id(), this->id(), CL_TRUE, flags, 0, this->size_bytes(),  0, NULL, NULL, &status);
 	OPENCL_SAFE_CALL (status ) ;
-	TRUE_ASSERT(pointer != NULL, "Could not map buffer");
-    OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
+	if(pointer == nullptr) throw std::runtime_error("could not map buffer");
+	OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
 	return pointer;
 }
 
@@ -322,12 +320,11 @@ ocl::Event ocl::Buffer::mapAsync ( void ** host_mem, size_t offset, size_t size_
 	cl_event event_id;
 	cl_int status;
 	cl_map_flags flags = access;
-    *host_mem = clEnqueueMapBuffer(this->activeQueue().id(), this->id(), CL_FALSE, flags, offset, size_bytes,
-																		 list.size(), list.events().data(), &event_id, &status);
+	*host_mem = clEnqueueMapBuffer(this->activeQueue().id(), this->id(), CL_FALSE, flags, offset, size_bytes,
+								   list.size(), list.events().data(), &event_id, &status);
 	OPENCL_SAFE_CALL (status ) ;
-	TRUE_ASSERT(*host_mem != NULL, "Could not map buffer");
-
-    return ocl::Event(event_id, this->context());
+	if(*host_mem == nullptr) throw std::runtime_error("could not map buffer");
+	return ocl::Event(event_id, this->context());
 }
 
 /*! \brief Transfers data from this Buffer to the host memory.
@@ -339,9 +336,9 @@ ocl::Event ocl::Buffer::mapAsync ( void ** host_mem, size_t offset, size_t size_
 */
 void ocl::Buffer::read ( size_t offset, void * host_mem, size_t size_bytes, const EventList & list ) const
 {
-	TRUE_ASSERT(host_mem != NULL, "data == 0");
-    OPENCL_SAFE_CALL ( clEnqueueReadBuffer(this->activeQueue().id(), this->id(), CL_TRUE, offset, size_bytes, host_mem, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
+	if(host_mem == nullptr) throw std::runtime_error("host_mem should not be nullptr");
+	OPENCL_SAFE_CALL ( clEnqueueReadBuffer(this->activeQueue().id(), this->id(), CL_TRUE, offset, size_bytes, host_mem, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
 }
 
 /*! \brief Transfers data from this Buffer to the host memory.
@@ -352,9 +349,9 @@ void ocl::Buffer::read ( size_t offset, void * host_mem, size_t size_bytes, cons
 */
 void ocl::Buffer::read ( void * host_mem, size_t size_bytes, const EventList & list) const
 {
-	TRUE_ASSERT(host_mem != NULL, "data == 0");
-    OPENCL_SAFE_CALL ( clEnqueueReadBuffer(this->activeQueue().id(), this->id(), CL_TRUE, 0, size_bytes, host_mem, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
+	if(host_mem == nullptr) throw std::runtime_error("host_mem should not be nullptr");
+	OPENCL_SAFE_CALL ( clEnqueueReadBuffer(this->activeQueue().id(), this->id(), CL_TRUE, 0, size_bytes, host_mem, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
 }
 
 /*! \brief Transfers data from this Buffer to the host memory.
@@ -368,10 +365,10 @@ void ocl::Buffer::read ( void * host_mem, size_t size_bytes, const EventList & l
 */
 void ocl::Buffer::read (const ocl::Queue& queue, size_t offset, void * host_mem, size_t size_bytes, const EventList & list ) const
 {
-    TRUE_ASSERT(host_mem != NULL, "data == 0");
-    TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    OPENCL_SAFE_CALL ( clEnqueueReadBuffer(queue.id(), this->id(), CL_TRUE, offset, size_bytes, host_mem, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(queue.id()) );
+	if(host_mem == nullptr) throw std::runtime_error("host_mem should not be nullptr");
+	if(*this->context() != queue.context()) throw std::runtime_error("context of queue and this must be equal");
+	OPENCL_SAFE_CALL ( clEnqueueReadBuffer(queue.id(), this->id(), CL_TRUE, offset, size_bytes, host_mem, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(queue.id()) );
 }
 
 /*! \brief Transfers data from this Buffer to the host memory.
@@ -384,10 +381,10 @@ void ocl::Buffer::read (const ocl::Queue& queue, size_t offset, void * host_mem,
 */
 void ocl::Buffer::read (const ocl::Queue& queue, void * host_mem, size_t size_bytes, const EventList & list) const
 {
-    TRUE_ASSERT(host_mem != NULL, "data == 0");
-    TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    OPENCL_SAFE_CALL ( clEnqueueReadBuffer(queue.id(), this->id(), CL_TRUE, 0, size_bytes, host_mem, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(queue.id()) );
+	if(host_mem == nullptr) throw std::runtime_error("host_mem should not be nullptr");
+	if(*this->context() != queue.context()) throw std::runtime_error("context of queue and this must be equal");
+	OPENCL_SAFE_CALL ( clEnqueueReadBuffer(queue.id(), this->id(), CL_TRUE, 0, size_bytes, host_mem, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(queue.id()) );
 }
 
 
@@ -404,9 +401,9 @@ ocl::Event
 ocl::Buffer::readAsync (size_t offset, void *host_mem, size_t size_bytes, const ocl::EventList & list) const
 {
 	cl_event event_id;
-	TRUE_ASSERT(host_mem != NULL, "data == 0");
-    OPENCL_SAFE_CALL ( clEnqueueReadBuffer(this->activeQueue().id(), this->id(), CL_FALSE, offset, size_bytes, host_mem, list.size(), list.events().data(), &event_id) );
-    return Event(event_id, this->context());
+	if(host_mem == nullptr) throw std::runtime_error("host_mem should not be nullptr");
+	OPENCL_SAFE_CALL ( clEnqueueReadBuffer(this->activeQueue().id(), this->id(), CL_FALSE, offset, size_bytes, host_mem, list.size(), list.events().data(), &event_id) );
+	return Event(event_id, this->context());
 }
 
 /*! \brief Transfers data from this Buffer to the host memory.
@@ -423,11 +420,11 @@ ocl::Buffer::readAsync (size_t offset, void *host_mem, size_t size_bytes, const 
 ocl::Event
 ocl::Buffer::readAsync (const ocl::Queue& queue, size_t offset, void *host_mem, size_t size_bytes, const ocl::EventList & list) const
 {
-    cl_event event_id;
-    TRUE_ASSERT(host_mem != NULL, "data == 0");
-    TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    OPENCL_SAFE_CALL ( clEnqueueReadBuffer(queue.id(), this->id(), CL_FALSE, offset, size_bytes, host_mem, list.size(), list.events().data(), &event_id) );
-    return Event(event_id, this->context());
+	cl_event event_id;
+	if(host_mem == nullptr) throw std::runtime_error("host_mem should not be nullptr");
+	if(*this->context() != queue.context()) throw std::runtime_error("context of queue and this must be equal");
+	OPENCL_SAFE_CALL ( clEnqueueReadBuffer(queue.id(), this->id(), CL_FALSE, offset, size_bytes, host_mem, list.size(), list.events().data(), &event_id) );
+	return Event(event_id, this->context());
 }
 
 /*! \brief Transfers data from host memory to this Buffer.
@@ -438,9 +435,9 @@ ocl::Buffer::readAsync (const ocl::Queue& queue, size_t offset, void *host_mem, 
 */
 void ocl::Buffer::write (const void * host_mem, size_t size_bytes, const EventList & list ) const
 {
-	TRUE_ASSERT(host_mem != NULL, "hostMem == 0");
-    OPENCL_SAFE_CALL (  clEnqueueWriteBuffer(this->activeQueue().id(), this->id(), CL_TRUE, 0, size_bytes, host_mem, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
+	if(host_mem == nullptr) throw std::runtime_error("host_mem should not be nullptr");
+	OPENCL_SAFE_CALL (  clEnqueueWriteBuffer(this->activeQueue().id(), this->id(), CL_TRUE, 0, size_bytes, host_mem, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
 }
 
 /*! \brief Transfers data from host_memory to this Buffer.
@@ -452,9 +449,9 @@ void ocl::Buffer::write (const void * host_mem, size_t size_bytes, const EventLi
 */
 void ocl::Buffer::write (size_t offset, const void * host_mem, size_t size_bytes, const EventList & list ) const
 {
-	TRUE_ASSERT(host_mem != NULL, "hostMem == 0");
-    OPENCL_SAFE_CALL (  clEnqueueWriteBuffer(this->activeQueue().id(), this->id(), CL_TRUE, offset, size_bytes, host_mem, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
+	if(host_mem == nullptr) throw std::runtime_error("host_mem should not be nullptr");
+	OPENCL_SAFE_CALL (  clEnqueueWriteBuffer(this->activeQueue().id(), this->id(), CL_TRUE, offset, size_bytes, host_mem, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
 }
 
 /*! \brief Transfers data from host memory to this Buffer.
@@ -467,10 +464,10 @@ void ocl::Buffer::write (size_t offset, const void * host_mem, size_t size_bytes
 */
 void ocl::Buffer::write (const ocl::Queue& queue, const void * host_mem, size_t size_bytes, const EventList & list ) const
 {
-    TRUE_ASSERT(host_mem != NULL, "hostMem == 0");
-    TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    OPENCL_SAFE_CALL (  clEnqueueWriteBuffer(queue.id(), this->id(), CL_TRUE, 0, size_bytes, host_mem, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(queue.id()) );
+	if(host_mem == nullptr) throw std::runtime_error("host_mem should not be nullptr");
+	if(*this->context() != queue.context()) throw std::runtime_error("context of queue and this must be equal");
+	OPENCL_SAFE_CALL (  clEnqueueWriteBuffer(queue.id(), this->id(), CL_TRUE, 0, size_bytes, host_mem, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(queue.id()) );
 }
 
 /*! \brief Transfers data from host_memory to this Buffer.
@@ -484,10 +481,10 @@ void ocl::Buffer::write (const ocl::Queue& queue, const void * host_mem, size_t 
 */
 void ocl::Buffer::write (const ocl::Queue& queue, size_t offset, const void * host_mem, size_t size_bytes, const EventList & list ) const
 {
-    TRUE_ASSERT(host_mem != NULL, "hostMem == 0");
-    TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    OPENCL_SAFE_CALL (  clEnqueueWriteBuffer(queue.id(), this->id(), CL_TRUE, offset, size_bytes, host_mem, list.size(), list.events().data(), NULL) );
-    OPENCL_SAFE_CALL( clFinish(queue.id()) );
+	if(host_mem == nullptr) throw std::runtime_error("host_mem should not be nullptr");
+	if(*this->context() != queue.context()) throw std::runtime_error("context of queue and this must be equal");
+	OPENCL_SAFE_CALL (  clEnqueueWriteBuffer(queue.id(), this->id(), CL_TRUE, offset, size_bytes, host_mem, list.size(), list.events().data(), NULL) );
+	OPENCL_SAFE_CALL( clFinish(queue.id()) );
 }
 
 
@@ -503,10 +500,10 @@ void ocl::Buffer::write (const ocl::Queue& queue, size_t offset, const void * ho
 ocl::Event ocl::Buffer::writeAsync (size_t offset, const void * host_mem, size_t size_bytes, const ocl::EventList & list) const
 {
 	cl_event event_id;
-	TRUE_ASSERT(host_mem != NULL, "data == 0");
-    OPENCL_SAFE_CALL ( clEnqueueWriteBuffer(this->activeQueue().id(), this->id(), CL_FALSE, offset, size_bytes, host_mem,
-                                                                                 list.size(), list.events().data(), &event_id) );
-    return Event(event_id, this->context());
+	if(host_mem == nullptr) throw std::runtime_error("host_mem should not be nullptr");
+	OPENCL_SAFE_CALL ( clEnqueueWriteBuffer(this->activeQueue().id(), this->id(), CL_FALSE, offset, size_bytes, host_mem,
+											list.size(), list.events().data(), &event_id) );
+	return Event(event_id, this->context());
 }
 
 /*! \brief Transfers data from host memory to this Buffer.
@@ -522,12 +519,12 @@ ocl::Event ocl::Buffer::writeAsync (size_t offset, const void * host_mem, size_t
 */
 ocl::Event ocl::Buffer::writeAsync (const ocl::Queue& queue, size_t offset, const void * host_mem, size_t size_bytes, const ocl::EventList & list) const
 {
-    cl_event event_id;
-    TRUE_ASSERT(host_mem != NULL, "data == 0");
-    TRUE_ASSERT(queue.context() == *this->context(), "Context of queue and this must be equal");
-    OPENCL_SAFE_CALL ( clEnqueueWriteBuffer(queue.id(), this->id(), CL_FALSE, offset, size_bytes, host_mem,
-                                                                                 list.size(), list.events().data(), &event_id) );
-    return Event(event_id, this->context());
+	cl_event event_id;
+	if(host_mem == nullptr) throw std::runtime_error("host_mem should not be nullptr");
+	if(*this->context() != queue.context()) throw std::runtime_error("context of queue and this must be equal");
+	OPENCL_SAFE_CALL ( clEnqueueWriteBuffer(queue.id(), this->id(), CL_FALSE, offset, size_bytes, host_mem,
+											list.size(), list.events().data(), &event_id) );
+	return Event(event_id, this->context());
 }
 
 /*! \brief Copies data from other Buffer to this Buffer.
@@ -537,9 +534,9 @@ ocl::Event ocl::Buffer::writeAsync (const ocl::Queue& queue, size_t offset, cons
   */
 ocl::Buffer & ocl::Buffer::operator= ( const Buffer & other )
 {
-    TRUE_ASSERT(this->context() == other.context(), "context must be equal");
-    this->recreate(other.size_bytes());
-    other.copyTo(0, other.size_bytes(), *this, 0);
+	if(this->context() != other.context()) throw std::runtime_error("context of queue and this must be equal");
+	this->recreate(other.size_bytes());
+	other.copyTo(0, other.size_bytes(), *this, 0);
 	return *this;
 }
 
@@ -551,9 +548,9 @@ ocl::Buffer & ocl::Buffer::operator= ( const Buffer & other )
   */
 ocl::Buffer & ocl::Buffer::operator= ( Buffer && other )
 {
-    if(this == &other) return *this;
-    ocl::Memory::operator =(std::move(other));
-    return *this;
+	if(this == &other) return *this;
+	ocl::Memory::operator =(std::move(other));
+	return *this;
 }
 
 /*! \brief Acquires access to this Buffer.
@@ -566,8 +563,8 @@ ocl::Buffer & ocl::Buffer::operator= ( Buffer && other )
 #ifdef __OPENGL__
 cl_int ocl::Buffer::acquireAccess(Queue &q) 
 {
-    glFinish();
-    return clEnqueueAcquireGLObjects(q.id(), 1, &this->_id, NULL, NULL, NULL);
+	glFinish();
+	return clEnqueueAcquireGLObjects(q.id(), 1, &this->_id, NULL, NULL, NULL);
 }
 #endif
 
@@ -579,7 +576,7 @@ cl_int ocl::Buffer::acquireAccess(Queue &q)
   */
 #ifdef __OPENGL__
 cl_int ocl::Buffer::releaseAccess(Queue &q, const EventList& list) {
-    cl_event event_id;
-    return clEnqueueReleaseGLObjects(q.id(), 1, &this->_id, list.size(), list.events().data(), &event_id);
+	cl_event event_id;
+	return clEnqueueReleaseGLObjects(q.id(), 1, &this->_id, list.size(), list.events().data(), &event_id);
 }
 #endif

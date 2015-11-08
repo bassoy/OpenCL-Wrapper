@@ -35,8 +35,6 @@
 #include <ocl_buffer.h>
 #include <ocl_sampler.h>
 
-#include <utl_assert.h>
-
 
 /*! \brief Instantiates this Context.
   *
@@ -51,7 +49,7 @@
 ocl::Context::Context(cl_context id, bool shared) :
     _id(id), _programs(), _queues(), _events(), _memories(), _samplers(), _devices(), _activeQueue(NULL), _activeProgram(NULL)
 {
-    TRUE_ASSERT(_id != 0, "Context not valid");
+	if(_id == 0) throw std::runtime_error("Context not valid");
 
 
     size_t num_devices = 0;
@@ -120,7 +118,7 @@ ocl::Context::Context() :
 ocl::Context::Context(const std::vector<Device> & devices, bool shared) :
 		_id(NULL), _programs(), _queues(), _events(), _memories(), _samplers(), _devices(devices), _activeQueue(NULL), _activeProgram(NULL)
 {
-	TRUE_ASSERT(!devices.empty(), "No Devices specified. Cannot create context without devices.");
+	if(devices.empty()) throw std::runtime_error("No Devices specified. Cannot create context without devices.");
 	this->create(shared);
 }
 
@@ -190,15 +188,15 @@ void ocl::Context::setDevices(const ocl::Device &d)
   */
 void ocl::Context::create(bool shared)
 {
-	TRUE_ASSERT(_id == 0, "Cannot create a context twice");
-	TRUE_ASSERT(!this->_devices.empty(), "No devices specified");
+	if(_id != 0) throw std::runtime_error( "Cannot create a context twice");
+	if(this->_devices.empty()) throw std::runtime_error( "No devices specified");
 	cl_int status;
 	std::vector<cl_device_id> dev = this->cl_devices();
 	if(shared == false)
 	{
 		_id = clCreateContext(NULL, dev.size(), dev.data(), NULL, NULL, &status);
 		OPENCL_SAFE_CALL(status);
-		TRUE_ASSERT(_id != 0, "Could not create Context");
+		if(_id == 0) throw std::runtime_error( "Could not create Context");
 		return;
 	}
 
@@ -315,8 +313,8 @@ cl_context ocl::Context::id() const
   */
 void ocl::Context::insert(ocl::Memory *mem)
 {
-    TRUE_ASSERT(mem != 0, "Memory not valid");
-    TRUE_ASSERT(*mem->context() == *this, "Memory has a different context.");
+	if(mem == 0) throw std::runtime_error( "Memory not valid");
+	if(*mem->context() != *this) throw std::runtime_error( "Memory has a different context.");
     _memories.insert(mem);
 }
 
@@ -330,7 +328,7 @@ void ocl::Context::insert(ocl::Memory *mem)
   */
 void ocl::Context::release(ocl::Memory *mem)
 {
-    TRUE_ASSERT(mem != 0, "Memory not valid");
+	if(mem == 0)  throw std::runtime_error("Memory not valid");
     if(_memories.find(mem) == _memories.end()) return;
     _memories.erase(mem);
     mem->release();
@@ -346,7 +344,7 @@ void ocl::Context::release(ocl::Memory *mem)
   */
 void ocl::Context::remove(ocl::Memory *mem)
 {
-    TRUE_ASSERT(mem != 0, "Memory not valid");
+	if(mem == 0)  throw std::runtime_error( "Memory not valid");
     if(_memories.find(mem) == _memories.end()) return;
     _memories.erase(mem);
 }
@@ -361,9 +359,9 @@ void ocl::Context::remove(ocl::Memory *mem)
   */
 void ocl::Context::insert(ocl::Sampler *sampler)
 {
-    TRUE_ASSERT(sampler != 0, "Sampler not valid.");
+	if(sampler == 0)  throw std::runtime_error("Sampler not valid.");
     if(this->has(*sampler)) return;
-    TRUE_ASSERT(sampler->context() == *this, "Cannot insert Sampler with a different Context and this Context");
+	if(sampler->context() != *this)  throw std::runtime_error( "Cannot insert Sampler with a different Context and this Context");
     this->_samplers.insert(sampler);
 }
 
@@ -377,7 +375,7 @@ void ocl::Context::insert(ocl::Sampler *sampler)
   */
 void ocl::Context::release(ocl::Sampler *sampler)
 {
-    TRUE_ASSERT(sampler != 0, "Sampler not valid");
+	if(sampler == 0)  throw std::runtime_error( "Sampler not valid");
     if(_samplers.find(sampler) == _samplers.end()) return;
     _samplers.erase(sampler);
     sampler->release();
@@ -392,7 +390,7 @@ void ocl::Context::release(ocl::Sampler *sampler)
   */
 void ocl::Context::remove(ocl::Sampler *sampler)
 {
-    TRUE_ASSERT(sampler != 0, "Sampler not valid");
+	if(sampler == 0)  throw std::runtime_error( "Sampler not valid");
     if(_samplers.find(sampler) == _samplers.end()) return;
     _samplers.erase(sampler);
 }
@@ -408,9 +406,9 @@ void ocl::Context::remove(ocl::Sampler *sampler)
   */
 void ocl::Context::insert(ocl::Queue *queue)
 {
-    TRUE_ASSERT(queue != 0, "Queue not valid.");
+	if(queue == 0)  throw std::runtime_error( "Queue not valid.");
     if(this->has(*queue)) return;
-    TRUE_ASSERT(queue->context() == *this, "Cannot insert Queue with a different Context and this Context");
+	if(queue->context() != *this)  throw std::runtime_error("Cannot insert Queue with a different Context and this Context");
     this->_queues.insert(queue);
 }
 
@@ -425,7 +423,7 @@ void ocl::Context::insert(ocl::Queue *queue)
   */
 void ocl::Context::release(ocl::Queue *queue)
 {
-    TRUE_ASSERT(queue != 0, "Queue not valid.");
+	if(queue == 0)  throw std::runtime_error( "Queue not valid.");
     if(!this->has(*queue)) return;
     _queues.erase(queue);
     if(queue == _activeQueue) _activeQueue = 0;
@@ -441,7 +439,7 @@ void ocl::Context::release(ocl::Queue *queue)
   */
 void ocl::Context::remove(ocl::Queue *queue)
 {
-    TRUE_ASSERT(queue != 0, "Queue not valid");
+	if(queue == 0)  throw std::runtime_error( "Queue not valid");
     if(this->has(*queue)) return;
     if(queue == _activeQueue) _activeQueue = 0;
     _queues.erase(queue);
@@ -458,9 +456,9 @@ void ocl::Context::remove(ocl::Queue *queue)
   */
 void ocl::Context::insert(ocl::Program *prog)
 {
-    TRUE_ASSERT(prog != 0, "Program not valid.");
+	if(prog == 0)  throw std::runtime_error("Program not valid.");
     if(this->has(*prog)) return;
-    TRUE_ASSERT(prog->context() == *this, "Cannot insert Program with a different Context and this Context");
+	if(prog->context() != *this)  throw std::runtime_error( "Cannot insert Program with a different Context and this Context");
     this->_programs.insert(prog);
 }
 
@@ -475,7 +473,7 @@ void ocl::Context::insert(ocl::Program *prog)
   */
 void ocl::Context::release(ocl::Program *prog)
 {
-    TRUE_ASSERT(prog != 0, "Program not valid.");
+	if(prog == 0)  throw std::runtime_error( "Program not valid.");
     if(!this->has(*prog)) return;    
     _programs.erase(prog);
     if(prog == _activeProgram) _activeProgram = 0;
@@ -491,7 +489,7 @@ void ocl::Context::release(ocl::Program *prog)
   */
 void ocl::Context::remove(ocl::Program *prog)
 {
-    TRUE_ASSERT(prog != 0, "Program not valid");
+	if(prog == 0)  throw std::runtime_error( "Program not valid");
     if(!this->has(*prog)) return;
     _programs.erase(prog);
     if(prog == _activeProgram) _activeProgram = 0;
@@ -507,9 +505,9 @@ void ocl::Context::remove(ocl::Program *prog)
   */
 void ocl::Context::insert(ocl::Event *event)
 {
-    TRUE_ASSERT(event != 0, "Event not valid.");
+	if(event == 0)  throw std::runtime_error("Event not valid.");
     if(this->has(*event)) return;
-    TRUE_ASSERT(event->context() == *this, "Cannot insert Event with a different Context and this Context");
+	if(event->context() != *this)  throw std::runtime_error( "Cannot insert Event with a different Context and this Context");
     this->_events.insert(event);
 }
 
@@ -524,7 +522,7 @@ void ocl::Context::insert(ocl::Event *event)
   */
 void ocl::Context::release(ocl::Event *event)
 {
-    TRUE_ASSERT(event != 0, "Event not valid.");
+	if(event == 0)  throw std::runtime_error( "Event not valid.");
     if(this->has(*event)) return;
     _events.erase(event);
     event->release();
@@ -539,7 +537,7 @@ void ocl::Context::release(ocl::Event *event)
   */
 void ocl::Context::remove(ocl::Event *event)
 {
-    TRUE_ASSERT(event != 0, "Event not valid");
+	if(event == 0)  throw std::runtime_error( "Event not valid");
     if(!has(*event)) return;
     _events.erase(event);
 }
@@ -555,7 +553,7 @@ void ocl::Context::remove(ocl::Event *event)
   */
 ocl::Queue& ocl::Context::activeQueue() const
 {
-    TRUE_ASSERT(this->_activeQueue != 0, "No active queue present");
+	if(this->_activeQueue == 0)  throw std::runtime_error( "No active queue present");
     return *this->_activeQueue;
 }
 
@@ -567,7 +565,7 @@ ocl::Queue& ocl::Context::activeQueue() const
   */
 void ocl::Context::setActiveQueue(ocl::Queue &q)
 {
-    TRUE_ASSERT(this->has(q), "Queue is not within this Context");
+	if(!this->has(q))  throw std::runtime_error( "Queue is not within this Context");
     this->_activeQueue = &q;
 }
 
@@ -578,7 +576,7 @@ void ocl::Context::setActiveQueue(ocl::Queue &q)
   */
 ocl::Program& ocl::Context::activeProgram() const
 {
-    TRUE_ASSERT(this->_activeProgram != 0, "No active queue present");
+	if(this->_activeProgram == 0)  throw std::runtime_error( "No active queue present");
     return *this->_activeProgram;
 }
 
@@ -588,8 +586,8 @@ ocl::Program& ocl::Context::activeProgram() const
   */
 void ocl::Context::setActiveProgram(Program &p)
 {
-    TRUE_ASSERT(this->has(p), "Program is not within this Context");
-    TRUE_ASSERT(p.isBuilt(), "Program not yet created.");
+	if(!this->has(p))  throw std::runtime_error( "Program is not within this Context");
+	if(!p.isBuilt())  throw std::runtime_error( "Program not yet created.");
     this->_activeProgram = &p;
 }
 

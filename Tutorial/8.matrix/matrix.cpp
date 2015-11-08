@@ -2,7 +2,8 @@
 #include <algorithm>
 
 #include <ocl_wrapper.h>
-#include <utl_utils.h>
+#include <utl_matrix.h>
+
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
 #else

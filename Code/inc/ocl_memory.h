@@ -87,7 +87,7 @@ protected:
     virtual ~Memory ();
 
 protected:
-    Context *_context;
+	Context *_ctxt;
     cl_mem _id;
 
 };

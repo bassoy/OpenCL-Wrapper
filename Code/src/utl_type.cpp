@@ -16,8 +16,6 @@
 //along with OpenCL Utility Toolkit.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <utl_type.h>
-#include <utl_assert.h>
-#include <utl_stream.h>
 
 #include <algorithm>
 
@@ -112,16 +110,12 @@ utl::Types::Types(const Type& other) :
 utl::Types::Types(const Types& other) :
 	types_(other.types_)
 {
-
-	DEBUG_COMMENT(this->toString());
 }
 
 utl::Types::Types(Types&& other) :
 	types_()
 {
 	std::swap( other.types_, types_ );
-
-	DEBUG_COMMENT(this->toString());
 }
 
 bool utl::Types::contains(const Type &type)   const

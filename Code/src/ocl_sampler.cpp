@@ -19,7 +19,6 @@
 #include <ocl_platform.h>
 #include <ocl_sampler.h>
 #include <ocl_query.h>
-#include <utl_assert.h>
 
 /*! \brief Instantiates this Sampler with the active Context.
   *
@@ -71,8 +70,8 @@ ocl::Sampler::~Sampler()
  */
 void ocl::Sampler::create(AdressingMode amode, FilterMode fmode, bool normalized)
 {
-    TRUE_ASSERT(this->_context != 0, "Context not valid - cannot create Sampler");
-    
+	if(this->_context == nullptr) throw std::runtime_error("context not valid. cannot create a sampler");
+
     cl_bool coords = normalized ? CL_TRUE : CL_FALSE;
     cl_addressing_mode cl_amode = amode;
     cl_filter_mode cl_fmode = fmode;
@@ -93,7 +92,7 @@ void ocl::Sampler::create(AdressingMode amode, FilterMode fmode, bool normalized
 #endif
 
     OPENCL_SAFE_CALL(status);
-    TRUE_ASSERT(this->_id != 0, "Could not create Sampler.");
+	if(this->_id == nullptr) throw std::runtime_error("Could not create Sampler.");
 }
 
 /**
@@ -103,7 +102,7 @@ void ocl::Sampler::create(AdressingMode amode, FilterMode fmode, bool normalized
  */
 const ocl::Context& ocl::Sampler::context() const
 {
-	TRUE_ASSERT(this->_context != 0, "Context not valid - cannot create Sampler");
+	if(this->_context == nullptr) throw std::runtime_error("Could not create Sampler.");
 	return *(this->_context);
 }
 
@@ -115,7 +114,7 @@ const ocl::Context& ocl::Sampler::context() const
  */
 cl_sampler ocl::Sampler::id() const
 {
-	TRUE_ASSERT(this->_id != 0, "Could not release Sampler.");
+	if(this->_id == nullptr) throw std::runtime_error("Could not release Sampler.");
 	return this->_id;
 }
 
@@ -124,7 +123,7 @@ cl_sampler ocl::Sampler::id() const
  */
 void ocl::Sampler::release()
 {
-	TRUE_ASSERT(this->_id != 0, "Could not release Sampler.");	
+	if(this->_id == nullptr) throw std::runtime_error("Could not release Sampler.");
 	cl_int status = clReleaseSampler (this->_id);
 	OPENCL_SAFE_CALL(status);
 }
@@ -135,9 +134,9 @@ void ocl::Sampler::release()
  */
 bool ocl::Sampler::isNormalized() const
 {
-	TRUE_ASSERT(this->_context != 0, "Context not valid - cannot create Sampler");
-	TRUE_ASSERT(this->_id != 0, "Could not create Sampler.");
-	
+	if(this->_context == nullptr) throw std::runtime_error("context not valid. cannot create a sampler");
+	if(this->_id == nullptr) throw std::runtime_error("id not valid. cannot create a sampler");
+
 	cl_bool normalized;
 	
 	cl_int status = clGetSamplerInfo (this->_id, CL_SAMPLER_NORMALIZED_COORDS, sizeof(cl_bool), &normalized, NULL);
@@ -153,8 +152,8 @@ bool ocl::Sampler::isNormalized() const
  */
 ocl::Sampler::AdressingMode ocl::Sampler::addressingMode() const
 {
-	TRUE_ASSERT(this->_context != 0, "Context not valid - cannot create Sampler");
-	TRUE_ASSERT(this->_id != 0, "Could not create Sampler.");
+	if(this->_context == nullptr) throw std::runtime_error("context not valid. cannot create a sampler");
+	if(this->_id == nullptr) throw std::runtime_error("id not valid. cannot create a sampler");
 	
 	cl_addressing_mode mode;
 	
@@ -171,9 +170,9 @@ ocl::Sampler::AdressingMode ocl::Sampler::addressingMode() const
  */
 ocl::Sampler::FilterMode ocl::Sampler::filterMode() const
 {
-	TRUE_ASSERT(this->_context != 0, "Context not valid - cannot create Sampler");
-	TRUE_ASSERT(this->_id != 0, "Could not create Sampler.");
-	
+	if(this->_context == nullptr) throw std::runtime_error("context not valid. cannot create a sampler");
+	if(this->_id == nullptr) throw std::runtime_error("id not valid. cannot create a sampler");
+
 	cl_filter_mode mode;
 	
 	cl_int status = clGetSamplerInfo (this->_id, CL_SAMPLER_FILTER_MODE, sizeof(mode), &mode, NULL);

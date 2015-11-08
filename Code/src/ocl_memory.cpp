@@ -21,8 +21,6 @@
 #include <ocl_queue.h>
 #include <ocl_platform.h>
 
-#include <utl_assert.h>
-
 /*! \brief Instantiates this Device Memory  within a Context with size_bytes.
   *
   * If no Context is provided the active Context of the Platform is taken if
@@ -31,13 +29,13 @@
   *
   */
 ocl::Memory::Memory () :
-    _context(0), _id(0)
+	_ctxt(0), _id(0)
 {
     if(!ocl::Platform::hasActivePlatform()) return;
     if(!ocl::Platform::activePlatform()->hasActiveContext()) return;
 
-    _context = ocl::Platform::activePlatform()->activeContext();
-    _context->insert(this);
+	_ctxt = ocl::Platform::activePlatform()->activeContext();
+	_ctxt->insert(this);
 }
 
 /*! \brief Instantiates this Device Memory  within a Context with size_bytes.
@@ -47,10 +45,10 @@ ocl::Memory::Memory () :
   * \param context is Context for which the Memory is created.
   */
 ocl::Memory::Memory (ocl::Context& context) :
-    _context(&context), _id(0)
+	_ctxt(&context), _id(0)
 {
-    TRUE_ASSERT(_context != 0, "context == 0");
-    _context->insert(this);
+	if(this->_ctxt == nullptr) throw std::runtime_error("context not valid");
+	_ctxt->insert(this);
 }
 
 
@@ -60,10 +58,10 @@ ocl::Memory::Memory (ocl::Context& context) :
   * \param other Device Memory from which the Context is taken from.
   */
 ocl::Memory::Memory (const Memory &other ) :
-    _context(other._context), _id(0)
+	_ctxt(other._ctxt), _id(0)
 {
-    TRUE_ASSERT(_context != 0, "context == 0");
-    _context->insert(this);
+	if(this->_ctxt == nullptr) throw std::runtime_error("context not valid");
+	_ctxt->insert(this);
 }
 
 /*! \brief Instantiates this Device Memory from another Device Memory.
@@ -72,11 +70,11 @@ ocl::Memory::Memory (const Memory &other ) :
   * \param other Device Memory from which the Context is taken.
   */
 ocl::Memory::Memory (Memory && other ) :
-    _context(other._context), _id(other._id)
+	_ctxt(other._ctxt), _id(other._id)
 {
-    TRUE_ASSERT(_context != 0, "context == 0");
-    _context->insert(this);    
-    _context->remove(&other);
+	if(this->_ctxt == nullptr) throw std::runtime_error("context not valid");
+	_ctxt->insert(this);
+	_ctxt->remove(&other);
     other._id = 0;
 }
 
@@ -100,10 +98,11 @@ ocl::Memory::~Memory ()
   */
 ocl::Memory& ocl::Memory::operator =(const Memory & other)
 {
-    TRUE_ASSERT(other._context != 0, "No active Context");
-    TRUE_ASSERT(this->context()== other.context(), "Context must be equal");
-	this->_context = other._context;
-    this->_context->insert(this);
+	if(this->_ctxt == nullptr) throw std::runtime_error("context not valid");
+	if(this->context() != other.context() ) throw std::runtime_error("context must be equal");
+
+	this->_ctxt = other._ctxt;
+	this->_ctxt->insert(this);
 	this->_id = 0;
 	return *this;
 }
@@ -118,15 +117,17 @@ ocl::Memory& ocl::Memory::operator =(const Memory & other)
 ocl::Memory& ocl::Memory::operator =(Memory && other)
 {
     if(this == &other) return *this;
-    TRUE_ASSERT(other._context != 0, "No active Context");
-    TRUE_ASSERT(this->context() == other.context(), "Context must be equal");
+
+	if(other._ctxt == nullptr) throw std::runtime_error("context not valid");
+	if(this->context() != other.context() ) throw std::runtime_error("context must be equal");
+
     this->release();
 
-    this->_context = other._context;
+	this->_ctxt = other._ctxt;
     this->_id = other._id;
 
-    this->_context->insert(this);
-    this->_context->remove(&other);
+	this->_ctxt->insert(this);
+	this->_ctxt->remove(&other);
 
     other._id = 0;
 
@@ -138,7 +139,7 @@ ocl::Memory& ocl::Memory::operator =(Memory && other)
   */
 ocl::Context* ocl::Memory::context () const
 {
-    return this->_context;
+	return this->_ctxt;
 }
 
 /*! \brief Sets a new context for this Device Memory.
@@ -146,8 +147,8 @@ ocl::Context* ocl::Memory::context () const
   */
 void ocl::Memory::setContext(ocl::Context &ctxt)
 {
-    TRUE_ASSERT(_context == 0 || ctxt == *this->context(), "cannot switch context");
-	_context = &ctxt;
+	if(_ctxt != nullptr && ctxt != *this->context()) throw std::runtime_error("cannot switch context");
+	_ctxt = &ctxt;
 }
 
 
@@ -171,7 +172,7 @@ void ocl::Memory::release()
 	if(this->_id == 0) return;
 
 	OPENCL_SAFE_CALL( clReleaseMemObject(_id) );
-	_context->remove(const_cast<ocl::Memory*>(this));
+	_ctxt->remove(const_cast<ocl::Memory*>(this));
 	this->_id = 0;
 }
 
@@ -207,7 +208,7 @@ size_t ocl::Memory::map_count() const
 size_t ocl::Memory::reference_count() const
 {
     if(this->_id == 0) return 0;
-    if(this->_context == 0) return 0;
+	if(this->_ctxt == 0) return 0;
     cl_uint info;
 	OPENCL_SAFE_CALL( clGetMemObjectInfo (this->_id, CL_MEM_REFERENCE_COUNT, sizeof(info), &info, NULL) ) ;
 	return size_t(info);

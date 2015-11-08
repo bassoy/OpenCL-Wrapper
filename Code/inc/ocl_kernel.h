@@ -26,7 +26,6 @@
 #include <vector>
 
 #include <ocl_event.h>
-#include <utl_assert.h>
 
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>

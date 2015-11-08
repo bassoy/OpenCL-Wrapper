@@ -25,8 +25,6 @@
 #include <ocl_queue.h>
 #include <ocl_platform.h>
 
-#include <utl_assert.h>
-
 
 /*! \brief Instantiates this Device.
   *
@@ -296,10 +294,10 @@ size_t ocl::Device::localMemSize() const
 /*! \brief Returns the OpenCL platform on which this Device is located.*/
 cl_platform_id ocl::Device::platform() const
 {
-	cl_platform_id _pl;
-	OPENCL_SAFE_CALL( clGetDeviceInfo (this->id(), CL_DEVICE_PLATFORM , sizeof(_pl), &_pl, NULL) );
-	TRUE_ASSERT(_pl != 0, "Platform not found");
-	return _pl;
+	cl_platform_id pl;
+	OPENCL_SAFE_CALL( clGetDeviceInfo (this->id(), CL_DEVICE_PLATFORM , sizeof(pl), &pl, NULL) );
+	if(pl == nullptr) throw std::runtime_error("platform not found");
+	return pl;
 }
 
 static std::string 

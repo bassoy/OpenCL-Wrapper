@@ -17,8 +17,6 @@
 
 #include <ocl_device_type.h>
 
-#include <utl_assert.h>
-
 #include <algorithm>
 #include <sstream>
 
@@ -196,7 +194,7 @@ const ocl::DeviceType& ocl::DeviceType::type(cl_device_type t)
 {
 
     std::vector<DeviceType>::const_iterator it = std::find(_allTypes.begin(), _allTypes.end(), t);
-    TRUE_ASSERT(it != _allTypes.end(), "Could not find that type.");
+	if(it == _allTypes.end()) throw std::runtime_error("could not find type");
     return *it;
 }
 

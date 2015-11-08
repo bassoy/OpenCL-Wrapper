@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <typeinfo>
 #include <cmath>
+#include <cassert>
 
 
 #include <ocl_program.h>
@@ -34,7 +35,6 @@
 #include <ocl_queue.h>
 #include <ocl_event_list.h>
 
-#include <utl_assert.h>
 #include <utl_type.h>
 
 
@@ -42,7 +42,7 @@
 
 /*! \brief Instantiates an empty Kernel object without a kernel function.*/
 ocl::Kernel::Kernel() :
-    _program(0),  _id(0), _workDim(1), _kernelfunc(), _name(), _memlocs()
+	_program(0),  _id(0), _workDim(1), _kernelfunc(), _name(), _memlocs()
 {
 }
 
@@ -54,12 +54,12 @@ ocl::Kernel::Kernel() :
   * should not be built yet.
   */
 ocl::Kernel::Kernel(const ocl::Program &p, const std::string &kernel) :
-    _program(&p), _id(0), _workDim(1), _kernelfunc(), _name(), _memlocs()
+	_program(&p), _id(0), _workDim(1), _kernelfunc(), _name(), _memlocs()
 {
-    TRUE_ASSERT(!_program->isBuilt(), "Program is already built.");
-    this->_kernelfunc = kernel;
-    this->_name = this->extractName(kernel);
-    this->_memlocs = this->extractMemlocs(kernel);
+	if(_program->isBuilt()) throw std::runtime_error("Program is already built.");
+	this->_kernelfunc = kernel;
+	this->_name = this->extractName(kernel);
+	this->_memlocs = this->extractMemlocs(kernel);
 }
 
 /*! \brief Instantiates this Kernel given the kernel function within a string.
@@ -70,11 +70,11 @@ ocl::Kernel::Kernel(const ocl::Program &p, const std::string &kernel) :
   * Kernel and built it.
   */
 ocl::Kernel::Kernel(const std::string &kernel) :
-    _program(0), _id(0), _workDim(1), _kernelfunc(), _name(), _memlocs()
+	_program(0), _id(0), _workDim(1), _kernelfunc(), _name(), _memlocs()
 {
-    this->_kernelfunc = kernel;
-    this->_name = this->extractName(kernel);
-    this->_memlocs = this->extractMemlocs(kernel);
+	this->_kernelfunc = kernel;
+	this->_name = this->extractName(kernel);
+	this->_memlocs = this->extractMemlocs(kernel);
 }
 
 /*! \brief Instantiates this Kernel given a Program, the kernel function within a string and a Type.
@@ -84,14 +84,14 @@ ocl::Kernel::Kernel(const std::string &kernel) :
   * The Program should not be built yet.
 */
 ocl::Kernel::Kernel(const ocl::Program &p, const std::string &kernel, const utl::Type & type) :
-    _program(&p), _id(0), _workDim(1), _kernelfunc(), _name(), _memlocs()
+	_program(&p), _id(0), _workDim(1), _kernelfunc(), _name(), _memlocs()
 {
 
-    if(this->templated(kernel))  this->_kernelfunc = this->specialize(kernel, type.name());
-    else                         this->_kernelfunc = kernel;
+	if(this->templated(kernel))  this->_kernelfunc = this->specialize(kernel, type.name());
+	else                         this->_kernelfunc = kernel;
 
-    this->_name = this->extractName(_kernelfunc);
-    this->_memlocs = this->extractMemlocs(_kernelfunc);
+	this->_name = this->extractName(_kernelfunc);
+	this->_memlocs = this->extractMemlocs(_kernelfunc);
 
 }
 
@@ -103,14 +103,14 @@ ocl::Kernel::Kernel(const ocl::Program &p, const std::string &kernel, const utl:
   * Kernel and built it.
 */
 ocl::Kernel::Kernel(const std::string &kernel, const utl::Type & type) :
-    _program(0), _id(0), _workDim(1), _kernelfunc(), _name(), _memlocs()
+	_program(0), _id(0), _workDim(1), _kernelfunc(), _name(), _memlocs()
 {
 
-    if(this->templated(kernel))  this->_kernelfunc = this->specialize(kernel, type.name());
-    else                         this->_kernelfunc = kernel;
+	if(this->templated(kernel))  this->_kernelfunc = this->specialize(kernel, type.name());
+	else                         this->_kernelfunc = kernel;
 
-    this->_name = this->extractName(_kernelfunc);
-    this->_memlocs = this->extractMemlocs(_kernelfunc);
+	this->_name = this->extractName(_kernelfunc);
+	this->_memlocs = this->extractMemlocs(_kernelfunc);
 
 }
 
@@ -119,7 +119,7 @@ ocl::Kernel::Kernel(const std::string &kernel, const utl::Type & type) :
 ocl::Kernel::~Kernel()
 {
 
-    release();
+	release();
 }
 
 /*! \brief Creates this Kernel for execution.
@@ -132,33 +132,33 @@ ocl::Kernel::~Kernel()
 */
 void ocl::Kernel::create()
 {
-    if(this->created()) return;
-    TRUE_ASSERT(this->_program  != 0, "program == 0");
-    TRUE_ASSERT(this->program().isBuilt(), "Program not yet built");
-    const char * __t = this->name().c_str();
-    
+	if(this->created()) return;
+	if(this->_program  == 0) throw std::runtime_error("program == 0");
+	if(!this->program().isBuilt())throw std::runtime_error("Program not yet built");
+	const char * __t = this->name().c_str();
+
 #if 0
-    std::cout << "Looking for kernel with name: " << __t << std::endl;
+	std::cout << "Looking for kernel with name: " << __t << std::endl;
 #endif
-    
-    cl_int err;
-    _id = clCreateKernel(this->_program->id(), __t, &err);
+
+	cl_int err;
+	_id = clCreateKernel(this->_program->id(), __t, &err);
 	OPENCL_SAFE_CALL(err);
-    TRUE_ASSERT(_id != 0, "id == 0");
+	if(_id == 0) throw std::runtime_error("id == 0");
 }
 
 /*! \brief Returns true if this Kernel is created and ready for execution. */
 bool ocl::Kernel::created() const
 {
-    return _id != 0;
+	return _id != 0;
 }
 
 /*! \brief Releases this Kernel. */
 void ocl::Kernel::release()
 {
-    if(created()){
-        OPENCL_SAFE_CALL(clReleaseKernel(_id));
-    }
+	if(created()){
+		OPENCL_SAFE_CALL(clReleaseKernel(_id));
+	}
 	_globalSize[0] = 1; _globalSize[1] = 1; _globalSize[2] = 1;
 	_localSize[0] = 1; _localSize[1] = 1; _localSize[2] = 1;
 	_id = 0;
@@ -176,23 +176,23 @@ cl_kernel ocl::Kernel::id() const
 /*! \brief Returns Program of this Kernel. */
 const ocl::Program& ocl::Kernel::program() const
 {
-    TRUE_ASSERT(_program != NULL, "Program not valid.");
-    return *_program;
+	if(_program == nullptr) throw std::runtime_error( "Program not valid.");
+	return *_program;
 }
 
 /*! \brief Set Program of this Kernel. */
 void ocl::Kernel::setProgram(const ocl::Program &program)
 {
-    TRUE_ASSERT(_program == NULL, "There should not be a program.");
-    _program = &program;
+	if(_program == nullptr) throw std::runtime_error( "Program not valid.");
+	_program = &program;
 }
 
 
 /*! \brief Returns the Context for this Kernel. */
 ocl::Context& ocl::Kernel::context() const
 {
-    TRUE_ASSERT(_program != NULL, "Program not valid.");
-    return this->_program->context();
+	if(_program == nullptr) throw std::runtime_error("Program not valid.");
+	return this->_program->context();
 }
 
 
@@ -204,12 +204,12 @@ ocl::Context& ocl::Kernel::context() const
 */
 ocl::Event ocl::Kernel::callKernel(const Queue& queue, const EventList& list)
 {
-    TRUE_ASSERT(queue.context() == this->context(), "Context must be equal.");
-    cl_event event_id;
+	if(queue.context() != this->context()) throw std::runtime_error( "Context must be equal.");
+	cl_event event_id;
 
-    OPENCL_SAFE_CALL( clEnqueueNDRangeKernel(queue.id(), this->id(), this->workDim(), 0, this->globalSize(), this->localSize(), list.size(), list.events().data(), &event_id) );
+	OPENCL_SAFE_CALL( clEnqueueNDRangeKernel(queue.id(), this->id(), this->workDim(), 0, this->globalSize(), this->localSize(), list.size(), list.events().data(), &event_id) );
 
-    return ocl::Event(event_id, &this->context());
+	return ocl::Event(event_id, &this->context());
 }
 
 /*! \brief Executes this Kernel and returns an Event by which the execution can be tracked.
@@ -220,10 +220,10 @@ ocl::Event ocl::Kernel::callKernel(const Queue& queue, const EventList& list)
 */
 ocl::Event ocl::Kernel::callKernel(const Queue& queue)
 {
-    TRUE_ASSERT(queue.context() == this->context(), "Context must be equal.");
-    cl_event event_id;
-    OPENCL_SAFE_CALL( clEnqueueNDRangeKernel(queue.id(), this->id(), this->workDim(), 0, this->globalSize(), this->localSize(), 0, NULL, &event_id) );
-    return ocl::Event(event_id, &this->context());
+	if(queue.context() != this->context()) throw std::runtime_error( "Context must be equal.");
+	cl_event event_id;
+	OPENCL_SAFE_CALL( clEnqueueNDRangeKernel(queue.id(), this->id(), this->workDim(), 0, this->globalSize(), this->localSize(), 0, NULL, &event_id) );
+	return ocl::Event(event_id, &this->context());
 }
 
 /*! \brief Executes this Kernel and returns an Event by which the execution can be tracked.
@@ -235,12 +235,12 @@ ocl::Event ocl::Kernel::callKernel(const Queue& queue)
 ocl::Event ocl::Kernel::callKernel()
 {
 
-    cl_event event_id;
+	cl_event event_id;
 
-    const ocl::Queue &queue = this->program().context().activeQueue();
+	const ocl::Queue &queue = this->program().context().activeQueue();
 
-    OPENCL_SAFE_CALL( clEnqueueNDRangeKernel(queue.id(), this->id(), this->workDim(), 0, this->globalSize(), this->localSize(), 0, NULL, &event_id) );
-    return ocl::Event(event_id, &this->context());
+	OPENCL_SAFE_CALL( clEnqueueNDRangeKernel(queue.id(), this->id(), this->workDim(), 0, this->globalSize(), this->localSize(), 0, NULL, &event_id) );
+	return ocl::Event(event_id, &this->context());
 }
 
 #if 0
@@ -252,7 +252,7 @@ ocl::Event ocl::Kernel::callKernel()
 */
 ocl::Event ocl::Kernel::operator ()()
 {
-    return this->callKernel();
+	return this->callKernel();
 }
 #endif
 
@@ -289,14 +289,14 @@ const size_t* ocl::Kernel::globalSize() const
 /*! \brief Returns the localSize of the index space for the specified dimension.*/
 size_t ocl::Kernel::localSize(size_t pos) const
 {
-	TRUE_ASSERT(pos < 3, "Cannot have more than three dims : " << pos);
+	if(pos >= 3) throw std::runtime_error( "Cannot have more than three dims : " + std::to_string(pos));
 	return _localSize[pos];
 }
 
 /*! \brief Returns the globalSize of the index space for the specified dimension.*/
 size_t ocl::Kernel::globalSize(size_t pos) const
 {
-	TRUE_ASSERT(pos < 3, "Cannot have more than three dims : " << pos);
+	if(pos >= 3) throw std::runtime_error("Cannot have more than three dims : " + std::to_string(pos));
 	return _globalSize[pos];
 }
 
@@ -333,7 +333,7 @@ void ocl::Kernel::setLocalSize(size_t *localSize)
 */
 void ocl::Kernel::setLocalSize(size_t localSize, size_t pos)
 {
-	TRUE_ASSERT(pos < 3, "Cannot have more than three dims : " << pos);
+	if(pos >= 3) throw std::runtime_error("Cannot have more than three dims : " + std::to_string(pos));
 	_localSize[pos] = localSize;
 }
 
@@ -424,8 +424,8 @@ void ocl::Kernel::setWorkSize(size_t lSizeX, size_t lSizeY, size_t lSizeZ, size_
 */
 void ocl::Kernel::setArg(int pos, cl_mem data)
 {
-    TRUE_ASSERT(this->numberOfArgs() > size_t(pos), "Position " << pos << " >= " << this->_memlocs.size());
-    //TRUE_ASSERT(this->memoryLocation(pos) == global, "Argument must be of type GLOBAL at pos " << pos);
+	if(this->numberOfArgs() <= size_t(pos)) throw std::runtime_error( "Position " + std::to_string(pos) + " <= " + std::to_string(this->numberOfArgs()));
+	//TRUE_ASSERT(this->memoryLocation(pos) == global, "Argument must be of type GLOBAL at pos " << pos);
 	cl_int stat = clSetKernelArg(_id, pos, sizeof(cl_mem), &data);
 	if(stat != CL_SUCCESS) cerr << "Error setting kernel "<< this->name() << " argument " << pos << endl;
 	OPENCL_SAFE_CALL( stat );
@@ -436,7 +436,7 @@ void ocl::Kernel::setArg(int pos, cl_mem data)
 */
 void ocl::Kernel::setArg(int pos, cl_sampler data)
 {
-	TRUE_ASSERT(this->numberOfArgs() > size_t(pos), "Position " << pos << " >= " << this->_memlocs.size());
+	if(this->numberOfArgs() <= size_t(pos)) throw std::runtime_error("Position " + std::to_string(pos) + " <= " + std::to_string(this->numberOfArgs()));
 	cl_int stat = clSetKernelArg(_id, pos, sizeof(cl_sampler), &data);
 	if(stat != CL_SUCCESS) cerr << "Error setting kernel "<< this->name() << " argument " << pos << endl;
 	OPENCL_SAFE_CALL( stat );
@@ -449,29 +449,29 @@ void ocl::Kernel::setArg(int pos, cl_sampler data)
 template<class T>
 void ocl::Kernel::setArg(int pos, const T& data)
 {
-  TRUE_ASSERT(this->numberOfArgs() > size_t(pos), "Position " << pos << " >= " << this->_memlocs.size());
+	if(this->numberOfArgs() <= size_t(pos)) throw std::runtime_error("Position " + std::to_string(pos) + " <= " + std::to_string(this->numberOfArgs()));
 
 	cl_int stat ;
 
-  if(this->memoryLocation(pos) == host)
-  {
+	if(this->memoryLocation(pos) == host)
+	{
 		stat = clSetKernelArg(_id, pos, sizeof(T), (void*)&data);
 	}
-  else if(this->memoryLocation(pos) == local)
+	else if(this->memoryLocation(pos) == local)
 	{
-    TRUE_ASSERT(typeid(data) == typeid(size_t), "data: "<< data << " at pos " << pos << " must be of type size_t");
+		if(typeid(data) != typeid(size_t)) throw std::runtime_error("data: " + std::to_string(data) + " at pos " + std::to_string(pos) + " must be of type size_t");
 
-    // TODO This is a hack and should be better implemented using compile time type erasure.
+		// TODO This is a hack and should be better implemented using compile time type erasure.
 		stat = clSetKernelArg(_id, pos, static_cast<size_t>( data ), NULL);
 	}
 	else
-  {
-    TRUE_ASSERT(0,"Location Unkown - Error setting kernel "<< name() << " at pos = " << pos << ", arg = " << data);
+	{
+		throw std::runtime_error("Location Unkown - Error setting kernel " + name() + " at pos = " + std::to_string(pos) + ", arg = " + std::to_string(data));
 	}
-    
-  if(stat != CL_SUCCESS) cerr << "Error setting kernel "<< name() << " at pos = " << pos << ", arg = " << data << endl;
+
+	if(stat != CL_SUCCESS) cerr << "Error setting kernel "<< name() << " at pos = " << pos << ", arg = " << data << endl;
 	
-  OPENCL_SAFE_CALL( stat );
+	OPENCL_SAFE_CALL( stat );
 }
 
 template void ocl::Kernel::setArg<int>   (int pos, const int& data);
@@ -485,7 +485,7 @@ template void ocl::Kernel::setArg<unsigned int>( int pos, unsigned int const& da
 /*! \brief Returns the kernel function of this Kernel. */
 const std::string& ocl::Kernel::toString() const
 {
-    return this->_kernelfunc;
+	return this->_kernelfunc;
 }
 
 /*! \brief Returns the kernel function name of this Kernel. */
@@ -503,149 +503,152 @@ size_t ocl::Kernel::numberOfArgs() const
 /*! \brief Returns the memory location of this Kernel at the specified position. */
 ocl::Kernel::mem_loc ocl::Kernel::memoryLocation(size_t pos) const
 {
-    return this->_memlocs.at(pos);
+	return this->_memlocs.at(pos);
 }
 
 bool ocl::Kernel::templated(const std::string &kernel)
 {
-    return !ocl::Kernel::extractParameter(kernel).empty();
+	return !ocl::Kernel::extractParameter(kernel).empty();
 }
 
 std::vector<ocl::Kernel::mem_loc> ocl::Kernel::extractMemlocs(const std::string & kernel)
 {
-    const auto afterAttributes = kernel.find("void");
+	const auto afterAttributes = kernel.find("void");
 
-    const size_t start = kernel.find("(",afterAttributes) + 1;
-    const size_t end   = kernel.find(")",start) - 1;
+	const size_t start = kernel.find("(",afterAttributes) + 1;
+	const size_t end   = kernel.find(")",start) - 1;
 	//TRUE_ASSERT(start < end, "Function not correctly defined.");
-	TRUE_ASSERT((start-1) < (end+1), "Function not correctly defined.");
+	assert((start-1) < (end+1));
 
-    size_t pos_before = start;
-    size_t pos_after = start;
+	size_t pos_before = start;
+	size_t pos_after = start;
 
-    vector<mem_loc> locs;
+	vector<mem_loc> locs;
 
-    while(pos_after <= end)
-    {
-        pos_after = kernel.find(",", pos_before) - 1;
-        if(pos_after > end) pos_after = kernel.find(")", pos_before) - 1;
-        if(pos_after > end) return locs;
+	while(pos_after <= end)
+	{
+		pos_after = kernel.find(",", pos_before) - 1;
+		if(pos_after > end) pos_after = kernel.find(")", pos_before) - 1;
+		if(pos_after > end) return locs;
 
-        const string& argument = kernel.substr(pos_before, pos_after - pos_before + 1);
+		const string& argument = kernel.substr(pos_before, pos_after - pos_before + 1);
 
-        if( argument.find("global") != argument.npos || argument.find("__global") != argument.npos )
-            locs.push_back(global);
-        else if( argument.find("local") != argument.npos || argument.find("__local") != argument.npos)
-            locs.push_back(local);
-        else if( argument.find("image") != argument.npos)
-            locs.push_back(image);
-        else if( argument.find("sampler") != argument.npos)
-            locs.push_back(sampler);
-        else
-            locs.push_back(host);
-        pos_before = pos_after+2;
-    }
-    return locs;
+		if( argument.find("global") != argument.npos || argument.find("__global") != argument.npos )
+			locs.push_back(global);
+		else if( argument.find("local") != argument.npos || argument.find("__local") != argument.npos)
+			locs.push_back(local);
+		else if( argument.find("image") != argument.npos)
+			locs.push_back(image);
+		else if( argument.find("sampler") != argument.npos)
+			locs.push_back(sampler);
+		else
+			locs.push_back(host);
+		pos_before = pos_after+2;
+	}
+	return locs;
 }
 
 std::string ocl::Kernel::extractParameter(const std::string& kernel)
 {
-    DEBUG_ASSERT(!kernel.empty(), "Function empty");
-    size_t start, end;
+	assert(!kernel.empty());
+	size_t start, end;
 
-    start = kernel.find("class");
-    if(start == kernel.npos) return "";
-    end = kernel.find(">");
-    TRUE_ASSERT(start < kernel.length(), "Template not correctly defined.");
-    TRUE_ASSERT(end < kernel.length(), "Template not correctly defined.");
-    TRUE_ASSERT(start < end, "Template not correctly defined.");
-    start += 5;
-    end--;
+	start = kernel.find("class");
+	if(start == kernel.npos) return "";
+	end = kernel.find(">");
+	// Template not correctly defined.
+	assert(start < kernel.length());
+	assert(end < kernel.length());
+	assert(start < end);
+	start += 5;
+	end--;
 
-    const string &substr = kernel.substr(start, end - start + 1);
+	const string &substr = kernel.substr(start, end - start + 1);
 
-    start = substr.find_first_not_of(" ");
-    end = substr.find_last_not_of(" ");	
+	start = substr.find_first_not_of(" ");
+	end = substr.find_last_not_of(" ");
 
-    //if(start == end) return "";
-    return substr.substr(start, end - start + 1);
+	//if(start == end) return "";
+	return substr.substr(start, end - start + 1);
 }
 
 std::string ocl::Kernel::extractName(const string &kernel)
 {
-    size_t pos_void    = kernel.find("void")+4;
-    size_t pos_bracket = kernel.find("(", pos_void)-1;
-    TRUE_ASSERT(pos_bracket > pos_void, "Could not find function name.");
-    string uname = kernel.substr(pos_void, pos_bracket - pos_void + 1);
+	size_t pos_void    = kernel.find("void")+4;
+	size_t pos_bracket = kernel.find("(", pos_void)-1;
+	if(pos_bracket <= pos_void) throw std::runtime_error("Could not find function name.");
+	string uname = kernel.substr(pos_void, pos_bracket - pos_void + 1);
 
-//	DEBUG_COMMENT(uname);
+	//	DEBUG_COMMENT(uname);
 
-    size_t start = uname.find_first_not_of(" ");
-    size_t end = uname.find_last_not_of(" ");
+	size_t start = uname.find_first_not_of(" ");
+	size_t end = uname.find_last_not_of(" ");
 
-//    DEBUG_COMMENT("start=" << start << "; end=" << end);
+	//    DEBUG_COMMENT("start=" << start << "; end=" << end);
 
-    TRUE_ASSERT(start < end, "Could not find function name.");
+	assert(start < end); // "Could not find function name.");
 
-    return uname.substr(start, end - start + 1);
+	return uname.substr(start, end - start + 1);
 }
 
 
 std::string ocl::Kernel::specialize(const std::string& kernel, const std::string& type)//const utl::Type &type)
 {
 
-    const string temp_param = ocl::Kernel::extractParameter(kernel);
+	const string temp_param = ocl::Kernel::extractParameter(kernel);
 
-    if(temp_param.empty()) return kernel;
+	if(temp_param.empty()) return kernel;
 
-    string fct = kernel;
+	string fct = kernel;
 
-    //    DEBUG_COMMENT("fct = " << fct);
-
-
-    size_t start = 0, end = 0;
-
-    start = fct.find("template", start);
-    end   = fct.find(">",end,1);
-    TRUE_ASSERT(start < end, "Template not correctly defined.");
-
-    fct.erase(start, end - start + 2);
-
-// #if defined OPENCL_V1_1 || defined OPENCL_V1_0
-//if(type == "double") fct.insert(0, "#if !defined(__OPENCL_VERSION__) || __OPENCL_VERSION__ < 120\n#pragma OPENCL EXTENSION cl_khr_fp64: enable\n#endif\n");
-// #endif
+	//    DEBUG_COMMENT("fct = " << fct);
 
 
-    size_t pos = 0;
-    
-    pos = fct.find("void", pos);
+	size_t start = 0, end = 0;
 
-    pos = fct.find("(", pos, 1);
-    TRUE_ASSERT(pos < fct.length(), "Could not find the fct.");
-    fct.insert(pos++,"_",1);
-    //fct.insert(pos,type.name());
-    fct.insert(pos,type);
-    //pos += type.name().length();
-    pos += type.length();
+	start = fct.find("template", start);
+	end   = fct.find(">",end,1);
+	//assert(start >= end);
+	assert(start <= end);
 
-    const string s1 = temp_param + " ";
-    const string s2 = temp_param + "*";
-    const string s3 = temp_param + "&";
-    const string s4 = temp_param + ")";
+	fct.erase(start, end - start + 2);
 
-    while(pos < fct.length()){
-        int pos1 = fct.find(s1, pos); if(pos1 == (int)string::npos) pos1 = fct.length();
-        int pos2 = fct.find(s2, pos); if(pos2 == (int)string::npos) pos2 = fct.length();
-        int pos3 = fct.find(s3, pos); if(pos3 == (int)string::npos) pos3 = fct.length();
-        int pos4 = fct.find(s4, pos); if(pos4 == (int)string::npos) pos4 = fct.length();
+	// #if defined OPENCL_V1_1 || defined OPENCL_V1_0
+	//if(type == "double") fct.insert(0, "#if !defined(__OPENCL_VERSION__) || __OPENCL_VERSION__ < 120\n#pragma OPENCL EXTENSION cl_khr_fp64: enable\n#endif\n");
+	// #endif
 
-        pos = std::min(std::min(std::min(pos1,pos2),pos3),pos4);
-        if(pos >= fct.length()) break;
-        fct.replace(pos, temp_param.length() , type);//type.name());
 
-        //pos += type.name().length();
-        pos += type.length();
-    }
+	size_t pos = 0;
+
+	pos = fct.find("void", pos);
+
+	pos = fct.find("(", pos, 1);
+//	assert(pos >= fct.length());
+	assert(pos <= fct.length());
+	fct.insert(pos++,"_",1);
+	//fct.insert(pos,type.name());
+	fct.insert(pos,type);
+	//pos += type.name().length();
+	pos += type.length();
+
+	const string s1 = temp_param + " ";
+	const string s2 = temp_param + "*";
+	const string s3 = temp_param + "&";
+	const string s4 = temp_param + ")";
+
+	while(pos < fct.length()){
+		int pos1 = fct.find(s1, pos); if(pos1 == (int)string::npos) pos1 = fct.length();
+		int pos2 = fct.find(s2, pos); if(pos2 == (int)string::npos) pos2 = fct.length();
+		int pos3 = fct.find(s3, pos); if(pos3 == (int)string::npos) pos3 = fct.length();
+		int pos4 = fct.find(s4, pos); if(pos4 == (int)string::npos) pos4 = fct.length();
+
+		pos = std::min(std::min(std::min(pos1,pos2),pos3),pos4);
+		if(pos >= fct.length()) break;
+		fct.replace(pos, temp_param.length() , type);//type.name());
+
+		//pos += type.name().length();
+		pos += type.length();
+	}
 
 	return fct;
 }
