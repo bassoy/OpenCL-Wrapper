@@ -183,7 +183,7 @@ const ocl::Program& ocl::Kernel::program() const
 /*! \brief Set Program of this Kernel. */
 void ocl::Kernel::setProgram(const ocl::Program &program)
 {
-	if(_program == nullptr) throw std::runtime_error( "Program not valid.");
+	if(_program != nullptr) throw std::runtime_error( "There should not be a program.");
 	_program = &program;
 }
 
@@ -204,7 +204,7 @@ ocl::Context& ocl::Kernel::context() const
 */
 ocl::Event ocl::Kernel::callKernel(const Queue& queue, const EventList& list)
 {
-	if(queue.context() != this->context()) throw std::runtime_error( "Context must be equal.");
+	if(queue.context() != this->context()) throw std::runtime_error("Context must be equal.");
 	cl_event event_id;
 
 	OPENCL_SAFE_CALL( clEnqueueNDRangeKernel(queue.id(), this->id(), this->workDim(), 0, this->globalSize(), this->localSize(), list.size(), list.events().data(), &event_id) );
@@ -220,7 +220,7 @@ ocl::Event ocl::Kernel::callKernel(const Queue& queue, const EventList& list)
 */
 ocl::Event ocl::Kernel::callKernel(const Queue& queue)
 {
-	if(queue.context() != this->context()) throw std::runtime_error( "Context must be equal.");
+	if(queue.context() != this->context()) throw std::runtime_error("Context must be equal.");
 	cl_event event_id;
 	OPENCL_SAFE_CALL( clEnqueueNDRangeKernel(queue.id(), this->id(), this->workDim(), 0, this->globalSize(), this->localSize(), 0, NULL, &event_id) );
 	return ocl::Event(event_id, &this->context());
@@ -608,8 +608,7 @@ std::string ocl::Kernel::specialize(const std::string& kernel, const std::string
 
 	start = fct.find("template", start);
 	end   = fct.find(">",end,1);
-	//assert(start >= end);
-	assert(start <= end);
+	assert(start < end); // Template not correctly defined
 
 	fct.erase(start, end - start + 2);
 
@@ -624,7 +623,7 @@ std::string ocl::Kernel::specialize(const std::string& kernel, const std::string
 
 	pos = fct.find("(", pos, 1);
 //	assert(pos >= fct.length());
-	assert(pos <= fct.length());
+	assert(pos < fct.length());
 	fct.insert(pos++,"_",1);
 	//fct.insert(pos,type.name());
 	fct.insert(pos,type);

@@ -194,7 +194,7 @@ void ocl::Buffer::recreate(size_t size_bytes)
 void ocl::Buffer::copyTo ( size_t thisOffset, size_t size_bytes, const Buffer & dest, size_t destOffset, const ocl::EventList &list) const
 {
 	if(this->context() != dest.context()) throw std::runtime_error("context of this and dest must be equal");
-	if(this->id() != dest.id()) throw std::runtime_error("This and Other Buffer ids must be equal");
+	if(this->id() == dest.id()) throw std::runtime_error("This and Other Buffer ids must not be equal");
 	OPENCL_SAFE_CALL( clEnqueueCopyBuffer (this->activeQueue().id(), this->id(), dest.id(), thisOffset, destOffset, size_bytes, list.size(), list.events().data(), NULL) );
 	OPENCL_SAFE_CALL( clFinish(this->activeQueue().id()) );
 }
@@ -233,7 +233,7 @@ void ocl::Buffer::copyTo (const ocl::Queue& queue, size_t thisOffset, size_t siz
 {
 	if(this->context() != dest.context()) throw std::runtime_error("context of this and dest must be equal");
 	if(*this->context() != queue.context()) throw std::runtime_error("context of this and dest must be equal");
-	if(this->id() != dest.id()) throw std::runtime_error("This and Other Buffer ids must be equal");
+	if(this->id() == dest.id()) throw std::runtime_error("This and Other Buffer ids must not be equal");
 
 	OPENCL_SAFE_CALL( clEnqueueCopyBuffer (queue.id(), this->id(), dest.id(), thisOffset, destOffset, size_bytes, list.size(), list.events().data(), NULL) );
 	OPENCL_SAFE_CALL( clFinish(queue.id()) );

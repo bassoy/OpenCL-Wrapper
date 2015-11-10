@@ -87,6 +87,7 @@ namespace type{
 	Type Int     ("int",           typeid(int));
 	Type UInt    ("unsigned int",  typeid(unsigned int));
 	Type SChar    ("signed char",   typeid(signed char));
+	Type Char    ("char",   typeid(char));
 	Type UChar   ("unsigned char", typeid(unsigned char));
 	Type Bool    ("bool",          typeid(bool));
 	Type Undefined ("undefined",          typeid(bool));

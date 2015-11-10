@@ -26,6 +26,7 @@
 #include <utility>
 #include <vector>
 #include <stdexcept>
+#include <cassert>
 
 
 
@@ -123,6 +124,7 @@ public:
 	template <class T>
 	static const Type& type(){
 		for(auto __t : _allTypes) { if(*__t == typeid(T)) return *__t; }
+		assert(0);
 		throw std::runtime_error(std::string("Type with id ") + typeid(T).name() + " not found");
 	}
 private:
@@ -137,6 +139,7 @@ namespace type{
 	extern Type Single;
 	extern Type Int;
 	extern Type UInt;
+	extern Type Char;
 	extern Type SChar;
 	extern Type UChar;
 	extern Type Undefined;

@@ -19,7 +19,7 @@ TARGET := lib/libOclWrapper.a
 	OCL_VERSION=-DOPENCL_V1_2
 #endif
 
-GCC_FLAGS:=-std=c++11 -Wall -DDEBUG $(OCL_VERSION)
+GCC_FLAGS:=-std=c++11 -Wall -g $(OCL_VERSION)
 #$(GCC_FLAGS)	
 
 archive: $(OBJS)
