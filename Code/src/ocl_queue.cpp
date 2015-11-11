@@ -166,7 +166,7 @@ size_t ocl::Queue::reference_count() const
 	if(_id == nullptr) throw std::runtime_error("could not performance a reference count");
 
     cl_uint info;
-	OPENCL_SAFE_CALL( clGetCommandQueueInfo (_id,CL_QUEUE_REFERENCE_COUNT, sizeof(info), &info, NULL)) ;
+	OPENCL_SAFE_CALL( clGetCommandQueueInfo (_id, CL_QUEUE_REFERENCE_COUNT, sizeof(info), &info, NULL)) ;
 	return size_t(info);
 }
 
@@ -244,15 +244,9 @@ void ocl::Queue::finish() const
   *
   * clFinish does not return until all previously queued commands in command_queue have been processed and completed.
 */
-void ocl::Queue::barrier(const EventList& 
-#ifdef OPENCL_V1_2
-list
-#endif
-) const
+void ocl::Queue::barrier(const EventList&  list ) const
 {
-#ifdef OPENCL_V1_2
     OPENCL_SAFE_CALL(  clEnqueueBarrierWithWaitList (this->id(),  list.size(), list.events().data(), 0) );
-#endif
 }
 
 /*! \brief Returns the Context for this Queue.

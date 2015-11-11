@@ -24,6 +24,8 @@
 #include <ocl_queue.h>
 #include <ocl_image.h>
 
+#include <cassert>
+
 /**
  * \brief ocl::Image::Image Instantiates this Image without a Context
  *
@@ -34,6 +36,27 @@ ocl::Image::Image()
 {
 
 }
+
+
+/**
+ * \brief ocl::Image::Image Instantiates an 1D-Image within a context.
+ *
+ * No Memory is allocated but only an object created which can be used within
+ * the active Context. Allocation takes place when data is transfered.
+ * The existence of an active Context and an active Queue is assumed.
+ *
+ * \param ctxt Active Context.
+ * \param width Width of the 2D-Image.
+ * \param height Height of the 2D-Image.
+ * \param type Channeltype of the image.
+ * \param order Channelorder of the image.
+ */
+ocl::Image::Image(Context& ctxt, size_t width, ChannelType type, ChannelOrder order, Access access)
+	:Memory(ctxt)
+{
+	this->create(width, type, order, access);
+}
+
 
 /**
  * \brief ocl::Image::Image Instantiates an 2D-Image within a context.
@@ -96,53 +119,6 @@ ocl::Image::~Image()
 
 }
 
-/**
- * \brief ocl::Image::create Creates cl_mem for this Image.
- *
- * Note that no Memory is allocated. Allocation takes place when data is transfered.
- * It is assumed that an active Queue exists.
- *
- * \param width Width of the image.
- * \param height Height of the image.
- * \param type Channeltype of the image.
- * \param order Channelorder of the image.
- */
-void ocl::Image::create(size_t width, size_t height, ChannelType type, ChannelOrder order, Access access)
-{
-	if(this->_ctxt == nullptr)
-		throw std::runtime_error("Context not valid - cannot create Image");
-	cl_mem_flags flags = access;
-	cl_image_format format;
-	format.image_channel_order = order;
-	format.image_channel_data_type = type;
-	cl_int status;
-
-#ifdef OPENCL_V1_2
-	{
-		cl_image_desc desc;
-		desc.image_type = CL_MEM_OBJECT_IMAGE2D;
-		desc.image_height = height;
-		desc.image_width = width;
-		desc.image_depth = 1;
-		desc.image_array_size = 1;
-		desc.image_row_pitch = 0;
-		desc.image_slice_pitch = 0;
-		desc.num_mip_levels = 0;
-		desc.num_samples = 0;
-		desc.buffer = NULL;
-
-		this->_id = clCreateImage(this->_ctxt->id(), flags, &format, &desc, NULL, &status);
-	}
-#elif OPENCL_V1_1
-	{
-		this->_id = clCreateImage2D(this->_ctxt->id(), flags, &format, width, height, 0, NULL, &status);
-	}
-#endif
-	OPENCL_SAFE_CALL(status);
-
-	if(this->_id == nullptr)
-		throw std::runtime_error("Context not create 2D image");
-}
 
 
 /**
@@ -154,44 +130,47 @@ void ocl::Image::create(size_t width, size_t height, ChannelType type, ChannelOr
  * \param width Width of the image.
  * \param height Height of the image.
  * \param depth Depth of the image.
- * \param type Channeltype of the image.
+ * \param image_type ImageType for the image descriptor.
+ * \param channel_type Channeltype of the image.
  * \param order Channelorder of the image.
  */
-void ocl::Image::create(size_t width, size_t height, size_t depth, ChannelType type, ChannelOrder order, Access access)
+void ocl::Image::create(size_t width, size_t height, size_t depth, ImageType image_type, ChannelType channel_type, ChannelOrder order, Access access)
 {
+
+	assert(image_type != Image1DBuffer);
+	assert(image_type != Image1DArray);
+	assert(image_type != Image2DArray); // not yet implemented
+
 	if(this->_ctxt == nullptr)
 		throw std::runtime_error("Context not valid");
 
 
 	cl_image_format format;
 	format.image_channel_order = order;
-	format.image_channel_data_type = type;
+	format.image_channel_data_type = channel_type;
 
 	cl_int status;
 
+	if(image_type == Image2D)
+		if(depth > 1) throw std::runtime_error("Image2D cannot have height " + std::to_string(height));
 
-#ifdef OPENCL_V1_2
-	{
-		cl_mem_flags flags = access;
-		cl_image_desc desc;
-		desc.image_type = CL_MEM_OBJECT_IMAGE3D;
-		desc.image_height = height;
-		desc.image_width = width;
-		desc.image_depth = depth;
-		desc.image_array_size = 1;
-		desc.image_row_pitch = 0;
-		desc.image_slice_pitch = 0;
-		desc.num_mip_levels = 0;
-		desc.num_samples = 0;
-		desc.buffer = NULL;
-		this->_id = clCreateImage(this->_ctxt->id(), flags, &format, &desc, NULL, &status);
-	}
-#elif OPENCL_V1_1
-	{
-		cl_mem_flags flags = access;
-		this->_id = clCreateImage3D(this->_ctxt->id(), flags, &format, width, height, depth, 0, 0, NULL, &status);
-	}
-#endif
+	if(image_type == Image1D)
+		if(height > 1 || depth > 1) throw std::runtime_error("Image1D cannot have width " + std::to_string(width) + " or height " + std::to_string(height));
+
+
+	cl_mem_flags flags = access;
+	cl_image_desc desc;
+	desc.image_type = image_type;
+	desc.image_height = height;
+	desc.image_width = width;
+	desc.image_depth = depth;
+	desc.image_array_size = 1;
+	desc.image_row_pitch = 0;
+	desc.image_slice_pitch = 0;
+	desc.num_mip_levels = 0;
+	desc.num_samples = 0;
+	desc.buffer = NULL;
+	this->_id = clCreateImage(this->_ctxt->id(), flags, &format, &desc, NULL, &status);
 
 	OPENCL_SAFE_CALL(status);
 
@@ -199,6 +178,62 @@ void ocl::Image::create(size_t width, size_t height, size_t depth, ChannelType t
 		throw std::runtime_error("Context not create 3D image");
 
 }
+
+
+/**
+ * \brief ocl::Image::create Creates 3D cl_mem for this Image.
+ *
+ * Note that no Memory is allocated. Allocation takes place when data is transfered.
+ * It is assumed that an active Queue exists.
+ *
+ * \param width Width of the image.
+ * \param height Height of the image.
+ * \param depth Depth of the image.
+ * \param type Channeltype of the image.
+ * \param order Channelorder of the image.
+ */
+void ocl::Image::create(size_t width, size_t height, size_t depth, ChannelType channel_type, ChannelOrder channel_order, Access access)
+{
+	this->create(width,height, depth, Image3D, channel_type, channel_order, access);
+}
+
+
+
+/**
+ * \brief ocl::Image::create Creates 2D cl_mem for this Image.
+ *
+ * Note that no Memory is allocated. Allocation takes place when data is transfered.
+ * It is assumed that an active Queue exists.
+ *
+ * \param width Width of the image.
+ * \param height Height of the image.
+ * \param type Channeltype of the image.
+ * \param order Channelorder of the image.
+ */
+void ocl::Image::create(size_t width, size_t height, ChannelType channel_type, ChannelOrder channel_order, Access access)
+{
+	this->create(width,height,1, Image2D, channel_type, channel_order, access);
+}
+
+
+/**
+ * \brief ocl::Image::create Creates 1D cl_mem for this Image.
+ *
+ * Note that no Memory is allocated. Allocation takes place when data is transfered.
+ * It is assumed that an active Queue exists.
+ *
+ * \param width Width of the image.
+ * \param height Height of the image.
+ * \param type Channeltype of the image.
+ * \param order Channelorder of the image.
+ */
+void ocl::Image::create(size_t length, ChannelType channel_type, ChannelOrder channel_order, Access access)
+{
+	this->create(length,1,1,Image1D, channel_type, channel_order, access);
+}
+
+
+
 
 
 /**
@@ -216,11 +251,9 @@ void ocl::Image::create(unsigned int texture, unsigned long texture_target, long
 	}
 
 	cl_int status;
-#ifdef OPENCL_V1_2
+
 	this->_id = clCreateFromGLTexture(this->_ctxt->id(), flags, texture_target, miplevel, texture, &status);
-#elif OPENCL_V1_1
-	this->_id = clCreateFromGLTexture2D(this->_ctxt->id(), flags, texture_target, miplevel, texture, &status);
-#endif
+
 	OPENCL_SAFE_CALL(status);
 	if(this->_id == nullptr) throw std::runtime_error("Context not create 2D image");
 }

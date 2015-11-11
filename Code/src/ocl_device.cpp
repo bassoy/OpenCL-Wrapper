@@ -32,11 +32,11 @@
   * \param dev is a OpenCL device which is identified with cl_device_id.
   */
 ocl::Device::Device(cl_device_id dev) :
-    _id(dev), _type(ocl::device_type::ALL)
+	_id(dev), _type(ocl::device_type::ALL)
 {
 	cl_device_type t;
 	OPENCL_SAFE_CALL( clGetDeviceInfo (_id,CL_DEVICE_TYPE, sizeof(t), &t, NULL) );
-    _type = ocl::DeviceType::type(t);
+	_type = ocl::DeviceType::type(t);
 
 }
 
@@ -45,49 +45,29 @@ ocl::Device::Device(cl_device_id dev) :
   * No OpenCL device specified. Must do this later.
   */
 ocl::Device::Device() :
-    _id(0), _type(ocl::device_type::ALL)
+	_id(0), _type(ocl::device_type::ALL)
 {
 
 }
 
 bool ocl::Device::supportsVersion( int major, int minor ) const
 {
-  int mjr = 0, mnr = 0;
-  
-  std::sscanf( version().c_str(), "OpenCL %i.%i", &mjr, &mnr );
-  
-  return mjr > major || (mjr == major && mnr >= minor);
+	int mjr = 0, mnr = 0;
+
+	std::sscanf( version().c_str(), "OpenCL %i.%i", &mjr, &mnr );
+
+	return mjr > major || (mjr == major && mnr >= minor);
 }
 
-#ifdef OPENCL_V1_2
-static bool supportsAtLeast1Point2( cl_platform_id id )
-{
-  char version[128];
-  size_t versionLen = 0;
-  
-  clGetPlatformInfo( id, CL_PLATFORM_VERSION, 128, version, &versionLen );
-  
-  int major = 0, minor = 0;
-  
-  std::sscanf( version, "OpenCL %i.%i", &major, &minor );
-  
-  return major > 1 || (major == 1 && minor > 1);
-}
-#endif
 
 /*! \brief Destructs this Device.
   *
   */
 ocl::Device::~Device()
 {
-  if ( _id )
-  {
-#ifdef OPENCL_V1_2
-    if ( supportsAtLeast1Point2( platform() ) )
-      OPENCL_SAFE_CALL( clReleaseDevice( _id ) );
-#endif
-    _id = 0;
-  }
+	if ( _id == nullptr) return;
+	OPENCL_SAFE_CALL( clReleaseDevice( _id ) );
+	_id = nullptr;
 }
 
 
@@ -98,12 +78,9 @@ ocl::Device::~Device()
   * \param dev Device from which this Device is created.
   */
 ocl::Device::Device(const Device& dev) :
-    _id(dev._id), _type(dev._type)
+	_id(dev._id), _type(dev._type)
 {
-#ifdef OPENCL_V1_2
-  if ( supportsAtLeast1Point2( platform() ) )
-    OPENCL_SAFE_CALL( clRetainDevice( _id ) );
-#endif
+	OPENCL_SAFE_CALL( clRetainDevice( _id ) );
 }
 
 /*! \brief Copies from other device to this device
@@ -114,18 +91,15 @@ ocl::Device::Device(const Device& dev) :
   */
 ocl::Device& ocl::Device::operator =(const ocl::Device &dev)
 {
-  if ( this != &dev )
-  {
-    _id = dev._id;
-    _type = dev._type;
-    
-#ifdef OPENCL_V1_2
-    if ( supportsAtLeast1Point2( platform() ) )
-      OPENCL_SAFE_CALL( clRetainDevice( _id ) );
-#endif
-  }
-  
-  return *this;
+	if ( this != &dev )
+	{
+		_id = dev._id;
+		_type = dev._type;
+
+		OPENCL_SAFE_CALL( clRetainDevice( _id ) );
+	}
+
+	return *this;
 }
 
 
@@ -137,7 +111,7 @@ ocl::Device& ocl::Device::operator =(const ocl::Device &dev)
   */
 void ocl::Device::setId(cl_device_id id)
 {
-    this->_id = id;
+	this->_id = id;
 }
 
 /*! \brief Returns the id of this Device
@@ -208,7 +182,7 @@ bool ocl::Device::operator != (const ocl::DeviceType&  type) const
 /*! \brief Returns the true if this Device is a GPU . */
 bool ocl::Device::isGpu() const
 {
-    return this->type() == CL_DEVICE_TYPE_GPU;
+	return this->type() == CL_DEVICE_TYPE_GPU;
 }
 
 /*! \brief Returns the true if this Device is a CPU. */
@@ -243,17 +217,17 @@ size_t ocl::Device::maxWorkItemDim() const
 /*! \brief Returns the maximum number of work-items that can be specified in each dimension of the work-group for *this. */
 std::vector<size_t> ocl::Device::maxWorkItemSizes() const
 {
-    std::vector<size_t> a(3,0);
-    //size_t a[3];
-    OPENCL_SAFE_CALL( clGetDeviceInfo (this->id(), CL_DEVICE_MAX_WORK_ITEM_SIZES , sizeof(size_t)*3, a.data(), NULL) );
-    //std::vector<size_t> b(a, a + sizeof(a) / sizeof(int));
-    return a;
+	std::vector<size_t> a(3,0);
+	//size_t a[3];
+	OPENCL_SAFE_CALL( clGetDeviceInfo (this->id(), CL_DEVICE_MAX_WORK_ITEM_SIZES , sizeof(size_t)*3, a.data(), NULL) );
+	//std::vector<size_t> b(a, a + sizeof(a) / sizeof(int));
+	return a;
 }
 
 /*! \brief Returns the maximum number of work-items in a work- group executing a kernel on a single compute unit for *this. */
 size_t ocl::Device::maxWorkGroupSize() const
 {
-    size_t a;
+	size_t a;
 	OPENCL_SAFE_CALL( clGetDeviceInfo (this->id(), CL_DEVICE_MAX_WORK_GROUP_SIZE , sizeof(a), &a, NULL) );
 	return a;
 }
@@ -261,7 +235,7 @@ size_t ocl::Device::maxWorkGroupSize() const
 /*! \brief Returns the maximum size in bytes of a constant buffer allocation for *this. */
 size_t ocl::Device::maxConstantBufferSize() const
 {
-    cl_ulong a;
+	cl_ulong a;
 	OPENCL_SAFE_CALL( clGetDeviceInfo (this->id(), CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE , sizeof(a), &a, NULL) );
 	return size_t(a);
 }
@@ -270,25 +244,25 @@ size_t ocl::Device::maxConstantBufferSize() const
 /*! \brief Returns the maximum size of memory object allocation in bytes for *this . */
 size_t ocl::Device::maxMemAllocSize() const
 {
-    cl_ulong maxMemAllocSize;
-    OPENCL_SAFE_CALL(  clGetDeviceInfo (_id, CL_DEVICE_MAX_MEM_ALLOC_SIZE , sizeof(maxMemAllocSize), &maxMemAllocSize, NULL) );
-    return size_t(maxMemAllocSize);
+	cl_ulong maxMemAllocSize;
+	OPENCL_SAFE_CALL(  clGetDeviceInfo (_id, CL_DEVICE_MAX_MEM_ALLOC_SIZE , sizeof(maxMemAllocSize), &maxMemAllocSize, NULL) );
+	return size_t(maxMemAllocSize);
 }
 
 /*! \brief Returns the global memory size in bytes for *this . */
 size_t ocl::Device::globalMemSize() const
 {
-    cl_ulong a;
-    OPENCL_SAFE_CALL(  clGetDeviceInfo (_id, CL_DEVICE_GLOBAL_MEM_SIZE , sizeof(a), &a, NULL) );
-    return size_t(a);
+	cl_ulong a;
+	OPENCL_SAFE_CALL(  clGetDeviceInfo (_id, CL_DEVICE_GLOBAL_MEM_SIZE , sizeof(a), &a, NULL) );
+	return size_t(a);
 }
 
 /*! \brief Returns the local memory size in bytes for *this . */
 size_t ocl::Device::localMemSize() const
 {
-    cl_ulong a;
-    OPENCL_SAFE_CALL(  clGetDeviceInfo (_id, CL_DEVICE_LOCAL_MEM_SIZE , sizeof(a), &a, NULL) );
-    return size_t(a);
+	cl_ulong a;
+	OPENCL_SAFE_CALL(  clGetDeviceInfo (_id, CL_DEVICE_LOCAL_MEM_SIZE , sizeof(a), &a, NULL) );
+	return size_t(a);
 }
 
 /*! \brief Returns the OpenCL platform on which this Device is located.*/
@@ -306,7 +280,7 @@ getDeviceInfo(cl_device_id id, cl_device_info info)
 	size_t size = 0u;
 	OPENCL_SAFE_CALL( clGetDeviceInfo(id, info, 0u, nullptr, &size ) );
 	std::unique_ptr< char[] > buffer( new char[size] );
- 
+
 	OPENCL_SAFE_CALL( clGetDeviceInfo(id, info,  size, buffer.get(), NULL));
 	return buffer.get();
 }
@@ -338,25 +312,25 @@ std::string ocl::Device::extensions() const
 /*! \brief Prints this Device.*/
 void ocl::Device::print() const
 {
-    std::cout << "\tDevice " << std::endl;
-    std::cout << "\t\tVendor: " << this->vendor() << std::endl;
-    std::cout << "\t\tName: " <<  this->name() << std::endl;
+	std::cout << "\tDevice " << std::endl;
+	std::cout << "\t\tVendor: " << this->vendor() << std::endl;
+	std::cout << "\t\tName: " <<  this->name() << std::endl;
 }
 
 static bool supportsExtension( std::string const& extensionsString, char const* extension )
 {
- auto const len = std::strlen( extension );
- auto p = extensionsString.c_str();
+	auto const len = std::strlen( extension );
+	auto p = extensionsString.c_str();
 
- while ( *p != '\0' )
- {
+	while ( *p != '\0' )
+	{
 		auto n = std::strcspn( p, " " );
 
 		if ( len == n && 0 == strncmp( p, extension, n ) ) return true;
 		p += ++n;
 	}
 
- return false;
+	return false;
 }
 
 
@@ -370,7 +344,7 @@ bool ocl::Device::imageSupport() const
 
 bool ocl::Device::supportsExtension( std::string const& ext ) const
 {
-  return ::supportsExtension( extensions(), ext.c_str() );
+	return ::supportsExtension( extensions(), ext.c_str() );
 }
 
 
@@ -380,5 +354,5 @@ bool ocl::Device::supportsExtension( std::string const& ext ) const
  */
 bool ocl::Device::doubleSupport() const
 {
-  return supportsExtension( "cl_khr_fp64" );
+	return supportsExtension( "cl_khr_fp64" );
 }

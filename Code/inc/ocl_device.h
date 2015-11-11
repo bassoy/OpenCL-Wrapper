@@ -84,9 +84,9 @@ public:
 	std::string extensions() const;
 	
 	bool imageSupport() const;
-  bool doubleSupport() const;
+	bool doubleSupport() const;
 	bool supportsExtension( std::string const& extension ) const;
-  bool supportsVersion( int major, int minor ) const;
+	bool supportsVersion( int major, int minor ) const;
 
 private:
 	cl_device_id _id;

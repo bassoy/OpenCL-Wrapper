@@ -89,15 +89,30 @@ public:
                 A            = CL_A,         /*!< 4-vector (0,0,0,a) */
     };    
 
+
+	enum  ImageType {
+		Image1D       = CL_MEM_OBJECT_IMAGE1D ,
+		Image1DBuffer = CL_MEM_OBJECT_IMAGE1D_BUFFER ,
+		Image1DArray  = CL_MEM_OBJECT_IMAGE1D_ARRAY ,
+		Image2D       = CL_MEM_OBJECT_IMAGE2D ,
+		Image2DArray  = CL_MEM_OBJECT_IMAGE2D_ARRAY,
+		Image3D       = CL_MEM_OBJECT_IMAGE3D,
+	};
+
     explicit Image();
     ~Image();
-    Image(Context&, size_t width, size_t height, ChannelType type = Float, ChannelOrder order = RGBA, Access access = ReadWrite);
-    Image(Context&, size_t width, size_t height, size_t depth, ChannelType type = Float, ChannelOrder order = RGBA, Access access = ReadWrite);
+
+
+	Image(Context&, size_t width, ChannelType channel_type = Float, ChannelOrder order = RGBA, Access access = ReadWrite);
+	Image(Context&, size_t width, size_t height, ChannelType channel_type = Float, ChannelOrder order = RGBA, Access access = ReadWrite);
+	Image(Context&, size_t width, size_t height, size_t depth, ChannelType channel_type = Float, ChannelOrder order = RGBA, Access access = ReadWrite);
     Image(Context&, unsigned int texture, unsigned long texture_target, long miplevel);
 
 
-    void create(size_t width, size_t height, ChannelType type = Float, ChannelOrder order = RGBA, Access access = ReadWrite);
-    void create(size_t width, size_t height, size_t depth, ChannelType type = Float, ChannelOrder order = RGBA, Access access = ReadWrite);
+	void create(size_t width, size_t height, size_t depth, ImageType image_type, ChannelType channel_type = Float, ChannelOrder order = RGBA, Access access = ReadWrite);
+	void create(size_t width, size_t height, size_t depth, ChannelType channel_type = Float, ChannelOrder order = RGBA, Access access = ReadWrite);
+	void create(size_t width, size_t height, ChannelType channel_type = Float, ChannelOrder order = RGBA, Access access = ReadWrite);
+	void create(size_t width, ChannelType channel_type = Float, ChannelOrder order = RGBA, Access access = ReadWrite);
     void create(unsigned int texture, unsigned long texture_target, long miplevel);
 
     void recreate(size_t width, size_t height, ChannelType, ChannelOrder);
