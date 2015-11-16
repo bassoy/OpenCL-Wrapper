@@ -282,60 +282,60 @@ void ocl::safe_call(cl_int status, const std::string file, const std::string fun
 	// TODO This list is far from complete.
 	switch(status)
 	{
-	case CL_DEVICE_NOT_AVAILABLE                       :  {oss << "CL_DEVICE_NOT_AVAILABLE."; break;}
-	case CL_DEVICE_NOT_FOUND                           :  {oss << "CL_DEVICE_NOT_FOUND."; break;}
-	case CL_COMPILER_NOT_AVAILABLE                     :  {oss << "CL_COMPILER_NOT_AVAILABLE."; break;}
-	case CL_MEM_OBJECT_ALLOCATION_FAILURE              :  {oss << "CL_MEM_OBJECT_ALLOCATION_FAILURE."; break;}
-	case CL_OUT_OF_RESOURCES                           :  {oss << "CL_OUT_OF_RESOURCES."; break;}
-	case CL_OUT_OF_HOST_MEMORY                         :  {oss << "CL_OUT_OF_HOST_MEMORY."; break;}
-	case CL_MEM_COPY_OVERLAP                           :  {oss << "CL_MEM_COPY_OVERLAP."; break;}
-	case CL_PROFILING_INFO_NOT_AVAILABLE               :  {oss << "CL_PROFILING_INFO_NOT_AVAILABLE."; break;}
-	case CL_IMAGE_FORMAT_MISMATCH                      :  {oss << "CL_IMAGE_FORMAT_MISMATCH."; break;}
-	case CL_IMAGE_FORMAT_NOT_SUPPORTED                 :  {oss << "CL_IMAGE_FORMAT_NOT_SUPPORTED."; break;}
-	case CL_BUILD_PROGRAM_FAILURE                      :  {oss << "CL_BUILD_PROGRAM_FAILURE."; break;}
-	case CL_MAP_FAILURE                                :  {oss << "CL_MAP_FAILURE."; break;}
-	case CL_MISALIGNED_SUB_BUFFER_OFFSET               :  {oss << "CL_MISALIGNED_SUB_BUFFER_OFFSET."; break;}
-	case CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST  :  {oss << "CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST."; break;}
+	case CL_DEVICE_NOT_AVAILABLE                       :  {oss << "CL_DEVICE_NOT_AVAILABLE: "; break;}
+	case CL_DEVICE_NOT_FOUND                           :  {oss << "CL_DEVICE_NOT_FOUND: "; break;}
+	case CL_COMPILER_NOT_AVAILABLE                     :  {oss << "CL_COMPILER_NOT_AVAILABLE: "; break;}
+	case CL_MEM_OBJECT_ALLOCATION_FAILURE              :  {oss << "CL_MEM_OBJECT_ALLOCATION_FAILURE: "; break;}
+	case CL_OUT_OF_RESOURCES                           :  {oss << "CL_OUT_OF_RESOURCES: "; break;}
+	case CL_OUT_OF_HOST_MEMORY                         :  {oss << "CL_OUT_OF_HOST_MEMORY: "; break;}
+	case CL_MEM_COPY_OVERLAP                           :  {oss << "CL_MEM_COPY_OVERLAP: "; break;}
+	case CL_PROFILING_INFO_NOT_AVAILABLE               :  {oss << "CL_PROFILING_INFO_NOT_AVAILABLE: "; break;}
+	case CL_IMAGE_FORMAT_MISMATCH                      :  {oss << "CL_IMAGE_FORMAT_MISMATCH: "; break;}
+	case CL_IMAGE_FORMAT_NOT_SUPPORTED                 :  {oss << "CL_IMAGE_FORMAT_NOT_SUPPORTED: "; break;}
+	case CL_BUILD_PROGRAM_FAILURE                      :  {oss << "CL_BUILD_PROGRAM_FAILURE: "; break;}
+	case CL_MAP_FAILURE                                :  {oss << "CL_MAP_FAILURE: "; break;}
+	case CL_MISALIGNED_SUB_BUFFER_OFFSET               :  {oss << "CL_MISALIGNED_SUB_BUFFER_OFFSET: "; break;}
+	case CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST  :  {oss << "CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST: "; break;}
 #ifdef HAS_CL_KHR_ICD
-	case CL_PLATFORM_NOT_FOUND_KHR                     :  {oss << "CL_PLATFORM_NOT_FOUND_KHR."; break;}
-	case CL_DEVICE_PARTITION_FAILED_EXT                :  {oss << "CL_DEVICE_PARTITION_FAILED_EXT."; break;}
-	case CL_INVALID_PARTITION_COUNT_EXT                :  {oss << "CL_INVALID_PARTITION_COUNT_EXT."; break;}
-	case CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR        :  {oss << "CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR."; break;}
+	case CL_PLATFORM_NOT_FOUND_KHR                     :  {oss << "CL_PLATFORM_NOT_FOUND_KHR: "; break;}
+	case CL_DEVICE_PARTITION_FAILED_EXT                :  {oss << "CL_DEVICE_PARTITION_FAILED_EXT: "; break;}
+	case CL_INVALID_PARTITION_COUNT_EXT                :  {oss << "CL_INVALID_PARTITION_COUNT_EXT: "; break;}
+	case CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR        :  {oss << "CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR: "; break;}
 #endif
-	case CL_INVALID_EVENT_WAIT_LIST                    :  {oss << "CL_INVALID_EVENT_WAIT_LIST."; break;}
-	case CL_INVALID_PLATFORM                           :  {oss << "CL_INVALID_PLATFORM."; break;}
-	case CL_INVALID_DEVICE_TYPE                        :  {oss << "CL_INVALID_DEVICE_TYPE."; break;}
-	case CL_INVALID_DEVICE                             :  {oss << "CL_INVALID_DEVICE."; break;}
-	case CL_INVALID_VALUE                              :  {oss << "CL_INVALID_VALUE."; break;}
-	case CL_INVALID_PROGRAM                            :  {oss << "CL_INVALID_PROGRAM."; break;}
-	case CL_INVALID_QUEUE_PROPERTIES                   :  {oss << "CL_INVALID_QUEUE_PROPERTIES."; break;}
-	case CL_INVALID_CONTEXT                            :  {oss << "CL_INVALID_CONTEXT."; break;}
-	case CL_INVALID_BUILD_OPTIONS                      :  {oss << "CL_INVALID_BUILD_OPTIONS."; break;}
-	case CL_INVALID_KERNEL_NAME                        :  {oss << "CL_INVALID_KERNEL_NAME."; break;}
-	case CL_INVALID_ARG_INDEX                          :  {oss << "CL_INVALID_ARG_INDEX."; break;}
-	case CL_INVALID_COMMAND_QUEUE                      :  {oss << "CL_INVALID_COMMAND_QUEUE."; break;}
-	case CL_INVALID_WORK_DIMENSION                     :  {oss << "CL_INVALID_WORK_DIMENSION."; break;}
-	case CL_INVALID_GLOBAL_WORK_SIZE                   :  {oss << "CL_INVALID_GLOBAL_WORK_SIZE."; break;}
-	case CL_INVALID_MEM_OBJECT                         :  {oss << "CL_INVALID_MEM_OBJECT."; break;}
-	case CL_INVALID_HOST_PTR                           :  {oss << "CL_INVALID_HOST_PTR."; break;}
-	case CL_INVALID_IMAGE_FORMAT_DESCRIPTOR            :  {oss << "CL_INVALID_IMAGE_FORMAT_DESCRIPTOR."; break;}
-	case CL_INVALID_IMAGE_SIZE                         :  {oss << "CL_INVALID_IMAGE_SIZE."; break;}
-	case CL_INVALID_SAMPLER                            :  {oss << "CL_INVALID_SAMPLER."; break;}
-	case CL_INVALID_BINARY                             :  {oss << "CL_INVALID_BINARY."; break;}
-	case CL_INVALID_PROGRAM_EXECUTABLE                 :  {oss << "CL_INVALID_PROGRAM_EXECUTABLE."; break;}
-	case CL_INVALID_KERNEL_DEFINITION                  :  {oss << "CL_INVALID_KERNEL_DEFINITION."; break;}
-	case CL_INVALID_KERNEL                             :  {oss << "CL_INVALID_KERNEL."; break;}
-	case CL_INVALID_ARG_VALUE                          :  {oss << "CL_INVALID_ARG_VALUE."; break;}
-	case CL_INVALID_ARG_SIZE                           :  {oss << "CL_INVALID_ARG_SIZE."; break;}
-	case CL_INVALID_KERNEL_ARGS                        :  {oss << "CL_INVALID_KERNEL_ARGS."; break;}
-	case CL_INVALID_WORK_GROUP_SIZE                    :  {oss << "CL_INVALID_WORK_GROUP_SIZE."; break;}
-	case CL_INVALID_GLOBAL_OFFSET                      :  {oss << "CL_INVALID_GLOBAL_OFFSET."; break;}
-	case CL_INVALID_EVENT                              :  {oss << "CL_INVALID_EVENT."; break;}
-	case CL_INVALID_OPERATION                          :  {oss << "CL_INVALID_OPERATION."; break;}
-	case CL_INVALID_GL_OBJECT                          :  {oss << "CL_INVALID_GL_OBJECT."; break;}
-	case CL_INVALID_MIP_LEVEL                          :  {oss << "CL_INVALID_MIP_LEVEL."; break;}
-	case CL_INVALID_WORK_ITEM_SIZE                     :  {oss << "CL_INVALID_WORK_ITEM_SIZE."; break;}
-	default                                            :  {oss << "Unknown error (0x" << std::hex << status << std::dec << "or " << status << ")."; break;}
+	case CL_INVALID_EVENT_WAIT_LIST                    :  {oss << "CL_INVALID_EVENT_WAIT_LIST: "; break;}
+	case CL_INVALID_PLATFORM                           :  {oss << "CL_INVALID_PLATFORM: "; break;}
+	case CL_INVALID_DEVICE_TYPE                        :  {oss << "CL_INVALID_DEVICE_TYPE: "; break;}
+	case CL_INVALID_DEVICE                             :  {oss << "CL_INVALID_DEVICE: "; break;}
+	case CL_INVALID_VALUE                              :  {oss << "CL_INVALID_VALUE: "; break;}
+	case CL_INVALID_PROGRAM                            :  {oss << "CL_INVALID_PROGRAM: "; break;}
+	case CL_INVALID_QUEUE_PROPERTIES                   :  {oss << "CL_INVALID_QUEUE_PROPERTIES: "; break;}
+	case CL_INVALID_CONTEXT                            :  {oss << "CL_INVALID_CONTEXT: "; break;}
+	case CL_INVALID_BUILD_OPTIONS                      :  {oss << "CL_INVALID_BUILD_OPTIONS: "; break;}
+	case CL_INVALID_KERNEL_NAME                        :  {oss << "CL_INVALID_KERNEL_NAME: "; break;}
+	case CL_INVALID_ARG_INDEX                          :  {oss << "CL_INVALID_ARG_INDEX: "; break;}
+	case CL_INVALID_COMMAND_QUEUE                      :  {oss << "CL_INVALID_COMMAND_QUEUE: "; break;}
+	case CL_INVALID_WORK_DIMENSION                     :  {oss << "CL_INVALID_WORK_DIMENSION: "; break;}
+	case CL_INVALID_GLOBAL_WORK_SIZE                   :  {oss << "CL_INVALID_GLOBAL_WORK_SIZE: "; break;}
+	case CL_INVALID_MEM_OBJECT                         :  {oss << "CL_INVALID_MEM_OBJECT: "; break;}
+	case CL_INVALID_HOST_PTR                           :  {oss << "CL_INVALID_HOST_PTR: "; break;}
+	case CL_INVALID_IMAGE_FORMAT_DESCRIPTOR            :  {oss << "CL_INVALID_IMAGE_FORMAT_DESCRIPTOR: "; break;}
+	case CL_INVALID_IMAGE_SIZE                         :  {oss << "CL_INVALID_IMAGE_SIZE: "; break;}
+	case CL_INVALID_SAMPLER                            :  {oss << "CL_INVALID_SAMPLER: "; break;}
+	case CL_INVALID_BINARY                             :  {oss << "CL_INVALID_BINARY: "; break;}
+	case CL_INVALID_PROGRAM_EXECUTABLE                 :  {oss << "CL_INVALID_PROGRAM_EXECUTABLE: "; break;}
+	case CL_INVALID_KERNEL_DEFINITION                  :  {oss << "CL_INVALID_KERNEL_DEFINITION: "; break;}
+	case CL_INVALID_KERNEL                             :  {oss << "CL_INVALID_KERNEL: "; break;}
+	case CL_INVALID_ARG_VALUE                          :  {oss << "CL_INVALID_ARG_VALUE: "; break;}
+	case CL_INVALID_ARG_SIZE                           :  {oss << "CL_INVALID_ARG_SIZE: "; break;}
+	case CL_INVALID_KERNEL_ARGS                        :  {oss << "CL_INVALID_KERNEL_ARGS: "; break;}
+	case CL_INVALID_WORK_GROUP_SIZE                    :  {oss << "CL_INVALID_WORK_GROUP_SIZE: "; break;}
+	case CL_INVALID_GLOBAL_OFFSET                      :  {oss << "CL_INVALID_GLOBAL_OFFSET: "; break;}
+	case CL_INVALID_EVENT                              :  {oss << "CL_INVALID_EVENT: "; break;}
+	case CL_INVALID_OPERATION                          :  {oss << "CL_INVALID_OPERATION: "; break;}
+	case CL_INVALID_GL_OBJECT                          :  {oss << "CL_INVALID_GL_OBJECT: "; break;}
+	case CL_INVALID_MIP_LEVEL                          :  {oss << "CL_INVALID_MIP_LEVEL: "; break;}
+	case CL_INVALID_WORK_ITEM_SIZE                     :  {oss << "CL_INVALID_WORK_ITEM_SIZE: "; break;}
+	default                                            :  {oss << "Unknown error (0x" << std::hex << status << std::dec << "or " << status << "): "; break;}
 	}
 	oss << "Error in file=" << file << ", in function=" << function << ", in line="<< line << endl;
 

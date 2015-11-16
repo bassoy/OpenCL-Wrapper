@@ -158,7 +158,9 @@ public:
     void setArg(int pos, cl_sampler);
 
 private:
-    template< typename... Types > void pushArg( Types const& ... args )
+
+	template< typename... Types >
+	void pushArg( Types const& ... args )
     {
       ArgPusher< sizeof...(args), 0, Types... >( *this, args... );
     }
@@ -170,7 +172,7 @@ private:
     {
       ArgPusher( Kernel& kernel, Type const& arg, Types const&... args )
       {
-        kernel.setArg( ArgIndex, arg );
+		kernel.setArg( ArgIndex, arg );
         
         ArgPusher< sizeof...( args ), ArgIndex + 1, Types... >( kernel, args... );
       }
